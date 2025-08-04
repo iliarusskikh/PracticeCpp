@@ -112,3 +112,32 @@ int main()
     //int x = stoi(sub);  srtring to integer if string is integer
     return 0;
 }
+
+
+/*
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <vector>
+
+int main() {
+    std::string str = "apple,banana,orange,grape";
+    std::vector<std::string> tokens;
+    std::string temp;
+    std::stringstream obj(str);
+
+    // Tokenize by comma
+    while (std::getline(obj, temp, ',')) {
+        std::cout << temp << "\n";
+        tokens.push_back(temp);
+    }
+
+    // Print all tokens from the vector
+    std::cout << "\nStored tokens:\n";
+    for (const auto& token : tokens) {
+        std::cout << token << "\n";
+    }
+
+    return 0;
+}
+*/

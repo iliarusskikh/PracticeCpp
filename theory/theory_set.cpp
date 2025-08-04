@@ -45,6 +45,9 @@ int main()
     s1.insert(12);
     s1.insert(4);
 
+    auto it = s1.find(5);
+    //*it
+
     for (auto i : s1) {
         cout << i << ' '; //12,10,5,4.. discending
     }
