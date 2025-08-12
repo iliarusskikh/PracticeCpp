@@ -1,7 +1,11 @@
 // CPP program to illustrate Pair in STL
 #include <iostream>
 #include <utility>
+#include <priority_queue>
+
 using namespace std;
+
+typedef pair<int, pair<int, char>> Pair;
 
 // Driver Code
 int main()
@@ -32,6 +36,32 @@ int main()
     // prints old value of b
     cout << a << " " << b << "\n";
 
+    
+    
+    // Priority queue to process tasks by priority (highest first)
+    priority_queue<Pair> pq;
+
+    // Sample tasks: {priority, {task_id, type}}
+    Pair tasks[] = {{5, {1, 'A'}}, {5, {2, 'B'}}, {3, {3, 'C'}}};
+    int n = 3;
+
+    // Push tasks into priority queue
+    int i = 0;
+    while (i < n) {
+        pq.push(tasks[i]);
+        i++;
+    }
+
+    // Process tasks
+    while (!pq.empty()) {
+        Pair task = pq.top();
+        pq.pop();
+        cout << "Processing task ID " << task.second.first
+                  << " with priority " << task.first
+                  << " and type " << task.second.second << std::endl;
+    }
+    
+    
     return 0;
 }
 
