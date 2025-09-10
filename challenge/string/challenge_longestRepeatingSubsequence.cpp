@@ -32,7 +32,7 @@ int findLongestRepeatingSubsequence(int i, int j, string &s) {
         return 1 + findLongestRepeatingSubsequence(i - 1, j - 1, s);
     }
 
-    // Else make two recursive calls.
+    // Else make two recursive calls. Check from different parts of the code
     return max(findLongestRepeatingSubsequence(i - 1, j, s),
                findLongestRepeatingSubsequence(i, j - 1, s));
 }
