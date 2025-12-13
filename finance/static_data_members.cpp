@@ -1,9 +1,8 @@
 //static data members
 //initialised to 0 by default
 
-//#include <iostream>
+#include <iostream>
 
-/*
 class Student {
 public:
     int normalCount = 0;
@@ -23,26 +22,6 @@ int main(){
     
     std::cout << s1.normalCount <<std::endl;
     std::cout << Student::staticCount <<std::endl;
-    
-    return 0;
-}
-*/
-
-
-#include <iostream>
-
-
-int main(){
-    
-    void *ptr;
-    int a = 50;
-    ptr = (void*)&a;
-    //or
-    ptr = static_cast<void*>(&a);
-    
-    double *ptr2 = (double*)&a;
-    
-    
     
     return 0;
 }

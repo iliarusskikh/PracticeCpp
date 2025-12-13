@@ -22,6 +22,19 @@ typedef enum {
     Dec
 }year;
   
+
+enum Example : unsigned char //hat to be an integer
+{
+    A=5, B, C
+};
+
+enum Level
+{
+    Error = 0, Warning, Info
+};
+
+
+
 // Driver Code
 int main()
 {
@@ -35,6 +48,14 @@ int main()
     func_ptr2 new_func_ptr = &product;
     int x1 = (*new_func_ptr)(2, 4);
     std::cout<<x1;
+    
+    
+    Level m_LogLever = Info;
+    
+    if (m_LogLever == 2)
+        std::cout << "Kek"<<std::endl;
+    
+    
     return 0;
 }
 
