@@ -36,6 +36,8 @@ public:
     }
     
     
+    
+    
     //just random stuff
     Deck(Suit su, Rank ra) : startingCard{su, ra} {
         for (int s = Hearts; s <= Spades; ++s) {
@@ -51,6 +53,13 @@ public:
         for(auto const x : d.cards){
             cards.push_back(x);
         }
+        
+        //name = d.name; //shallow copy, stores same address
+        
+        //hence need to be replaced with the following for deep copy
+        name = new char[strlen(d.name)+1]; //dynamic allocation
+        strcpy(name,d.name);
+        
     }
     //shallow copy - copying only the member values
     
@@ -136,5 +145,10 @@ int main() {
     Deck d1("MyNewDeck");//each char points to read only location.
     Deck d2("MySecondDeck"); //this overwrites d1, and both d1 d2 point to the same location.
     //when one is changed, the other is affected
+    
+    //deep copy - copying actual content pointed by the pointer , not the address
+    
+    
+    
     return 0;
 }

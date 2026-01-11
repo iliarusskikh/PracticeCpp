@@ -65,3 +65,33 @@ int main()
     return 0;
 }
 
+
+
+/*
+ 
+ 
+ #include <iostream>
+ #include <utility>  // for std::pair and std::make_pair
+
+ std::pair<int, double> processValues(int inputInt, double inputDouble) {
+     // Example processing
+     int resultInt = inputInt * 2;
+     double resultDouble = inputDouble + 1.0;
+     
+     return std::make_pair(resultInt, resultDouble);  // Return using make_pair
+ }
+
+ int main() {
+     auto result = processValues(21, 2.14);  // Call function, get a std::pair
+     
+     // Access using std::get<index>
+     std::cout << "Processed integer (get<0>): " << std::get<0>(result) << std::endl;
+     std::cout << "Processed double (get<1>): " << std::get<1>(result) << std::endl;
+
+     // You could also use .first and .second (more common with pair)
+     std::cout << "Same via .first: " << result.first << std::endl;
+     std::cout << "Same via .second: " << result.second << std::endl;
+
+     return 0;
+ }
+ */

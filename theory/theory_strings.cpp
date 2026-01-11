@@ -7,6 +7,15 @@
 int main()
 {
     
+    char arrr[] = "hello";  // Array
+    const char* ptr13 = "world";  // Pointer to literal (use const to prevent modification)
+    // Or: char* s = new char[6]; strcpy(s, "hello");  // Dynamic allocation (heap).
+    std::string dynStr = "world";  // Internally allocates on heap if needed
+    
+    std::cout << strlen(prt13) << std::endl;
+    std::cout << sizeof(dynStr) << std::endl;
+    
+    
     char s[] = "cStyleString"; //c-style string terminated by \0 character //char s[] = {'g', 'f', 'g', '\0'};
     std::cout << s << std::endl;
     
@@ -37,7 +46,7 @@ int main()
     str2.resize(5);//adjust number of elements
     
     //string
-    //can be represented as strean of chars
+    //can be represented as stream of chars
     //in strings mem allocated dynamically
     //implementation is slower than char array
     
@@ -110,6 +119,18 @@ int main()
         for (int len = 1; len <= 7 - i; len++)
             std::cout << str5.substr(i, len) << std::endl;
     //int x = stoi(sub);  srtring to integer if string is integer
+    
+    
+    
+    
+    
+    
+    
+    const char* name0 = u8"Hello";
+    const wchar_t* name2 = L"Hello";
+    const char16_t* name3 = u"Hello";
+    const char32_t* name4 = U"Hello";
+    
     return 0;
 }
 

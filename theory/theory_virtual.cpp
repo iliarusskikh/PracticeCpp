@@ -11,14 +11,14 @@ public:
 class B : public A
 {
 public:
-    virtual void fun() { cout << "B" << endl; } //since base class is virtual, B and C virual by default
-};
+    virtual void fun() override{ cout << "B" << endl; } //since base class is virtual, B and C virual by default
+};//override added for clarity
 
 class C : public B
 {
 public:
-    virtual void fun() { cout << "C" << endl; }
-};
+    virtual void fun() override { cout << "C" << endl; }
+};//override added for clarity
 
 int main()
 {

@@ -13,6 +13,14 @@ int main()
     Test t;
     cout << sizeof(t) << " ";
     cout << sizeof(Test *);
+    
+    //to allocate on heap
+    Test* t = new Test(); //def constructor
+    
+    delete t;//release memory
+    
+    return 0;
+    
 }//returns 8 4, since static not considered when sizeof, + Test* is 4 since its a pointer
 
 //the Size of an empty structure/class is one byte
@@ -52,8 +60,8 @@ private:
 
 int main()
 {
-    Test *obj = new Test;
-    Test *arr = new Test[10];
+    Test *obj = new Test;//heap
+    Test *arr = new Test[10];//heap
     return 0;
 }
 */

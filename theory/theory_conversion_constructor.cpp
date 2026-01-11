@@ -24,5 +24,8 @@ int main()
     // Single parameter conversion constructor is invoked.
     object = 20;
     object.display();
+    
+    MyClass l = 44; //implicit conversion. if adding keyword explicit to constructor, would not allow implicit one
+    
     return 0;
 }

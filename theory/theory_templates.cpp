@@ -5,19 +5,21 @@ using namespace std;
 
 // One function works for all data types. This would work
 // even for user defined types if operator '>' is overloaded
-template <typename T> T myMax(T x, T y)
+template <typename T, int N>
+T myMax(T x, T y)
 {
+    T Arr[N];
     return (x > y) ? x : y;
 }
 
 int main()
 {
     // Call myMax for int
-    cout << myMax<int>(3, 7) << endl;
+    cout << myMax<int,4>(3, 7) << endl;
     // call myMax for double
-    cout << myMax<double>(3.0, 7.0) << endl;
+    cout << myMax<double,5>(3.0, 7.0) << endl;
     // call myMax for char
-    cout << myMax<char>('g', 'e') << endl;
+    cout << myMax<char,1>('g', 'e') << endl;
 
     return 0;
 }
@@ -100,4 +102,32 @@ int main()
      cout << max <int> (a, b);
  }
  
+ */
+
+
+
+
+
+/*
+ 
+ #include <iostream>
+
+ template<typename T, size_t S>
+ class Array
+ {
+ public:
+     int Size() const {return S;}
+
+ private:
+     T m_Data[S];
+ };
+
+
+ int main()
+ {
+     int size = 5;
+     Array<int,5> data;
+     return 0;
+ }
+
  */

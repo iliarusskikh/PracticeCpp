@@ -22,6 +22,29 @@ int main() {
     constexpr Point p(3, 4);
     constexpr int dist = p.distance(); // 25, computed at compile-time
     
+    int b =23;
+    
+    int* a = new int;
+    *a = 2;
+    a = (int*)&b;
+    
+    
+    const int* c = new int; //or int const*
+    //with const int* , c cannot change the content
+    //*c = 4; error
+    c = (int*)b;
+    
+    
+    int* const d = new int;
+    //with const int* , d cannot dereference
+    *d = 4;
+    //d = (int*)b; //error
+  
+    
+    const int* const e = new int;
+    //with const int* , e cannot dereference
+    //*e = 4;//cannot chagne the value
+    //e = (int*)b; //error
     
     return 0;
 }

@@ -24,13 +24,19 @@ public:
         return res;
     }
     void print() { cout << real << " + i" << imag << endl; }
+    
+    
+    std::ostream& operator<<(std::ostream& stream, const Complex& other){
+        stream << other.real << "+" << other.imag;
+        return stream;
+    }
 };
 
 // Driver code
 int main()
 {
     Complex c1(10, 5), c2(2, 4);
-
+    std::cout << c1 << std::endl;
     // An example call to "operator+"
     Complex c3 = c1 + c2;
     c3.print();

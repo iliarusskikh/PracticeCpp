@@ -1,4 +1,4 @@
-#include <memory>
+#include <memory>//for smart ptrs
 #include <iostream>
 
 using namespace std;
@@ -8,6 +8,7 @@ unique_ptr
 shared_ptr
 weak_ptr
 */
+//no need to call delete for new for ptr
 
 int main() {
     
@@ -47,6 +48,12 @@ int main() {
     // objects that manage the object
     cout << P2.use_count();
     
+    
+    //for classes
+    std::unique_ptr<Class> C(new Class());
+    std::shared_ptr<Class> C2 = std::make_shared<Class>();
+    std::shared_ptr<Class> C3;
+    C3 = C2;
     
     return 0;
 }

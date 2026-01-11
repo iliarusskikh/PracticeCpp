@@ -1,7 +1,7 @@
 /*
  The keyword mutable is mainly used to allow a particular data member of a const object to be modified.
  */
-
+/*
 #include <iostream>
 
 class A {
@@ -26,8 +26,36 @@ int main() {
 
     // Uncommenting below lines
     // will throw error
-    /* a.x = 8;
-    cout << a.x; */
+    // a.x = 8;
+    //cout << a.x;
   
+    return 0;
+}
+*/
+
+
+
+#include <iostream>
+
+class Example {
+public:
+    mutable int mutableVar;  // Can be modified even in const contexts
+    int normalVar;
+
+    Example(int m, int n) : mutableVar(m), normalVar(n) {}
+
+    // Const member function: Can't modify non-mutable members
+    void print() const {
+        mutableVar += 1;  // OK: mutable allows modification
+        // normalVar += 1;  // Error: Can't modify non-mutable in const function
+
+        std::cout << "Mutable: " << mutableVar << ", Normal: " << normalVar << std::endl;
+    }
+};
+
+int main() {
+    const Example obj(5, 10);  // Const object
+    obj.print();  // Calls const function, modifies mutableVar
+    obj.print();  // mutableVar incremented again
     return 0;
 }
