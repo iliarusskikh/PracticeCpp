@@ -11,7 +11,18 @@
 #include <mutex>
 #include <thread>
 
-// Defining thread-local variable
+static bool s_Finished = false;
+void DoWork()
+{
+    using namespace std::literals::chrono_literals;
+    
+    while(!s_Finished){
+        std::cout <<"Working...\n"; //do not use std::endl since it cout.flush() causing deadlock -> use \n instead
+        std::this_thread::sleep_for(1s);
+    }
+    
+}
+// Defining thread-local variable; each thread has its own value
 thread_local int val = 10;
 
 // Mutex for synchronization
@@ -26,9 +37,9 @@ int main() {
     // Modify value in thread 1
     std::thread th1([]() {
         val += 18;
-        std::lock_guard<std::mutex> lock(mtx);
+        std::lock_guard<std::mutex> lock(mtx); //locks here mutex
         std::cout << "Thread 1 value: " << val << '\n';
-    });
+    });// ← mutex is automatically unlocked here (destructor)
 
     std::thread th2([]() {
       
@@ -42,18 +53,28 @@ int main() {
       
         // Modify value in thread 3
         val += 13;
-        std::lock_guard<std::mutex> lock(mtx);
+        std::lock_guard<std::mutex> lock(mtx); //not required but good practice
         std::cout << "Thread 3 value: " << val << '\n';
     });
 
     // Wait for all threads to finish
-    th1.join();
-    th2.join();
+    th1.join();//joining back to main thread
+    th2.join(); //joining back into main thread
     th3.join();
 
     // Print the value of value in the main thread
     std::cout << "Main thread value: " << val << '\n';
 
+    
+    
+    
+    std::thread worker(DoWork);
+    //it starts execution, including main thread before it reaches join!
+    std::cin.get(); //hit enter
+    s_Finished = true;
+    worker.join(); //wait until worker finished
+    std::cout<< "Finished!" <<std::endl;
+    
     return 0;
 }
 
