@@ -150,5 +150,21 @@ int main() {
     // Use std::array when size is fixed and known; vector otherwise.
     // For very large fixed arrays, std::array or static to avoid heap.
     
+    
+    //multidimensional arrays
+    //int* dArr = new int[50]; //allocating memory
+    
+    int** a2d = new int*[50];//50 integer ptrs //allocating memory for 2 dimension array
+    for (int i = 0; i < 50; i++)
+    {
+        a2d[i] = new int[50]; //each of the element in the array allocated an array
+    }
+    
+    for (int i = 0; i < 50; i++)
+    {
+        delete[] a2d[i];
+    }
+    delete[] a2d;
+    
     return 0;
 }

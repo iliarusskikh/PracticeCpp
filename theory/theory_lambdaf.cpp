@@ -45,6 +45,15 @@ int main()
 
     std::cout << *it << std::endl;
     
+    std::sort(values.begin(), values.end(),
+              [](int a, int b) { return a < b; });
+    //std::ranges::sort(values)
+    
+    
+    
+    std::for_each(begin(values), end(values),[](int n) {std::cout << n <<', ';})
+    
+    
     return 0;
 }
 
