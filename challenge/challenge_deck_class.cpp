@@ -64,11 +64,18 @@ public:
     //shallow copy - copying only the member values
     
     
-    
     //implicit copy constructor created by compiler if no user copy constructor provided
     //it would do member wise initialisation
     
-     
+    //move constructor
+    Deck(Deck&&d){//when move constructor is triggered, we need R-value reference, with && in place; also const key word removed
+        name = d.name
+        d.name = nullptr;
+        std::cout << "Moved!\n";
+
+    }
+    
+    
     void shuffle() {
         std::random_device rd;
         std::mt19937 g(rd());
@@ -148,7 +155,9 @@ int main() {
     
     //deep copy - copying actual content pointed by the pointer , not the address
     
+    //move constructor
+    d2 = std::move(d1);//
     
     
-    return 0;
+    return EXIT_SUCCESS;
 }
