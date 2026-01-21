@@ -42,6 +42,10 @@ int main()
     
     
     //dynamic cast
+    //more on dynamic casting - only in c++, it does the validation
+    //evaluates at runtime
+    //used across inheritance
+    //could we promote child to parent?
     Animal* animal = new Dog();
 
     // Safe downcast with dynamic_cast
@@ -58,6 +62,10 @@ int main()
     delete animal;
     
     //const task
+    
+    
+
+    
     
     
     return EXIT_SUCCESS;
