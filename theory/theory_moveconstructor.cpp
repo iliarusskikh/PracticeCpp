@@ -24,6 +24,7 @@ public:
     MyString(const MyString& other){//lvalue reference is defined!
         data = new char[strlen(other.data) + 1];//null character
         strcpy(data,other.data);
+        //memcpy(data,other.data,strlen(other.data) + 1);
         std::cout << "Copied!\n";
 
     }
@@ -61,6 +62,8 @@ int main(){
     //we need to tell the compilor to read s1 as a temporary object or rvalue.
     
     MyString s3 = std::move(s1); //now
+    
+    
     
     return EXIT_SUCCESS;
 }
