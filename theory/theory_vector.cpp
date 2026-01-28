@@ -3,6 +3,11 @@
 
 
 using namespace std;
+//std vector stored in heap
+//heap is slower than stack
+
+//vector resizable
+
 
 int main() {
     vector<char> v = {'a', 'c', 'f', 'd', 'z'};
@@ -30,6 +35,18 @@ int main() {
 
     for (auto i : v)
         cout << i << " ";
+    
+    
+    //too many allocations
+    //dont copy vectors, use & where necessary
+    //use const references instead of copying into other vectors
+    //everytime when push_back, vector grows by 50%  for example 10->15...
+    //grows geometrically. Capacity increases. First do reserve or resize then push_back();
+    
+    //another problem is copying, for example when push_back(Data(i)) //structure
+    //use instead of that emplace_back()
+    
+    
     
     return 0;
 }

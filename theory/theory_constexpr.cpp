@@ -46,6 +46,16 @@ int main() {
     //*e = 4;//cannot chagne the value
     //e = (int*)b; //error
     
+    
+    const int* p1 = &value; //cant modify *p1
+    int* const p2 = &value; //cant modify p2
+    const int* const p3 = &value; //cant modify p3 or *p3
+    
+    
+    
+    
+    
+    
     return 0;
 }
 

@@ -27,6 +27,26 @@ int main()
 
     // Print output
     std::cout << gfg << std::endl;
+    
+    int value;
+    std::cin >> value;
+    if(std::cin.fail()){
+        std::cin.clear(); //clear error flags
+        std::cin.ignore(1000,'\n'); //discard input skip N characters
+        std::cout << "Invalid Input!";
+    }
+    
+    //fail()
+    //bad()  unrecoverable stream error
+    //eof() endof file reached
+    //good() no errors occured.
+    //peek() look at next character
+    //get() get a single character
+    
+
+    
+    
+    
 }
 
 

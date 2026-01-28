@@ -64,6 +64,15 @@ int main()
     //const task
     
     
+    //static_cast = compile-time type checking
+    //dynamic_cast = for polymorphic types
+    //const_cast = add/remove const qualifier
+    //reinterpret_cast = low-level reinterpreting of bits (no checks)
+    int num =43;
+    int* ptr = #;
+    //converts pointer to integer
+    uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+    
 
     
     

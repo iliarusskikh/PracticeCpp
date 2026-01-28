@@ -1,16 +1,39 @@
 // C++ program to illustrate the begin and end iterator
 #include <iostream>
-#include <map>
+#include <map> //self balancing binary search tree - elements end up sorted
 #include <string>
-#include <unordered_map>
+#include <unordered_map>//hash table - may be faster than map
 #include <sstream>
 using namespace std;
 
+struct CityRecord{
+    std::string Name;
+    uint64_t Population;
+    double Latitude, Longitude;
+};
+
+//everytime your map needs a hash function for custom structure
+namespace std{
+    tempalte<>
+    struct hash<CityRecord>
+    {
+        size_t operator()(const CityRecord& key){
+            return hash<std::string>()(key.Name);
+        }
+        
+    }
+}
+
+
 int main()
 {
+    unordered_map<CityRecord, string> mmap; //cannot hash custom data, alternatively use as a pointer CityRecord* or provide a hash implementation
+    
+     
+    
     // Create a map of strings to integers
     map<string, int> mp;
-
+    
     // Insert some values into the map
     mp["one"] = 1;
     mp["two"] = 2;
@@ -125,6 +148,22 @@ int main()
       cout << "(" << p->first << ", " <<
                      p->second << ")\n";
     
+    
+    string nn;
+    double gg;
+    for (auto& [nn,gg] : umap){
+        std::cout << nn << " " << gg << "\n";
+    }
+    
+    
+    /*-------------------------------------------------*/
+    
+    for (auto& kv : umap){
+        std::string& namee = kv.first;
+        double kkkk = kv.second;
+    }
+
+    //iterating through a vector is still faster than a map
     
     return 0;
 }

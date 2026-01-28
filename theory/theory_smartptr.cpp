@@ -43,10 +43,13 @@ int main() {
     shared_ptr<int> P1(16);
     
     // Created a weak_ptr smart pointer
+    //to be used with shared ptrs
     weak_ptr<int> P2(P1);
     // Returns the number of shared_ptr
     // objects that manage the object
     cout << P2.use_count();
+    
+    
     
     
     //for classes

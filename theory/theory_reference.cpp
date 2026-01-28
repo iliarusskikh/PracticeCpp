@@ -23,7 +23,12 @@ int main()
 {
     Test t;
     t.fun().fun().fun().fun();//possible because of reference
-    return 0;
+    
+    //given vector fruits!
+    //assume we have std::string& firstFruit = &fruits[0]; //if later we gonna push_back into that vector, it may need to resize. meaning that the memory pointer address would change. hence you would not be able to print the reference to obj
+    //instead just remmeber the index, for example uint32_t firstFruit =0; then fruits[FirstFruit]
+    
+    return EXIT_SUCCESS;
 }
 
 
