@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <array>
+#include <sstream>
 
 
 static uint32_t s_AllocCount=0;
@@ -97,19 +98,19 @@ int main()
     
     //ways to create an array of strings
     
-    //array of strings using pointers, each pointer points to a particular string
+    //array of strings using pointers, each pointer points to a particular string STACK
     const char* colour[4] = { "Blue", "Red", "Orange", "Yellow" };
     
-    //create array of strings using a 2D array
+    //create array of strings using a 2D array STACK
     char colour2[4][10] = { "Blue", "Red", "Orange", "Yellow" }; //storing chars
     
-    //create array of strings using string class
+    //create array of strings using string class STACK
     std::string colour3[4] = { "Blue", "Red", "Orange", "Yellow" };
     
-    //using vector class
+    //using vector class HEAP
     std::vector<std::string> colour4 { "Blue", "Red", "Orange", "Yellow" };
     
-    //using array class
+    //using array class STACK
     std::array<std::string,4>colour5 { "Blue", "Red", "Orange", "Yellow" };
     
     
@@ -147,7 +148,21 @@ int main()
     const char32_t* name4 = U"Hello";
     
     
+    //c+ string to c-stryle string
+    std::string cppStr = "Hello w";
+    const char* cStr = cppStr.c_str();
     
+    //c-stryle string to c++ string neither stack nor heap
+    const char* cString = "hello c++"; //do not modify string literals - read-only segment of memory
+    std::string cppString(cString);
+    
+    //number to string
+    int nuum = 42;
+    std::string numStr = std::to_string(num);
+    
+    //string to number
+    std::string numText = "3.432";
+    double pp = std::stod(numText);//stoi
     
     
     //how to make strings performance faster
@@ -171,6 +186,20 @@ int main()
     
     std::string test = "MyTest";//allocated in stack in release mode .. for debug it would allocate on heap
     
+    
+    //string to multiple values
+    std::string data = "John 23 159.4";
+    std::stringstream iss(data);
+    std::string name;
+    int age;
+    double height;
+    
+    iss >> name >> age >> height;
+    
+    //multiple values to string
+    std::ostringstream oss;
+    oss << "Name: " << name << age << height;
+    std::string result = oss.str();
     
     return 0;
 }

@@ -34,6 +34,41 @@ enum Level
 };
 
 
+//using scoped enums
+enum class Color {
+    Red,
+    Green,
+    Blue
+};
+
+enum class Operation{
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE
+};
+
+double calculate(double a, double b, Operation op){
+    switch(op){
+        case Operation::ADD:
+            return a+b;
+        case Operation::SUBTRACT:
+            return a-b;
+        case Operation::MULTIPLY:
+            return a*b;
+        case Operation::DIVIDE:
+            return a/b;
+
+    }
+}
+
+
+enum class Permissions : uint8_t{
+    READ= = 0x04;
+    WRITE = 0x02;
+    EXECUTE = 0x01
+};
+
 
 // Driver Code
 int main()
@@ -56,6 +91,11 @@ int main()
         std::cout << "Kek"<<std::endl;
     
     
-    return 0;
+    Color c = Color::Red;     // strongly typed, no implicit int conversion
+    
+    uint8_t readPerm = static_cast<uint8_t>(Permissions::READ);
+
+    
+    return EXIT_SUCCESS;
 }
 

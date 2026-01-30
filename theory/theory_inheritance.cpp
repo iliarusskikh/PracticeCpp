@@ -32,6 +32,15 @@ public:
 };
 
 
+class Monster2 : protected Animal { //private members not accessible, public protected - accessible
+public:
+    void bark() {
+        std::cout << "Protected "  <<c<<"\n"; //way to access protected
+        std::cout << "The dog barks: Woof!" << std::endl;
+    }
+};
+
+
 int main() {
     Dog myDog;
     myDog.eat();  // Inherited from Animal

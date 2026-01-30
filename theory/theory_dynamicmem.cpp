@@ -33,6 +33,8 @@ int main()
     
     delete p2;
     delete[] p;
+    p2 = nullptr;
+    p = nullptr;
 
     custum* cu = new custum(2);
     std::cout<<cu->p<<"\n";
@@ -45,8 +47,19 @@ int main()
     
     //Run-time or Dynamic Memory Allocation
 
+    int *pooot = new int(10);//allocated 10
+    MyClass* pObj = new MyClass();
+    delete pooot;
+    pooot = nullptr;
     
-    return 0;
+    std::unique_ptr<int> smartPtr = std::make_unique<int>(45);
+    
+    return EXIT_SUCCESS;
     
 }
 
+
+// Memory leaks: forgetting to deallocate memory
+// Dangling pointers: using memory after its been freed;
+// Double deletion: deleting the same memory twice;
+// Wrong delete operator: using delete instead of delete[] for arrays;
