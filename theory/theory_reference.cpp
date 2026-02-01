@@ -28,8 +28,26 @@ int main()
     //assume we have std::string& firstFruit = &fruits[0]; //if later we gonna push_back into that vector, it may need to resize. meaning that the memory pointer address would change. hence you would not be able to print the reference to obj
     //instead just remmeber the index, for example uint32_t firstFruit =0; then fruits[FirstFruit]
     
+    int number = 66;
+    int& ref = number;
+    
+    
     return EXIT_SUCCESS;
 }
+
+
+int& retRef(){
+    int local = 100;
+    int& ref = 44; //reference to temp! ISSUE!
+    
+    return local; //local will be destroyed!  ISSUE!
+}
+
+int& getLarger(int& a, int& b){
+    return (a>b) ? a:b;
+}
+
+
 
 
 //The & in Test& fun() means fun() returns a reference to a Test object (not a copy or a pointer). A reference is an alias for an existing object, allowing further operations on the same object without creating a copy.

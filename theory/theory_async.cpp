@@ -41,6 +41,22 @@ double heavy_calculation(size_t n) {
     return sum;
 }
 
+
+void producer(std::promise<int> promise){
+    int value = 54;//simulate work
+    
+    promise.set_value(value);//sets the result
+}
+
+void consumer(std::future<int> future){
+    int result = future.get();//waits for result
+    
+}
+
+
+
+
+
 int main()
 {
     std::cout << "Main thread ID: " << std::this_thread::get_id() << "\n\n";
@@ -98,14 +114,39 @@ int main()
     // 4. Most flexible: let the system decide (async or deferred)
     //    (this is the default policy when you don't specify)
     // ────────────────────────────────────────────────
-    auto fut_default = std::async(make_greeting, "Modern C++");
+    //auto futuree = std::async([](){return compute_value_function();})
+    auto future_default = std::async(make_greeting, "Modern C++");
 
     std::cout << "Default policy task launched...\n";
-    std::string msg = fut_default.get();
-    std::cout << msg << "\n";
+    
+    //future_default.wait();
+    
+    //if(future_default.valid()){
+        std::string msg = future_default.get();//later when we need the value
+        std::cout << msg << "\n";
+    //}
+    
 
+    
+    
 
     std::cout << "\nAll tasks completed. Main exiting.\n";
+    
+    
+    //waits for a specified duration, returns status if result is ready
+    auto status = future_default.wait_for(std::chrono::seconds(2));
+    
+    //waits until the result is ready, but doesnt retrieve the value
+    future_default.wait();
+    
+    //checks if the future refers to a shared state that contains a deferred function, result or exceptions
+    if(future_default.valid()){
+        //safe to call get();
+    }
+
+    
+    
+    
     return EXIT_SUCCESS;
 }
 

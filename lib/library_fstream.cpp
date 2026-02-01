@@ -49,7 +49,84 @@ int main()
     cout << "Text successfully written to NewFile.txt"
          << endl;
 
-    // Return 0 to indicate successful execution
-    return 0;
+    
+    
+    
+    
+    
+    
+    std::fstream file; //read & Write
+    std::ifstream inputFile; //read only
+    std::ofstream outputFile; //write only
+    
+    
+    //opening a file
+    std::ifstream inFile("data.txt");
+    //or
+    std::fstream myFile; //read & Write
+    myFile.open("data.txt",ios::in | ios::out);
+    //ios::in open for reading
+    //ios::out open for writing
+    //ios::app append to end of file
+    //ios::ate - go to end of file on opening
+    //ios::trunc - delete content if file exists
+    //ios::binary - open in binary mode
+    
+    
+    //reading a file
+    //get() - read a single character
+    //getline() - read a line of text
+    //read() - read binary data
+    //>> operator - read formatted data
+    //check for eof() (end of file)
+    //close()
+    ifstream inFile("data.txt");
+    string line;
+    //read line by line
+    while(getline(inFile,line)){
+        std::cout << line << std::endl;
+    }
+    
+    //reading word by word
+    string word;
+    while(inFile >> word){
+        //words
+    }
+    
+    //reading character by character
+    char ch;
+    while(!inFile.eof()){
+        
+    }
+    
+    
+    //writing to files
+    ofstream outFile("output.txt");
+    outFile <<"Hello"<<endl;
+    //.put() - write a single char
+    //.write() write binary data
+    //<< operator - write formatted data
+    //ios::out mode to create/overwrite
+    //ios::app mode to append
+    //flush() to ensure data is written
+    
+    //appending to files
+    ofstream outFile("output.txt", ios::app);
+
+    if(!outFile){
+        //error opening a file)
+        return 1
+    }
+    
+    
+    //.good() - no errors
+    //.eof() end of file reached
+    //.fail() logical error on I/O operation
+    //.bad() read.write error
+    //.is_open() check if file is open
+    //.clear() clear error flags
+    //exceptions()
+    
+    return EXIT_SUCCESS;
 }
 

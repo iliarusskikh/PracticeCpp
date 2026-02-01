@@ -12,12 +12,12 @@ using namespace std::chrono_literals;   // lets us write 200ms instead of std::c
 
 // This atomic bool acts as our **spinlock** (very simple mutex-like mechanism)
 std::atomic<bool> locked {false};
-// → starts as "unlocked" (false = free)
-// → only one thread should ever see it as false and change it to true at a time
+// starts as "unlocked" (false = free)
+// only one thread should ever see it as false and change it to true at a time
 
 // This atomic integer is used for **lock-free counting**
 std::atomic<int> counter {0};
-// → we will safely increment it from many threads without any mutex
+// we will safely increment it from many threads without any mutex
 
 
 // ───────────────────────────────────────────────
@@ -111,5 +111,22 @@ int main()
     // Read final value (load() is safe even without synchronization)
     std::cout << "\nFinal visitor count = " << counter.load() << "\n";
 
+    
+    
+    int value = 55;
+    counter.store(value, std::memory_order_release);
+    //std::memory_order_release
+    //std::memory_order_acquire
+    //std::memory_order_relaxed
+    //std::memory_order_seq_cst
+    
+    //.load() atomic read
+    //.store() atomic write
+    //.exchange() swap values atomically
+    //.compare_exchange_*() compare and swap
+    
+    
+    
+    
     return 0;
 }

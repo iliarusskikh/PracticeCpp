@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 class Animal {
 public:
@@ -74,6 +75,12 @@ int main()
     uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
     
 
+    
+    int *i = new int(44);
+    float *f = reinterpret_cast<float *>(i);
+    std::cout << *f<<"\n";//undefined behaviour when accessing
+    
+    
     
     
     

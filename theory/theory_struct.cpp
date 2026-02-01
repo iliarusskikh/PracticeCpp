@@ -44,6 +44,7 @@ int main()
     std::cout<< Node1.link->data1 << "\n";//accessing data from Node2
     
     
+    
     return 0;
 }
 

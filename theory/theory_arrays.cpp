@@ -33,6 +33,12 @@ int main() {
     // Passing to functions: Decays to pointer, loses size info
     // void printStatic(int arr[], size_t size);  // Need to pass size separately
 
+    
+    
+    
+    
+    
+    
     // =====================================
     // 2. std::array (Fixed-Size, Static-Sized STL Array)
     // =====================================
@@ -106,11 +112,19 @@ int main() {
     int* another = new int[5]; //cannot applly size calc, as it would measure pointer size
     delete[] another;
     
+    
+    
+    
+    
+    
+    
+    
     // =====================================
     // 3. Dynamic Arrays (std::vector)
     // =====================================
     // For comparison: Resizable, dynamic allocation.
     // Use when size isn't known at compile-time or needs to change.
+    // The vector itself is usually on the stack, but its contents (the elements you put in it) live on the heap.
     
     std::vector<int> dynVec = {1, 2, 3};  // Initial size 3
     std::cout << "Dynamic vector size: " << dynVec.size() << std::endl;
@@ -141,16 +155,15 @@ int main() {
     //use empalceback instead of push_back
 
     dynVec.clear();//entire array
-    // =====================================
-    // Key Differences Summary (in comments)
-    // =====================================
-    // - Static built-in: Simplest, but unsafe, no STL.
-    // - std::array: Fixed-size like static, but safe, STL-compatible, no overhead.
-    // - std::vector: Dynamic size, resizable, some overhead for growth.
-    // Use std::array when size is fixed and known; vector otherwise.
-    // For very large fixed arrays, std::array or static to avoid heap.
     
     
+
+    
+    
+    
+    
+    
+    //allocation on heap!
     //multidimensional arrays
     //int* dArr = new int[50]; //allocating memory
     
@@ -166,5 +179,13 @@ int main() {
     }
     delete[] a2d;
     
-    return 0;
+    
+     
+    
+    
+    
+    
+    
+    
+    return EXIT_SUCCESS;
 }

@@ -20,6 +20,9 @@ void B(void (*ptr)()){//func ptr as argument
     ptr();//callback func that ptr points to
 }
 
+int add(int a, int b){
+    return a+b;
+}
 
 
 void Increment(int* a){
@@ -193,7 +196,27 @@ int main(){
     //malloc -> free
     //new -> delete
     
+    Object* potr = &obj; //old style
+    Object* potr = std::addressof(obj);//improved
     
+    
+    
+    
+    
+    //heap
+    int* ppp = new int;
+    *ppp = 55;
+    int vall = *ppp;
+    delete ppp;
+    ppp = nullptr;
+    
+    //function ptrs
+    int(*operation)(int,int);
+    operation = &add;
+    int result = operation(1,4);
     
     return EXIT_SUCCESS;
 }
+
+
+
