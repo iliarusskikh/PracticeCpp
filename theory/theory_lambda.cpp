@@ -16,6 +16,48 @@ int mylambda(int x, int y, function<int(int,int)>f)
     return f(x,y);
 }
 
+//similar to tempaltes
+auto multiply = [](auto a, auto b){
+    return a*b;
+}
+
+
+template<typename T, typename U>
+auto multiply_func(T a, U b){
+    return a * b;
+}
+
+
+//lambda captures
+//init captures c++14
+auto ptr = std::make_unique<int>(10);
+auto lama = [value = std::move(ptr)](){
+    return *value;
+}
+
+struct Counter {
+    int value = 0;
+    auto get_counter(){
+        return [*this](){return value;};
+    }
+}
+
+
+//template lambdas
+auto lambda = []<typename T>(T value){
+    return value*2;
+};
+
+auto greeet = [](std::string name = "Guest"){
+    return "Hello "+ name;
+};
+
+//capturing structured bindings (c++20)
+auto [x, y] = std::make_pair(1,2);
+auto lambda = [=] {return x+y;};
+
+
+
 // Driver Code
 int main()
 {
@@ -54,7 +96,66 @@ int main()
     std::for_each(begin(values), end(values),[](int n) {std::cout << n <<', ';})
     
     
-    return 0;
+    
+    /*----------------------------------------*/
+    //basic lambda syntax
+    auto greet = [](const std::string& name){
+        return "Hello, "+ name "!";
+        
+    };
+    std::string message = greet("Bob");
+    
+    int x =10;
+    int y = 44;
+    
+    auto val_lambda = [x](){
+        return x*2;
+    };
+    
+    auto ref_lambda = [&x](){
+        x = 30;
+        return x;
+    }
+    
+    //using with algorithms
+    std::vector<int> numbers = {1,2,3,4,5,6,7,8,9,10};
+    
+    //find first even number
+    auto even = std::find_if(numbers.begin(), numbers.end(), [](int n){return n % 2; });
+    
+    //transform all numbers mult by 2
+    std::transform(numbers.begin(), numbers.end(), numbers.begin(), [](int n){return n * 2; });
+    
+    //mutable keyword allows modifying copy within lambda
+    
+    int cnt = 0;
+    auto incr = [cnt]() mutable {
+        return ++cnt;//modifies captured copy
+    };
+    
+    std::cout <<incr(); //1
+    std::cout <<incr(); //2
+    std::cout <<cnt; //0!!!
+    
+    
+    
+    int result1 = multiply(5,10); //int * int
+    int result2 = multiply(4.3,2.1);
+    
+    
+    std::vector<int> vecs = {1,2,3,4,5,6,7,8,9,10};
+    //sort by custom criteria
+    std::sort(vecs.begin(), vecs.end(),
+        [](int a, int b){
+        return std::abs(a) < std::abs(b);
+    });
+    
+    //concise transformation
+    std::transform(vecs.begin(), vecs.end(), vecs.begin(), [](int n){
+        return n*n;
+    }); 
+    
+    return EXIT_SUCCESS;
 }
 
 /*

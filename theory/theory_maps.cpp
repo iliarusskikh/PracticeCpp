@@ -17,7 +17,7 @@ namespace std{
     tempalte<>
     struct hash<CityRecord>
     {
-        size_t operator()(const CityRecord& key){
+        size_t operator()(const a& key){
             return hash<std::string>()(key.Name);
         }
         
@@ -27,10 +27,6 @@ namespace std{
 
 int main()
 {
-    unordered_map<CityRecord, string> mmap; //cannot hash custom data, alternatively use as a pointer CityRecord* or provide a hash implementation
-    
-     
-    
     // Create a map of strings to integers
     map<string, int> mp;
     
@@ -123,6 +119,11 @@ int main()
     
     
     
+    
+    
+    
+    
+    
     //print frequencies
     string str = "geeks for geeks geeks quiz "
                  "practice qa for";
@@ -156,14 +157,76 @@ int main()
     }
     
     
+    
+    
+    //unordered map
+    //unordered map is a container that stores key-value pairs in a hash table providing fast access by key
+    //hash based implementation O(1) average look up
+    //no guaranteed element order
+    //keys must be unique
+    unordered_map<CityRecord, string> mmap; //cannot hash custom data, alternatively use as a pointer CityRecord* or provide a hash implementation
+    
+    std::unordered_map<std::string,int>scores {
+        {"Alice",99},
+        {"Bob",22},
+        {"Geg",12},
+    };
+    scores["Alice"] = 99;
+    if(scores.count("Dave")>0){
+        //key exists
+    }
+    int aliceScore = scores["Alice"];//if using at() would through exception if not found
+    scores.erase("Alice");
+    auto it = scores.find("Bob");
+    
+    
+    for (const auto& pair:scores){
+        std::cout << pair.first <<" "<<pair.second<<std::endl;
+    }
+    
+    
+    for (const auto& [name,score] :scores){
+        std::cout << name <<" "<<score<<std::endl;
+    }
+    
+    //performance
+    //Lookup O(1) -> O(n) worst
+    //Insertion  O(1) -> O(n);
+    //Deletion O(1) -> O(n);
+    //worst case occurs when many elements hash to the same bucket collision
+    //performance degrades as load factor increases
+    
+    //optimising performance
+    //reserve capacity to avoid rehashing
+    std::unordered_map<std::string,int>map;
+    map.reserve(1000); //reserve for 1000 elements
+    
+    //control load factor to balance the memroy usage vs speed
+    //get current load factor
+    map.load_factor();//set maximum load factor;
+    map.max_load_factor(0.7);//use custom hash functions for complex keys
+    //lower factor (increase buckets)reduce collisions but increases memory consumption
+    //to use the custom type as key, a hash function needs to be defined
+    
+    
+    
+    
+    
+    
     /*-------------------------------------------------*/
     
     for (auto& kv : umap){
         std::string& namee = kv.first;
         double kkkk = kv.second;
     }
-
+    
     //iterating through a vector is still faster than a map
+    
+    
+    
+    
+    
+    
     
     return 0;
 }
