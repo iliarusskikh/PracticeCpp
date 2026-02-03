@@ -1,4 +1,5 @@
 // CPP Program to implement Deque in STL
+
 #include <deque>
 #include <iostream>
 
@@ -36,7 +37,39 @@ int main()
     cout << "\ngquiz.pop_back() : ";
     gquiz.pop_back();
     showdq(gquiz);
-
+    
+    
+    
+    
+    
+    //const time for insertion, removal and access element
+    //reallocated, memory in blocks
+    std::deque<int> dq = {10,22,59};
+    dq.push_back(10);
+    dq.push_front(20);
+    dq.push_back(30);
+    dq.push_front(15);
+    
+    //access
+    int value = dq[1];
+    int a = dq.at(2);//position 2
+    int first = dq.back();
+    int second = dq.front();
+    
+    dq.insert(dq.begin()+1, 14);
+    dq.insert(dq.begin()+1,2,25);//2 elements
+    dq.erase(dq.begin()+3);
+    
+    for(auto it = dq.begin(); it!=dq.end(); ++it){
+        std::cout<<*it<<" ";
+    }
+    for (const auto& element : dq){
+        std::cout << element << " ";
+    }
+    
+    //size()
+    //empty()
+    //clear()
     return 0;
 }
 

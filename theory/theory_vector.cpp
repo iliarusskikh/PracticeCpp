@@ -9,6 +9,14 @@ using namespace std;
 //vector resizable
 
 
+void know_algos(){
+    const std::vector<int> data = {12,3,-1,-44,6,33};
+    const auto is_positive = [](const auto &x){return x>0;};
+    auto fist_pos_it = std::find_if(data.cbegin(),data.cend(),is_positive);
+    //use first position it
+}
+
+
 int main() {
     vector<char> v = {'a', 'c', 'f', 'd', 'z'};
 
@@ -45,6 +53,10 @@ int main() {
     
     //another problem is copying, for example when push_back(Data(i)) //structure
     //use instead of that emplace_back()
+    
+    
+    
+    
     
     
     

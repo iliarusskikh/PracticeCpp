@@ -47,7 +47,13 @@ int main()
     cout << "\ngqlist2.sort(): ";
     gqlist2.sort();
     showlist(gqlist2);
+    
+    std::list<int> numbers = {10,20,40};
+    numbers.push_front(40);
+    
+    auto it = ++numbers.begin();
+    numbers.insert(it,15);//insert in the middle
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 

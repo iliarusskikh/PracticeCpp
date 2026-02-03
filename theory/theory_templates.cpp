@@ -1,7 +1,43 @@
 // C++ Program to demonstrate
 // Use of template
+//type safety at compile time
+
 #include <iostream>
 using namespace std;
+
+
+//class tempalte
+template<typename T>
+class Pair{
+private:
+    T first;
+    T second;
+  
+public:
+    Pair(T a, T b) : first(a), second(b){}
+    
+    T getMax(){
+        return (first > second) ? first : second;
+    }
+};
+
+
+template<typename T, typename U = int>//default
+class Container{
+private:
+    T data;
+    T id;
+  
+public:
+    Container(T d, U i) : data(d), id(i){}
+    
+    T getData(){ return data;}
+    U getId(){return id;}
+};
+
+
+
+
 
 // One function works for all data types. This would work
 // even for user defined types if operator '>' is overloaded
@@ -12,6 +48,55 @@ T myMax(T x, T y)
     return (x > y) ? x : y;
 }
 
+
+template <typename T>
+T swap(T& a, T& b){
+    T temp = a;
+    a = b;
+    b = temp;
+}
+ 
+
+template<typename T, typename U>
+auto add(T a, U b){
+    return a + b;
+}
+
+
+//generic template
+template<typename T>
+void display(T value){
+    std::cout << value << std::endl;
+}
+
+//specialised tempalte for char*
+template<>
+void display(char* value){
+    std::cout << "String:" <<value << std::endl;
+}
+
+
+//C++20
+//concepts allow you to constrain tepalte parameters to specific parameters
+//define a concept
+template<typename T>
+concept Numeric = std::is_arithmetic_v;
+
+//use the concept to constrain a tempalte
+template<Numeric T>
+T add(T a, T b){
+    return a+b;
+}
+
+//simplified syntax
+Numeric auto multiply(Numeric auto a, Numeric auto b){
+    return a* b;
+}
+
+
+
+
+
 int main()
 {
     // Call myMax for int
@@ -21,7 +106,18 @@ int main()
     // call myMax for char
     cout << myMax<char,1>('g', 'e') << endl;
 
-    return 0;
+    
+    
+    int x = 5, y = 10;
+    swap(x,y);//compiler generates swap
+    
+    int num = 10;
+    double val = 3.14;
+    auto result1 = add(num,val);
+    display(99);
+    display("Heheh");
+    
+    return EXIT_SUCCESS;
 }
 
 
