@@ -28,6 +28,11 @@ int main() {
 
     // Copy the addres of P1 into p2
     P2 = move(P1);
+
+    //to reset previously managed resource
+    P2.reset(new int(100));
+    
+    
     
     //By using shared_ptr, more than one pointer can point to same object at a time, and it will maintain a reference counter using the use_count() method.
     
@@ -38,9 +43,17 @@ int main() {
     P2 = P1;
     cout << P1.use_count();
     
+    
+    
     //weak_ptr is a smart pointer that holds a non-owning reference to an object. It's much more similar to shared_ptr except it will not maintain a reference counter.
+    //breaks circular references in pointers
     // Create shared_ptr Smart Pointer
     shared_ptr<int> P1(16);
+    auto ptr2 = P1;
+    std::cout << P1.use_count();//outputs 2
+    P1.reset();//reset one pointer
+    std::cout << ptr2.use_count();//outputs 1 - decreased
+    
     
     // Created a weak_ptr smart pointer
     //to be used with shared ptrs
