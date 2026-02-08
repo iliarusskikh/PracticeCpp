@@ -23,13 +23,25 @@ public:
         res.imag = imag + obj.imag;
         return res;
     }
+    
     void print() { cout << real << " + i" << imag << endl; }
     
     
+    //output stream operator overloading
     std::ostream& operator<<(std::ostream& stream, const Complex& other){
         stream << other.real << "+" << other.imag;
         return stream;
     }
+    
+    //input stream
+    std::istream& operator>>(std::istream& is, const Complex& other){
+        char ch;
+        is >> ch >> other.real >> ch >> other.imag;
+        return is;
+    }
+    
+    
+    
 };
 
 // Driver code

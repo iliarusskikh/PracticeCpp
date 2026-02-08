@@ -1,5 +1,6 @@
 #include <iostream>
 #include <tuple>
+#include <string>
 
 std::tuple<int, double> processValues(int inputInt, double inputDouble) {
     // Example: Modify inputs and return as tuple
@@ -16,7 +17,30 @@ int main() {
     std::cout << "Processed integer: " << intVal << std::endl;
     std::cout << "Processed double: " << doubleVal << std::endl;
 
-    return 0;
+    
+    
+    std::tuple<int, std::string, double> person {30, "joj",4.1};
+    auto t2 = std::make_tuple(111,"wrew",false);
+    int i = std::get<0>(t2);//111
+    
+    constexpr size_t size = std::tuple_size<decltype(t2)>::value; //3
+    using FirstType = std::tuple_element<0,decltype(t2)>::type; //int
+    
+    
+    auto [age, name, gpa] = person;//bindings
+    
+    
+    
+    //to modify elements
+    std::get<0>(person) = 11; //update age
+    
+    //concatenation - merge tuples
+    auto t3 = std::make_tuple(111,"wrew",false);
+    auto t4 = std::make_tuple(341,"wrewwwrer",true);
+
+    auto combined = std::tuple_cat(t3,t4); //result (111, wrew, false, 341, weerwerq, true)
+    
+    return EXIT_SUCCESS;
 }
 
 

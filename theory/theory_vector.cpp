@@ -5,8 +5,9 @@
 using namespace std;
 //std vector stored in heap
 //heap is slower than stack
-
+//contiguous storage - reallocate if more elements neeeded
 //vector resizable
+
 
 
 void know_algos(){
@@ -56,11 +57,15 @@ int main() {
     
     
     
+    std::vector<int> veeec = {10,20,40};
+    veeec.reserve(10);
+    veeec.shrink_to_fit(); //capacity = size
     
     
+    //2d vectors
+    std::vector<std::vector<int>> matrix(3,std::vector<int>(4,0));
     
-    
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -121,17 +126,17 @@ auto it_if = std::find_if(vec.begin(), vec.end(),
 
 
 
-//// Max element in vector
+// Max element in vector
 //cout << *max_element(v.begin(), v.end()) << endl;
 //
-//// Max element in array
+// Max element in array
 //cout << *max_element(arr, arr + n);
 
 
 
 
-//// Find the maximum element in the vector of structure
-//// based on the sno field
+// Find the maximum element in the vector of structure
+// based on the sno field
 //St max = *max_element(v.begin(), v.end(),
 //                [](const St &i, const St &j) {
 //                    return i.sno < j.sno;

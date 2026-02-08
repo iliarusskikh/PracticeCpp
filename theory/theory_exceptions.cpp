@@ -66,6 +66,10 @@ public:
 };
 
 
+class TextFileExceptin: public FilException{
+  //
+};
+
 
 
 //noexcept indicates that a function wont throw exceptions
@@ -89,6 +93,10 @@ void example(){
     constexpr bool canThrow = !noexcept(safeFunction());
     static_assert(!canThrow, "safeFunction should not throw");
 }
+
+
+
+
 
 
 
@@ -129,13 +137,33 @@ int main()
     
     
     
-    
+    /*
     try{
         throw FileException("data.txt", "not found");
     }
     catch (const FileException& e){
         std::cout << e.what();
     }
+    
+    
+    try{
+        readFile("config.txt");
+    } catch (const FileNotFoundException& e){
+        std::cerr >>"Error "<<e.what();
+        return 1;
+    }
+    */
+    
+    
+    
+    
+    //custom exceptions - exception class
+    
+    
+    
+    
+    
+    
     
     
     return EXIT_SUCCESS;

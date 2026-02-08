@@ -4,8 +4,14 @@
 #include <string>
 #include <unordered_map>//hash table - may be faster than map
 #include <sstream>
+
+
+//multimap - same keys allowed; sorted order
+
 using namespace std;
 
+
+//for unordered_map custom hash
 struct CityRecord{
     std::string Name;
     uint64_t Population;
@@ -23,6 +29,12 @@ namespace std{
         
     }
 }
+
+
+
+
+
+
 
 
 int main()
@@ -155,6 +167,8 @@ int main()
     for (auto& [nn,gg] : umap){
         std::cout << nn << " " << gg << "\n";
     }
+    
+    
     
     
     

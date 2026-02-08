@@ -9,7 +9,7 @@
 class Singleton
 {
 public:
-    static Singleton& Get(){
+    static Singleton& Get(){ //static ensures only one instance
         return s_Instance;
     }
     

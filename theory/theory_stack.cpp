@@ -19,6 +19,7 @@ int main() {
   
     while (!stack.empty()) {
         cout << stack.top() <<" ";
+        std::cout << stack.size()<<"\n";
         stack.pop();
     }
     

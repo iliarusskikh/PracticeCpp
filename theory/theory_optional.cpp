@@ -1,7 +1,26 @@
 // C++ program to show the different operator functions on std optional
+
 #include <iostream>
 #include <fstream>
 #include <optional>
+
+
+struct User{
+    std::string name;
+    int age;
+};
+
+
+std::optional<User> findUser(const std::string& id){
+    //database lookup logic
+    if(userExits(id)){
+        return User{getName(id),getAge(id)};
+    }
+    
+    
+    return std::nullopt;
+}
+
 
 
 std::optional<std::string> ReadFileAsString(const std::string& filepath){
@@ -37,6 +56,9 @@ int main()
     }
     //std::string& string = *data; //accessing data
     std::cout << "Hello " << "\n";
+    
+    
+    //.reset(), makes empty or destroying any contained value
     
     
     

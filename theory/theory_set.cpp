@@ -5,6 +5,15 @@
 #include<unordered_set>
 using namespace std;
 
+struct DescendingOrder{
+    //overloading comparator
+    bool operator()(const int& a, const int& b)const{
+        return a>b;
+    }
+}
+
+
+
 
 void printDuplicates(int arr[], int n)
 {
@@ -33,6 +42,7 @@ void printDuplicates(int arr[], int n)
     for (itr = duplicate.begin(); itr != duplicate.end();
          itr++)
         cout << *itr << " ";
+        //duplicate.erase(it);
 }
 
 
@@ -48,7 +58,7 @@ int main()
     auto it = s1.find(5);
     //*it
 
-    for (auto i : s1) {
+    for (auto& i : s1) {
         cout << i << ' '; //12,10,5,4.. discending
     }
     
@@ -67,6 +77,8 @@ int main()
     }
     
     
+    
+    
     multiset<int> q;
     q.insert(10);
     q.insert(10);
@@ -78,6 +90,37 @@ int main()
     // it will give output 2
     cout << q.count(10) << endl;
     
-    return 0;
+    //.size()
+    //.empty()
+    //.count(10);
+    //.lower_bound(10);
+    
+    
+    //using custom comparators
+    std::set<int, DescendingOrder> descNumbers;
+    descNumbers.insert({5,19,12,11});
+    
+    //19,12,11,5
+    for(const auto& num : descNumbers){
+        std::cout << num << " ";
+    }
+    
+    
+    
+    //for unordered_set
+    /*
+     bucket_count() - number of buckets in the container
+     max_bucket_count()
+     bucket_size(n)
+     rehash(n)
+     ..
+     
+     
+     
+     
+     */
+    
+    
+    return EXIT_SUCCESS;
 }
 
