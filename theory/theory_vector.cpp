@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <range>
+#include <algorithm>
 
 
 using namespace std;
@@ -64,6 +66,48 @@ int main() {
     
     //2d vectors
     std::vector<std::vector<int>> matrix(3,std::vector<int>(4,0));
+    
+
+    /*-------------------*/
+    
+    //merging two vectors = sorted
+    //1
+
+    std::vector<int> a = {1, 3, 5, 7, 9};
+    std::vector<int> b = {2, 4, 6, 8, 10};
+
+    std::vector<int> result;
+    result.reserve(a.size() + b.size());           // good practice
+
+    // Merge two sorted ranges into a new sorted range
+    std::merge(a.begin(), a.end(),
+               b.begin(), b.end(),
+               std::back_inserter(result));
+
+
+    //2
+    //if also removing duplicates
+    std::set_union(a.begin(), a.end(),
+                   b.begin(), b.end(),
+                   std::back_inserter(result));
+    
+    //3
+    std::ranges::merge(a, b, std::back_inserter(result));
+    
+    //vector.insert + sort -> avoid, O(nlogn)
+    
+    //unsorted vectors
+    std::vector<int> aa = {5, 1, 8, 3, 9};
+    std::vector<int> bb = {4, 7, 2, 6, 0};
+
+    std::vector<int> v3;
+    v3.reserve(aa.size() + bb.size());           // does not move .end() reference
+
+    v3.insert(v3.end(), aa.begin(), aa.end()); // inserts all elements of a at the end, end =begin since its empty
+    v3.insert(v3.end(), bb.begin(), bb.end());//insert BB
+
+    std::sort(v3.begin(), v3.end()); // sort merged!
+    
     
     return EXIT_SUCCESS;
 }
