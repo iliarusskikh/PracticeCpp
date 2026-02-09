@@ -75,3 +75,11 @@ int main()
     return EXIT_SUCCESS;
 }
 
+
+
+//creating a lambda comparator
+//auto cmp = [](const Person& a, const Person& b){
+//    return a.age > b.age;
+//};
+//using comparator within a priority queue
+//std::priority_queue<Person, std::vector<Person>, decltype(cmp)> people(cmp);
