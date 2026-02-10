@@ -19,17 +19,10 @@ int main(){
     
     
     
-    return 0;
-}
-
-
-
-
-int main() {
-    std::string origital = "Hello World";
-    std::string copy = origital;
-    
-
+    //if the class has reference qualified members the result is the same
+    //std::move(obj).foo();
+    //vs
+    //std::move(obj.foo());
     
     return 0;
 }
