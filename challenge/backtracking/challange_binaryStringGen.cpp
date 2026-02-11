@@ -1,14 +1,3 @@
-//Binary String Generation (Backtracking 101)
-
-/*Problem:
-Generate all binary strings of length N.
-
-Core idea
-At each position:
--- Try a choice (0 or 1)
--- Recurse
--- Undo the choice (backtrack)
-*/
 
 #include <iostream>
 #include <vector>
@@ -43,3 +32,8 @@ int main(){
     
     return EXIT_SUCCESS;
 }
+
+
+
+
+
