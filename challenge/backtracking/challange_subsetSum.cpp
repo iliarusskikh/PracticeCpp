@@ -31,6 +31,40 @@ bool subsetSum(int pos, const std::vector<int>& nums, int current_sum, int targe
 }
 
 
+//O(2^n)
+int countSubsetSum2(int index,
+                   const std::vector<int>& nums,
+                   int current_sum,
+                   int target)
+{
+    // Found valid subset
+    if (current_sum == target)
+        return 1;
+
+    // Exhausted elements
+    if (index == nums.size())
+        return 0;
+
+    // Prune (valid only if all numbers are positive)
+    if (current_sum > target)
+        return 0;
+
+    // Choice 1: Take element
+    int take = countSubsetSum(index + 1,
+                              nums,
+                              current_sum + nums[index],
+                              target);
+
+    // Choice 2: Skip element
+    int skip = countSubsetSum(index + 1,
+                              nums,
+                              current_sum,
+                              target);
+
+    return take + skip;
+}
+
+
 
 int main() {
     std::vector<int> nums = {3, 34, 4, 12, 5, 2};
