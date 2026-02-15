@@ -1,62 +1,92 @@
+//You are given:
+//A graph with N vertices
+//M colors
+//The graph is represented as an adjacency matrix
+//O(M^N)
+
+
+//Determine if it is possible to color the graph such that:
+//
+//1. Every vertex gets exactly one color
+//2. No two adjacent vertices have the same color
+
+
 #include <iostream>
 #include <vector>
 
-
-using namespace std;
-
-// Function to check if it's safe to color the current vertex
-// with the given color
-bool issafe(int vertex, int col, vector<int> adj[], vector<int> &color) {
-    for (auto it : adj[vertex]) {
-        // If adjacent vertex has the same color, not safe
-        if (color[it] != -1 && col == color[it])
+bool isSafe(int vertex, std::vector<std::vector<int>>& graph, std::vector<int>& color, int chosenColor)
+{
+    for (int neighbor = 0; neighbor < graph.size(); neighbor++) //checking children of each parent basicall
+    {
+        if (graph[vertex][neighbor] == 1 && color[neighbor] == chosenColor)//it is 1 if connection exists; if so, ensure its different color
+        {
             return false;
-    }
-    return true;
-}
-
-// Recursive function to try all colorings
-bool cancolor(int vertex, int m, vector<int> adj[], vector<int> &color) {
-    // If all vertices are colored successfully
-    if (vertex == color.size())
-        return true;
-
-    // Try all colors from 0 to m-1
-    for (int i = 0; i < m; i++) {
-        if (issafe(vertex, i, adj, color)) {
-            color[vertex] = i;
-            if (cancolor(vertex + 1, m, adj, color))
-                // If the rest can be colored, return true
-                return true;
-            color[vertex] = -1;
         }
     }
+
+    return true; //all children checked, all valid after assigning a color to parent VERTEX
+}
+
+
+
+bool solve(int vertex, std::vector<std::vector<int>>& graph, std::vector<int> color, int colors){
     
-    // No valid coloring found
-    return false;
-}
+    int n = graph.size();
+    
+    // base case: all vertices colored
+    if (vertex == n) //
+        return true;
+    
+    // try all colors
+    //0 - no color assigned yet
+    for (int c = 1; c <= colors; c++)// 1, 2, 3
+    {
+        if (isSafe(vertex, graph, color, c))
+        {
+            color[vertex] = c;     // if safe, apply the color and recruse with the next vertex parent DO
 
-bool graphColoring(int v, vector<vector<int>> &edges, int m) {
-    vector<int> adj[v];
+            if (solve(vertex + 1, graph, color, colors))
+                return true;
 
-    // Build adjacency list from edges
-    for (auto it : edges) {
-        adj[it[0]].push_back(it[1]);
-        adj[it[1]].push_back(it[0]);
+            color[vertex] = 0;     // BACKTRACK
+            
+        } //false if any children have that chosen color already
     }
-
-    vector<int> color(v, -1);
-    return cancolor(0, m, adj, color);
+    
+    
+    
+    
 }
+
+
+bool graphColoring(std::vector<std::vector<int>>& graph, int colors){
+    vector<int> color(colors, 0); // 0 = unassigned
+
+    return solve(0, graph, color, colors);
+}
+
 
 int main() {
-    int V = 4;
-    vector<vector<int>> edges = {{0, 1}, {0, 2},{0,3}, {1, 3}, {2, 3}};
-    int m = 3;
+    // Example graph (4 vertices)
+    // 0---1
+    // |  /|
+    // | / |
+    // 2---3
 
-    // Check if the graph can be colored with m colors
-    // such that no adjacent nodes share the same color
-    cout << (graphColoring(V, edges, m) ? "true" : "false") << endl;
+    vector<vector<int>> graph =
+    {
+        {0, 1, 1, 0},
+        {1, 0, 1, 1},
+        {1, 1, 0, 1},
+        {0, 1, 1, 0}
+    };
 
-    return 0;
+    int colors = 3; // number of colors
+
+    if (graphColoring(graph, colors))
+        std::cout << "Coloring is possible\n";
+    else
+        std::cout << "Coloring is NOT possible\n";
+
+    return EXIT_SUCCESS;
 }

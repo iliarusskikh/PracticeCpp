@@ -39,6 +39,12 @@ private:
     Logger& operator=(const Logger&) = delete;//copy
     Logger(Logger&&) = delete;
     Logger& operator=(Logger&&) = delete;//move
+    
+    /*void operator=(Logger&&){
+        throw std::logic_error("Can not move Singleton")
+     }
+
+     */
 
 public:
     // The only way to get the instance
