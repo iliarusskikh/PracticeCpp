@@ -16,7 +16,8 @@
 
 bool isSafe(int vertex, std::vector<std::vector<int>>& graph, std::vector<int>& color, int chosenColor)
 {
-    for (int neighbor = 0; neighbor < graph.size(); neighbor++) //checking children of each parent basicall
+    for (int neighbor = 0; neighbor < graph[0].size(); neighbor++) //checking children of each parent basicall
+        //graph.size() == graph[0].size() as for adjescent matrix
     {
         if (graph[vertex][neighbor] == 1 && color[neighbor] == chosenColor)//it is 1 if connection exists; if so, ensure its different color
         {
@@ -72,7 +73,7 @@ int main() {
     // |  /|
     // | / |
     // 2---3
-
+//N by N adjecent matrix
     vector<vector<int>> graph =
     {
         {0, 1, 1, 0},
