@@ -57,11 +57,7 @@
 class Solution {
 public:
 
-    bool isSafe(std::vector<std::vector<char>>& board,
-                int row,
-                int col,
-                char num)
-    {
+    bool isSafe(std::vector<std::vector<char>>& board, int row, int col, char num){
         // Check row
         for (int c = 0; c < 9; c++)
             if (board[row][c] == num)
@@ -87,13 +83,12 @@ public:
 
     bool solve(std::vector<std::vector<char>>& board)
     {
-        for (int row = 0; row < 9; row++)
-        {
-            for (int col = 0; col < 9; col++)
-            {
-                if (board[row][col] == '.') //looking for an empty cell
-                {
-                    for (char num = '1'; num <= '9'; num++) //try to insert a number in an empty cell
+        for (int row = 0; row < 9; row++){
+            for (int col = 0; col < 9; col++){
+                //looking for an empty cell
+                if (board[row][col] == '.'){
+                    //try to insert a number in an empty cell
+                    for (char num = '1'; num <= '9'; num++)
                     {
                         if (isSafe(board, row, col, num))
                         {
