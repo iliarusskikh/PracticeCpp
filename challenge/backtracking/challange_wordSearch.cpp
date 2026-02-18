@@ -64,7 +64,7 @@ public:
         int rows = board.size();
         int cols = board[0].size();
 
-        // Try starting from every cell
+        // Try starting from every cell, similar to sudoku
         for (int r = 0; r < rows; r++)
         {
             for (int c = 0; c < cols; c++)
