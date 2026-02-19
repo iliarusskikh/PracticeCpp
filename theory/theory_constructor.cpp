@@ -1,3 +1,6 @@
+//constructors are executed from base to derived
+//destructors are executed from derived to base
+
 //#include <iostream>
 //using namespace std;
 //
