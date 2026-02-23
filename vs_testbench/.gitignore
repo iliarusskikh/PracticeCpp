@@ -1,0 +1,39 @@
+# Build directories
+build/
+cmake-build-debug/
+cmake-build-release/
+*.dSYM/
+
+# Compiled objects
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.exe
+*.out
+
+# CMake
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+*.cmake
+
+# IDE and editor directories
+.vscode/
+.idea/
+.VS/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.dSYM/
+
+# Executables
+main
+VS_CPP
