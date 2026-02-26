@@ -1,184 +1,293 @@
-# C++ Hash Tables – Complete Cheat Sheet
----
-## What is hashing?
-- A hash function is a pure function that takes a key (any type) and returns a fixed-size integer (in C++ usually size_t = 64-bit on modern machines).
+# C++ Hash Tables – Practical Examples
 
-## 1. Core Concept & Why So Efficient
 
-- **Hash table** = array of **buckets** + **hash function** that maps `key → bucket index` (`hash(key) % bucket_count()`).
-- **Average O(1)** insert / lookup / erase because:
-  - Hash computation is O(1) (or O(length) for strings).
-  - Bucket lookup is O(1).
-  - Collision chains are kept **short** (good hash → uniform distribution → average chain length ≈ load factor).
-- **Amortized** guarantee: rehash cost is spread over many insertions.
-- **Worst case O(n)** only with pathological hash (all keys collide) or adversarial input.
+## Core Concepts – Quick Reference
 
-**C++ STL implementation (`std::unordered_map` / `std::unordered_set`)**  
-- **Separate chaining** (mandated by the standard).  
-- Internal: array of buckets, each bucket is a singly-linked list of nodes.  
-- Collisions resolved by: same-hash → same bucket → linear search with `key_equal`.
+### Hash Table Basics
 
----
+- Separate chaining (linked lists per bucket) – standard-mandated
+- Average O(1) lookup/insert/erase when load factor controlled & hash good
+- Worst case O(n) when all keys collide → one giant linked list
 
-## 2. `std::unordered_map` vs `std::unordered_set`
-
-| Feature              | `unordered_map<Key, T>`                  | `unordered_set<Key>`                  |
-|----------------------|------------------------------------------|---------------------------------------|
-| Stores               | `pair<const Key, T>`                     | Key only                              |
-| `operator[]` / `at`  | Yes                                      | No                                    |
-| Typical use          | Symbol → price/volume, ID → order        | Unique IDs, visited nodes             |
-
-Both share identical hash/bucket/re-hash mechanics.
-
----
-
-## 3. Performance Guarantees (C++ Standard)
-
-| Operation                          | Average | Worst  | Notes                              |
-|------------------------------------|---------|--------|------------------------------------|
-| `insert`/`emplace` / `try_emplace` | O(1)    | O(n)   | Amortized                          |
-| `erase` /`find`/`count`/`contains` |C++20 O(1)| O(n) | —                           |
-| `operator[]`                       | O(1)    | O(n)   | Inserts default if missing         |
-| `rehash` / `reserve`               | O(n)    | O(n)   | Full rebuild                       |
-| Iteration                          | O(n)    | O(n)   | Arbitrary order, changes on rehash |
-
-**Iterator invalidation rules** (critical):  
-- Rehash (`reserve`, `rehash`, insert that triggers growth) → **all iterators invalidated**.  
-- Single `erase(it)` → only that iterator invalidated.
-
----
-
-## 4. Load Factor & Rehashing (The Magic Behind Amortized O(1))
-
-- `load_factor() = size() / bucket_count()` (O(1))
-- `max_load_factor()` default = **1.0**
-- When `size() > bucket_count() * max_load_factor()` → automatic rehash to ~2× buckets
-- `reserve(n)` → **best practice** before bulk insert (ensures no rehash for next `n` elements)
-
-> “`m.reserve(1e6)` before inserting 1M elements turns worst-case O(n log n) into guaranteed amortized O(n)”  
-
----
-
-## 5. Bucket Interface (Shows You Understand Internals)
+### Important Member Functions
 
 ```cpp
+m.reserve(n);               // best practice – pre-allocate for ~n elements
+m.rehash(n);                // force at least n buckets (rarely needed)
+m.bucket_count();           // current number of buckets
+m.load_factor();            // size() / bucket_count()
+m.max_load_factor(0.7f);    // tune – lower = fewer collisions, more memory
+m.bucket(key);              // which bucket this key would go to
+m.bucket_size(b);           // how many elements in bucket b
+
+```
+
+
+### Iterator Invalidation Rules 
+
+- Rehash (automatic or reserve/rehash call) → all iterators invalidated
+- erase(iterator) → only that iterator invalidated
+- Never store raw iterators across operations that may cause rehash
+
+#### Custom Hash + Equal – Golden Rules
+
+- Hash must be noexcept, deterministic in one run
+- Equal keys → must produce same hash
+- Good distribution → minimize long chains
+
+Common combine pattern (used in Boost/Abseil/etc.):
+
+size_t h = std::hash<T1>{}(v1);
+h ^= std::hash<T2>{}(v2) + 0x9e3779b9 + (h << 6) + (h >> 2);
+
+
+When to prefer alternatives
+
+Scenario Recommended choice Reason
+Need ordering / range queriesstd::map / std::setlog n guaranteed
+Very hot path, millions of ops/secabsl::flat_hash_map or ska::flat_hash_mapOpen addressing, better cache
+Known small & fixed key setPerfect hash / array + enumZero collisions, compile-time
+Symbol lookups (strings)std::unordered_map <std::string, T, ...> with transparent hasherAvoid string copies with string_view
+
+
+### Memory 
+
+std::unordered_map itself stores almost everything on the heap.
+
+The map object (the small control structure with pointers to buckets, size counters, load factor etc.) lives where you declare it — usually on the stack if it's a local variable, or inside another object if it's a member.
+But all the actual data (buckets array + all nodes with keys and values) lives on the heap.
+
+- Allocation cost
+Every insert / emplace → at least one heap allocation (new node)
+Expensive when inserting millions one-by-one without reserve()
+
+- Cache performance
+Nodes are scattered on heap → poor locality (pointer chasing)
+Main reason flat/open-addressing maps (absl, ska) are often 20–100% faster
+
+- Memory usage
+High overhead: ~24–64 bytes per element (node + pointers + padding) + buckets
+Much higher than std::vector or dense arrays
+
+- Rehash
+Allocates new bigger bucket array + new nodes → many allocations at once
+That's why reserve() before bulk insert is critical
+
+- Lifetime
+Data lives as long as the map object — map destruction frees all heap nodes
+No manual delete needed (RAII)
+
+
+### FAQ 
+
+- “Does unordered_map store data on heap or stack?”
+→ “The control structure is small and can be on stack, but buckets and all key-value nodes are dynamically allocated on the heap.”
+- “Why does it matter in performance?”
+→ “Heap allocations are slow, scattered nodes hurt cache locality — that's why pre-reserving capacity and using flat hash maps can give big speedups in hot paths.”
+- “Any way to avoid heap?”
+→ “For very small fixed-size cases you could use a sorted array or perfect hash, but for dynamic data (order books, risk maps) heap is unavoidable with unordered_map.”
+
+
+
+### Implications
+- Deletion is expensive in open addressing → tombstones hurt probe chains → many fast maps discourage erase or use lazy deletion
+
+- String keys — transparent hashing + string_view still saves huge memory/cycles
+
+- Very small maps (< 64 elements) → often std::vector + linear search or sorted vector faster
+
+- Very large keys (big structs) → node-based (chaining) better than flat (less movement during Robin Hood swaps)
+
+- SIMD metadata lookup (SwissTable style) → wins big on modern CPUs (AVX2/AVX-512)
+
+- Hash DoS is still real → never use hash of untrusted input without per-process seed (most std libs now do this automatically)
+
+
+
+
+# QUICK LEARN
+
+## 1. Core Container: std::unordered_map / unordered_set
+- Implementation — separate chaining (array of buckets, each bucket is a forward-linked list of nodes)
+- Average complexity — O(1) for lookup / insert / erase / count (amortized)
+- Worst case — O(n) when many keys collide → degenerate to linked list
+- Order — unordered (arbitrary iteration order, changes on rehash)
+- Iterator invalidation — rehash invalidates all iterators; single-element erase invalidates only iterators to that element
+
+## 2. Template Parameters
+
+template<
+    class Key,
+    class T,                            // for map; ignored in set
+    class Hash      = std::hash<Key>,
+    class KeyEqual  = std::equal_to<Key>,
+    class Allocator = std::allocator<std::pair<const Key, T>>
+> class unordered_map;
+
+Most common customizations:
+Provide custom Hash + KeyEqual for user-defined types
+Rarely change allocator (polymorphic / arena / pmr in C++17+)
+
+## 3. std::hash<Key> Requirements (Named Requirement: Hash)
+Must satisfy:
+- Function object: size_t operator()(const Key&) const
+- Deterministic within one program run
+- Equal keys must produce equal hash values (very important!)
+- Should be noexcept (strongly recommended since C++11)
+- Good avalanche / uniformity → minimize collisions
+
+Standard provides specializations for:
+- All integer types (int, long, uint64_t, …)
+- float, double, long double
+- std::string, std::string_view (C++17+)
+- std::nullptr_t, pointers, enums, std::optional, std::variant, std::bitset, chrono types, etc.
+
+### No built-in for: std::pair, std::tuple, arrays, custom structs → you must implement!
+
+## 4. Custom Hash – Most Common Patterns
+### Style 1 – separate hasher + equal (cleanest)
+
+```
+struct MyKey {
+ uint64_t a; 
+ int b; 
+ std::string s; 
+};
+
+
+struct MyHash {
+    size_t operator()(const MyKey& k) const noexcept {
+        size_t h = std::hash<uint64_t>{}(k.a);
+        h ^= std::hash<int>{}(k.b) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        h ^= std::hash<std::string>{}(k.s) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        return h;
+    }
+};
+
+struct MyEqual {
+    bool operator()(const MyKey& x, const MyKey& y) const {
+        return x.a == y.a && x.b == y.b && x.s == y.s;
+    }
+};
+
+std::unordered_map<MyKey, Value, MyHash, MyEqual> m;
+
+```
+
+### Style 2 – specialize std::hash in namespace std (requires operator==)
+```
+namespace std {
+    template<> struct hash<MyKey> {
+        size_t operator()(const MyKey& k) const noexcept 
+        { /* ... */ }
+    };
+}
+
+```
+
+Golden-ratio mixer (0x9e3779b9) is still very common in 2026 (from Boost).
+
+- Modern alternatives (better quality / faster):
+
+absl::Hash<T> (Abseil) — very high quality
+xxh3 / wyhash / t1ha — extremely fast non-cryptographic hashes
+SplitMix64 + per-run seed (anti-hash-flooding)
+
+
+## 5. Load Factor & Rehashing
+
+max_load_factor() default = 1.0
+load_factor() = size() / bucket_count()
+When size() > bucket_count() × max_load_factor() → automatic rehash (~2× buckets)
+reserve(n) — best practice before bulk insert
+
+m.reserve(1'000'000);   // ensures ~no rehash for next 1M inserts
+reserve(n) ≈ rehash(ceil(n / max_load_factor()))
+
+
+## 6. Bucket API
+```
 size_t bc = m.bucket_count();
-size_t b  = m.bucket(key);                    // which bucket this key lands in
-size_t bs = m.bucket_size(b);                 // elements in that bucket
-for (auto it = m.begin(b); it != m.end(b); ++it) { ... }  // local iterators
+size_t b  = m.bucket(key);
+size_t len = m.bucket_size(b);          // elements in this bucket
+for (auto it = m.begin(b); it != m.end(b); ++it) { /* local iteration */ }
 ```
 
----
+Average chain length ≈ load factor → aim for 0.7–1.3
 
-## 6. `std::hash` Requirements & Built-ins
+## 7. Floating-point & String Gotchas
 
-- Must be `noexcept`, deterministic within one run.
-- Provided for: all arithmetic, enums, pointers, `std::string`, `string_view`, `chrono::*`, smart pointers, etc.
-- **NOT** provided for: `pair`, `tuple`, user structs, `const char*` (hashes pointer!).
+double hashing — bit representation (NaN issues, +0 vs -0)
+Equality for floats — use epsilon in custom KeyEqual
+const char* — hashes pointer, not content → dangerous
+Prefer std::string_view + transparent hasher (C++20 is_transparent)
 
----
-
-## 7. Custom Hash + Equality for User Types (Classic)
-
-### Option A – Template params (cleanest)
-```cpp
-struct Position { double px; int qty; std::string sym; };
-
-struct PosHash {
-    size_t operator()(const Position& p) const noexcept {
-        size_t h1 = std::hash<std::string>{}(p.sym);
-        size_t h2 = std::hash<double>{}(p.px);
-        size_t h3 = std::hash<int>{}(p.qty);
-        h1 ^= h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2);
-        h1 ^= h3 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2);
-        return h1;
-    }
+C++
+```
+struct str_hash {
+    using is_transparent = void;
+    size_t operator()(std::string_view sv) const noexcept { /* ... */ }
 };
 
-struct PosEqual {
-    bool operator()(const Position& a, const Position& b) const {
-        return a.sym == b.sym && std::abs(a.px - b.px) < 1e-9 && a.qty == b.qty;
-    }
-};
-
-std::unordered_map<Position, double, PosHash, PosEqual> book;
+std::unordered_map<std::string, T, str_hash, std::equal_to<>> m;
 ```
 
-### Option B – Specialize `std::hash` (requires `operator==`)
-```cpp
-template<> struct std::hash<Position> { /* ... */ };
-```
+8. vs std::map / std::set
 
-**Floating-point gotcha**: Use epsilon in equality.  
-**Anti-DoS safe hash**: Use SplitMix64 + random seed (widely used in competitive code).
 
-**Pair / Tuple example**:
-```cpp
-template<class T1, class T2>
-struct std::hash<std::pair<T1,T2>> {
-    size_t operator()(const std::pair<T1,T2>& p) const {
-        return std::hash<T1>{}(p.first) ^ (std::hash<T2>{}(p.second) << 1);
-    }
-};
-```
+Need                    Prefer unordered_map/set    Prefer map/set  
+Fastest average lookup              Yes (O(1))          No (O(log n))
+No order needed                     Yes                 Waste
+Range queries / lower_bound         No                  Yes
+Predictable worst-case              No                  Yes
+Memory overhead                 Usually lower           Higher (tree nodes)
 
----
+## 9. Modern Alternatives
 
-## 8. C++ Version Highlights
+Popular high-speed implementations (often 1.5–4× faster than std::unordered_map):
+- absl::flat_hash_map (SwissTable)
+Open addressing + SIMD
+8-bit hash fingerprints + group loading (SIMD)
+2–3.5×
+General purpose, Google's production
 
-- **C++11**: 
-- **C++17**: `try_emplace`, `insert_or_assign`, node extract/merge
-- **C++20**: `contains()`, `erase_if()`
-- **C++23/26**: `insert_range`, `constexpr` containers
+- martinus::unordered_dense
+Robin Hood + separate value array
+8-bit hash bits, index indirection
+2–4×
+Often fastest in 2024–2025 benches
 
----
+- martinus/robin_hood::unordered_flat_map
+Robin Hood hashing
+Linear probing with displacement stealing
+1.8–3×
+Classic fast & simple Robin Hood
 
-## 9. `unordered_` vs `map` / `set` (Decision Table)
+- ska::flat_hash_map / bytell_hash_map
+Robin Hood / linear
+Byte-wise metadata
+1.5–3×
+Extremely cache-friendly
 
-| Need                        | Choose `unordered_` | Choose ordered (`map`/`set`) |
-|-----------------------------|---------------------|------------------------------|
-| Fastest lookups             | Yes                 | No (`log n`)                 |
-| No order required           | Yes                 | Waste                        |
-| Range queries / `lower_bound` | No                | Yes                          |
-| Predictable worst-case      | No                  | Yes                          |
-| Memory / cache              | Usually better      | Tree nodes overhead          |
 
----
+## Why binary trees (std::map, std::set) have high overhead
 
-## 10. Common Questions & Answers
+Node-based structure
+Every element lives in its own heap-allocated node.
+Three pointers per node (red-black tree)
+left child
+right child
+parent (almost all implementations use parent pointers)
+→ 24 bytes just for pointers (64-bit)
 
-1. **“How does rehash work?”**  
-   → Allocates new larger bucket array → re-computes hash for every element → O(current size).
+Color bit (red/black) → usually 1 byte + padding → often 8 bytes more
+Per-element allocation overhead
+malloc/free metadata (~16–32 bytes per allocation on many allocators)
+Alignment/padding to satisfy alignof(pair<const K,V>)
 
-2. **“Why is it amortized O(1)?”**  
-   → Each rehash doubles buckets → each element is rehashed O(log n) times in its lifetime.
+No bulk allocation
+Unlike vector, tree nodes are scattered → terrible cache locality + fragmentation
 
-3. **“What happens with bad hash?”**  
-   → All elements in one bucket → O(n). Mention DoS attacks and safe hashes.
+### Result: even for tiny key+value (e.g. int→int = 8 bytes), you easily pay 5–8× more memory.
 
-4. **“How to pre-size?”**  
-   → `m.reserve(expected_size);`
-
-5. **“Can I modify key while in map?”**  
-   → No → UB (keys are `const`).
-
----
-
-## 11. Best Practices
-
-- Always `reserve()` when you know size.
-- Prefer `emplace` / `try_emplace`.
-
-- For symbols → `std::string_view` with transparent hash/equal.
-- std::string as key → copies the string data into the map node.
-- std::string_view → stores only pointer + length → no copy, lower memory, faster.
-
-- In hot paths → consider `absl::flat_hash_map` or `ska::flat_hash_map` (open addressing, faster) but know they are non-standard.
-- Profile hot buckets: `for(size_t i=0; i<m.bucket_count(); ++i) if(m.bucket_size(i)>10) ...`
-
----
-
-**One-liner **:
-> `unordered_map` = O(1) average via hashing + chaining + controlled load factor. Master `reserve`, custom `std::hash`, and rehash semantics → instant senior quant credibility.
-
----
+In contrast - std::vector<pair<K,V>> would use one single contiguous block

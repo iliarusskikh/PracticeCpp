@@ -102,8 +102,8 @@ int main() {
     // Stats
     std::cout << "Size          : " << book.size() << '\n'; //Number of key-value pairs stored
     std::cout << "Bucket count  : " << book.bucket_count() << '\n';
-    //Size of the internal array of bucketsAfter reserve(10) the implementation chose
-    //the next suitable size.
+    //Size of the internal array of buckets total size before re-allocation
+    //After reserve(10) the implementation chosenthe next suitable size.
     //Most standard libraries (GCC, Clang) use small prime numbers (11 is the smallest prime ≥ 10).
     
     std::cout << "Load factor   : " << book.load_factor() << '\n';
