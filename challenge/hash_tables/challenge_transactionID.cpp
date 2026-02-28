@@ -16,8 +16,8 @@ std::vector<std::string> get_fraud_id(const std::vector<std::string>& uid, int t
     std::vector<std::string> temp;
 
     for (const std::string& transaction : uid) { //using range
-        stringstream ss(transaction);
-        temp.clear();
+        stringstream ss(transaction); //single string appended into stream
+        temp.clear(); //ensure temp vector is cleard
 
         std::string word;
         while (ss >> word) {
@@ -27,7 +27,7 @@ std::vector<std::string> get_fraud_id(const std::vector<std::string>& uid, int t
         // Safety: skip invalid lines (less than 2 IDs)
         if (temp.size() < 2) {
             continue;
-        }
+        } // valid: 2 ids
 
         const std::string& id1 = temp[0];
         const std::string& id2 = temp[1];
@@ -40,21 +40,27 @@ std::vector<std::string> get_fraud_id(const std::vector<std::string>& uid, int t
         }
     }
 
-    std::vector<std::string> result;
+    std::vector<std::string> result; //detected IDs over threshold
     for (const auto& [id, freq] : count) { //new style
-        if (freq >= threshold) {
+        if (freq >= threshold) { //if more than threshold transactions
             result.push_back(id);
         }
     }
 
+    
     // Sort descending numerically (safest with stoull to avoid overflow)
     sort(result.begin(), result.end(),
          [](const std::string& a, const std::string& b) {
              return stoull(a) > stoull(b);
          });
-//OR rbegin()/rend() - reverse iterator
+    
+    //OR rbegin()/rend() - reverse iterator
+    //sort(result.rbegin(), result.rend()
+    
     return result;
 }
+
+
 
 int main() {
     std::vector<std::string> id = {
