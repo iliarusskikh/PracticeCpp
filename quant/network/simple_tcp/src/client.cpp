@@ -5,7 +5,11 @@
 #include <arpa/inet.h>       // inet_pton() — modern way to convert IP string → binary
 #include <unistd.h>          // close(), read()  (on POSIX systems)
 
+#include "timer.hpp"
+
 int main() {
+    Timer timer; //creating object - starting the timer
+
     // ────────────────────────────────────────────────
     //                VARIABLES
     // ────────────────────────────────────────────────
@@ -97,58 +101,3 @@ int main() {
 
     return EXIT_SUCCESS;
 }
-
-
-/*#include <iostream>
-#include <cstring>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>   // inet_pton
-#include <unistd.h>
-
-int main() {
-    int sock = 0;
-    struct sockaddr_in serv_addr;
-    const char* message = "Hello from client!";
-    char buffer[1024] = {0};
-    const char* SERVER_IP = "127.0.0.1";  // localhost
-    const int PORT = 8080;
-
-    // 1. Create socket
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        std::cerr << "Socket creation error\n";
-        return 1;
-    }
-
-    // 2. Set server address
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-
-    // Convert IPv4 string to binary
-    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        std::cerr << "Invalid address / Address not supported\n";
-        return 1;
-    }
-
-    // 3. Connect to server
-    if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        std::cerr << "Connection failed\n";
-        return 1;
-    }
-
-    std::cout << "Connected to server\n";
-
-    // 4. Send message
-    send(sock, message, strlen(message), 0);
-    std::cout << "Message sent: " << message << "\n";
-
-    // 5. Read reply (optional)
-    read(sock, buffer, 1024);
-    std::cout << "Reply from server: " << buffer << "\n";
-
-    // 6. Clean up
-    close(sock);
-
-    return EXIT_SUCCESS;
-}
-*/

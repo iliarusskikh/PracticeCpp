@@ -1,0 +1,29 @@
+# CMake / build
+build/
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+compile_commands.json
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# Object files and binaries
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+server
+client
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
