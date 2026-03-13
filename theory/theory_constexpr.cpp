@@ -52,7 +52,16 @@ int main() {
     const int* const p3 = &value; //cant modify p3 or *p3
     
     
+    // Review
+    // Case A:
+    const int myvar1 = 10; //compile time constant
+    constexpr int myvar2 = 10; //compile time constant
     
+    // Case B:
+    int x;
+    std::cin >> x;
+    const int c= x; //runtime constant
+    //constexpr int d = x; // Error as it should be compile time
     
     
     
