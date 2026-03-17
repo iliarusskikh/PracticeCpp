@@ -99,5 +99,5 @@ int main() {
 
     std::cout << "Connection closed. Client exiting.\n";
 
-    return EXIT_SUCCESS;
+    return 0;
 }
