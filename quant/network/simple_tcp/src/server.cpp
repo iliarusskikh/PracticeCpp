@@ -1,4 +1,6 @@
 //g++ -o server server.cpp -std=c++11
+//Server: create → bind → listen → accept → receive → send → close
+
 #include <iostream>          // std::cout, std::cerr
 #include <cstring>           // memset, strlen
 #include <sys/socket.h>      // socket(), bind(), listen(), accept(), send(), read(), setsockopt()
@@ -23,7 +25,7 @@ int main() {
     // SOCK_STREAM → TCP (reliable, connection-oriented)
     // 0          → default protocol (IPPROTO_TCP)
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == 0) {   // Note: == 0, not < 0 (very old mistake in some examples)
+    if (server_fd < 0) {
         std::cerr << "Error: Socket creation failed\n";
         return 1;
     }

@@ -1,3 +1,5 @@
+//Client: create → connect → send → receive → close
+
 #include <iostream>          // For std::cout, std::cerr
 #include <cstring>           // For strlen()
 #include <sys/socket.h>      // socket(), connect(), send(), close();
@@ -97,7 +99,7 @@ int main() {
     // 5. RECEIVE RESPONSE (simple blocking read)
     // ────────────────────────────────────────────────
     // read() blocks until data arrives or connection closes
-    ssize_t bytes_received = read(sock, buffer, sizeof(buffer) - 1);
+    ssize_t bytes_received = read(sock, buffer, sizeof(buffer) - 1); //buffer is 1024 bytes. We read at most 1023 so we can always add a null terminator
     if (bytes_received < 0) {
         std::cerr << "Error: Read failed\n";
     } else if (bytes_received == 0) {
