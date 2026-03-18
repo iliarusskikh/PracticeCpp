@@ -1,6 +1,6 @@
 #include <iostream>          // For std::cout, std::cerr
 #include <cstring>           // For strlen()
-#include <sys/socket.h>      // socket(), connect(), send(), read(), close()
+#include <sys/socket.h>      // socket(), connect(), send(), close();
 #include <netinet/in.h>      // sockaddr_in, htons()
 #include <arpa/inet.h>       // inet_pton() — modern way to convert IP string → binary
 #include <unistd.h>          // close(), read()  (on POSIX systems)
@@ -10,6 +10,15 @@
 int main() {
     Timer timer; //creating object - starting the timer
 
+    /* for reference
+    struct sockaddr_in {
+        sa_family_t    sin_family;   // Address family (AF_INET)
+        in_port_t      sin_port;     // Port number (network byte order)
+        struct in_addr sin_addr;     // IPv4 address (32-bit)
+        char           sin_zero[8];  // Padding to match sockaddr size
+    };  
+    
+    */
     // ────────────────────────────────────────────────
     //                VARIABLES
     // ────────────────────────────────────────────────
@@ -20,11 +29,15 @@ int main() {
     const char* SERVER_IP = "127.0.0.1"; // localhost (loopback address)
     const int PORT = 8080;              // Port the server is listening on
 
+
     // ────────────────────────────────────────────────
     // 1. CREATE SOCKET
     // ────────────────────────────────────────────────
-    // AF_INET    → IPv4
+    // AF_INET    → IPv4; AF_INET6 (IPv6), AF_UNIX (local)
     // SOCK_STREAM → TCP (reliable, connection-oriented, byte stream)
+    // SOCK_STREAM = TCP: reliable, ordered, connection‑oriented byte stream
+    // SOCK_DGRAM = UDP: unreliable, connectionless datagrams
+    // SOCK_RAW = raw IP (low‑level, usually privileged)
     // 0          → use default protocol (IPPROTO_TCP)
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -32,11 +45,12 @@ int main() {
         return 1;
     }
     // At this point we have a socket file descriptor (like a handle)
+    std::cout << "Socket created: "<< sock << "\n";
 
     // ────────────────────────────────────────────────
     // 2. PREPARE SERVER ADDRESS STRUCTURE
     // ────────────────────────────────────────────────
-    // Clear structure (good practice, though not always strictly needed)
+    // Clear structure
     memset(&serv_addr, 0, sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;           // Must match socket family (IPv4)
@@ -55,6 +69,8 @@ int main() {
     // ────────────────────────────────────────────────
     // Initiates TCP 3-way handshake
     // Blocks until connection succeeds or fails
+    //int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         std::cerr << "Error: Connection failed (server down? wrong port?)\n";
         close(sock);
@@ -64,7 +80,7 @@ int main() {
     std::cout << "Successfully connected to " << SERVER_IP << ":" << PORT << "\n";
 
     // ────────────────────────────────────────────────
-    // 4. SEND DATA
+    // 4. SEND DATA over TCP connection
     // ────────────────────────────────────────────────
     // send() may not send everything in one call in general,
     // but here message is tiny → almost always succeeds in one go
