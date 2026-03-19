@@ -2,10 +2,19 @@
 //Server: create → bind → listen → accept → receive → send → close
 
 #include <iostream>          // std::cout, std::cerr
+#include <csignal>           // sigaction, SIGINT, SIGTERM
 #include <cstring>           // memset, strlen
 #include <sys/socket.h>      // socket(), bind(), listen(), accept(), send(), read(), setsockopt()
 #include <netinet/in.h>      // sockaddr_in, htons(), INADDR_ANY
 #include <unistd.h>          // close(), read()
+
+// ────────────────────────────────────────────────
+//                SHUTDOWN FLAG
+// ────────────────────────────────────────────────
+volatile sig_atomic_t g_shutdown = 0;
+
+void on_signal(int) { g_shutdown = 1; }
+
 
 int main() {
     // ────────────────────────────────────────────────
@@ -72,53 +81,67 @@ int main() {
         return 1;
     }
 
-    std::cout << "Server listening on port " << PORT << " (all interfaces)...\n";
+    std::cout << "Server listening on port " << PORT << " (all interfaces)... (Ctrl+C to stop)\n";
 
-    // ────────────────────────────────────────────────
-    // 5. ACCEPT a client connection (blocking call)
-    // ────────────────────────────────────────────────
-    // Blocks until a client connects
-    // Creates a NEW socket (new_socket) for THIS client
-    // server_fd remains listening for more clients
-    new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-    if (new_socket < 0) {
-        std::cerr << "Error: Accept failed\n";
-        close(server_fd);
-        return 1;
+    struct sigaction sa;
+    sa.sa_handler = on_signal;
+    sigemptyset(&sa.sa_mask); //Clears the signal mask. sa_mask is the set of signals blocked while the handler runs. Empty means no extra signals are blocked during handling.
+    sigaction(SIGINT, &sa, nullptr); //Signal number 2. Sent when the user presses Ctrl+C in the terminal.
+    sigaction(SIGTERM, &sa, nullptr); //Signal number 15. Sent by kill <pid> or kill -15 <pid>.
+
+    while (!g_shutdown) {
+        // ────────────────────────────────────────────────
+        // 5. ACCEPT a client connection (blocking call)
+        // ────────────────────────────────────────────────
+        // Blocks until a client connects
+        // Creates a NEW socket (new_socket) for THIS client
+        // server_fd remains listening for more clients
+        new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+        if (new_socket < 0) {
+            if (g_shutdown) break;
+            std::cerr << "Error: Accept failed\n";
+            close(server_fd);
+            return 1;
+        }
+        if (g_shutdown) {
+            close(new_socket);
+            break;
+        }
+
+        std::cout << "Client connected\n";
+
+        // ────────────────────────────────────────────────
+        // 6. READ data from the connected client
+        // ────────────────────────────────────────────────
+        // read() blocks until data arrives or connection closes
+        int valread = read(new_socket, buffer, sizeof(buffer) - 1);
+        if (valread < 0) {
+            std::cerr << "Error: Read failed\n";
+        } else if (valread == 0) {
+            std::cout << "Client closed connection\n";
+        } else {
+            buffer[valread] = '\0';                     // Null-terminate for safe printing
+            std::cout << "Message from client: \"" << buffer << "\" (" << valread << " bytes)\n";
+        }
+
+        // ────────────────────────────────────────────────
+        // 7. SEND reply back to client (echo / greeting)
+        // ────────────────────────────────────────────────
+        const char* reply = "Hello from server!";
+        ssize_t bytes_sent = send(new_socket, reply, strlen(reply), 0);
+        if (bytes_sent < 0) {
+            std::cerr << "Warning: Send failed\n";
+        } else {
+            std::cout << "Replied: \"" << reply << "\"\n";
+        }
+
+        // ────────────────────────────────────────────────
+        // 8. CLEAN UP
+        // ────────────────────────────────────────────────
+        // Close the client connection first
+        close(new_socket);
     }
 
-    std::cout << "Client connected\n";
-
-    // ────────────────────────────────────────────────
-    // 6. READ data from the connected client
-    // ────────────────────────────────────────────────
-    // read() blocks until data arrives or connection closes
-    int valread = read(new_socket, buffer, sizeof(buffer) - 1);
-    if (valread < 0) {
-        std::cerr << "Error: Read failed\n";
-    } else if (valread == 0) {
-        std::cout << "Client closed connection\n";
-    } else {
-        buffer[valread] = '\0';                     // Null-terminate for safe printing
-        std::cout << "Message from client: \"" << buffer << "\" (" << valread << " bytes)\n";
-    }
-
-    // ────────────────────────────────────────────────
-    // 7. SEND reply back to client (echo / greeting)
-    // ────────────────────────────────────────────────
-    const char* reply = "Hello from server!";
-    ssize_t bytes_sent = send(new_socket, reply, strlen(reply), 0);
-    if (bytes_sent < 0) {
-        std::cerr << "Warning: Send failed\n";
-    } else {
-        std::cout << "Replied: \"" << reply << "\"\n";
-    }
-
-    // ────────────────────────────────────────────────
-    // 8. CLEAN UP
-    // ────────────────────────────────────────────────
-    // Close the client connection first
-    close(new_socket);
     // Then close the listening socket
     close(server_fd);
 
