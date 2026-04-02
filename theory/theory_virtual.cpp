@@ -26,6 +26,7 @@ public:
 
 int main()
 {
+    // A child class derived through a base pointer
     A *a = new C; //Base class pointer to derived class
     A *b = new B;
     a->A::fun(); // Explicitly call A's fun()

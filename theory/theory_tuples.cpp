@@ -40,7 +40,7 @@ int main() {
 
     auto combined = std::tuple_cat(t3,t4); //result (111, wrew, false, 341, weerwerq, true)
     
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 

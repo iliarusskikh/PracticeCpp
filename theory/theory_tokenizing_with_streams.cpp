@@ -17,8 +17,7 @@ int main()
      
     // Tokenizing w.r.t. space ' '
     //    while(getline(check1, intermediate, ' '))
-    while(getline(check1, intermediate, '1'))
-    //while(check1 >> intermediate)
+    while(getline(check1, intermediate, '1'))//while(check1 >> intermediate)
     {
         if(intermediate[0] == '3')
         {
@@ -34,3 +33,26 @@ int main()
         std::cout << tokens[i] << '\n';
     }
 }
+
+
+
+
+
+
+/*
+int main2(){
+    
+    std::map<string,int> mp;
+    std::string input = "joshfe  owkof w0 if0w 0i3f0 ofkew oo okfw 23f";
+    
+    std::stringstream ss(input);
+    std::string token;
+    while(getline(ss,token,' ')){
+        mp[token]++;
+        token = "";
+    }
+    
+    auto it = *std::max_element(mp.begin(),mp.end(),[](const auto &i, const auto &j){return i.second < j.second;})
+    std::cout << it.second <<"\n";
+}
+*/

@@ -201,6 +201,7 @@ int main()
     std::cout << "Result "<<result.get() << std::endl;
     
     
+    
     //atomic operations
     
     t1(incr, 1000);
@@ -221,14 +222,7 @@ int main()
     
     
     
-    
-    
-    
-    
     //thread synchronisation
-    
-    
-    
     
     
     return EXIT_SUCCESS;

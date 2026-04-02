@@ -12,7 +12,8 @@ int main() {
                                          const std::pair<const int, int>& j) {
                                           return i.second < j.second;
                                       });
-
+    
+    
     // Print the result
     std::cout << "Key-value pair with maximum value: {"
               << max_pair.first << ", " << max_pair.second << "}\n";
@@ -54,4 +55,24 @@ int main() {
 
      return 0;
  }
+ */
+
+
+/*
+ //copy to vector, and sort
+ 
+ std::map<int, int> m = {{1, 10}, {2, 30}, {3, 20}, {4, 50}, {5, 40}};
+
+ std::vector<std::pair<int,int>> v(m.begin(), m.end());
+
+ // Sort by value ascending
+ std::sort(v.begin(), v.end(), [](const auto& a, const auto& b) {
+     return a.second < b.second;
+ });
+
+ for (auto& [key, val] : v)
+     std::cout << key << " -> " << val << "\n";
+ // 1->10, 3->20, 2->30, 5->40, 4->50
+ 
+ 
  */

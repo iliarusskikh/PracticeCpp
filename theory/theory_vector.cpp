@@ -94,6 +94,11 @@ int main() {
     //3
     std::ranges::merge(a, b, std::back_inserter(result));
     
+    // std::vector<int> result;
+    // or result.reserve(a.size() + b.size());
+    // std::ranges::merge(a, b, std::back_inserter(result));   //this also sorts the result
+    //v1.insert(v1.end(), v2.begin(), v2.end()); then sort 
+    
     //vector.insert + sort -> avoid, O(nlogn)
     
     //unsorted vectors

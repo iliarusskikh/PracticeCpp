@@ -1,4 +1,5 @@
-/*It’s not “just a pointer to char”. It is a pointer to raw memory — byte by byte.
+/*
+ It’s not “just a pointer to char”. It is a pointer to raw memory — byte by byte.
 
 In C++, unsigned char has a special property:
 It is allowed to access the raw object representation of any type.
@@ -55,7 +56,7 @@ int main(){
     //    std::cout <<std::hex << std::to_integer<int>(b) << "\n"
 
     
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 

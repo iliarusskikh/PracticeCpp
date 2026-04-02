@@ -1,5 +1,5 @@
 //coroutines = async code execution which allows pausing and continuing execution without thread blocking. simpler than threads
-//co_await, co)yield, co_return, std::generator, std::future, std::promise
+//co_await, co_yield, co_return, std::generator, std::future, std::promise
 #include <iostream>
 #include <coroutine>
 #include <thread>

@@ -23,17 +23,12 @@ namespace std{
     tempalte<>
     struct hash<CityRecord>
     {
-        size_t operator()(const a& key){
+        size_t operator()(const& key){
             return hash<std::string>()(key.Name);
         }
         
     }
 }
-
-
-
-
-
 
 
 
@@ -156,11 +151,8 @@ int main()
     // now iterating over word, freq pair
     // and printing them in <, > format
     unordered_map<string, int>:: iterator p;
-    for (p = wordFreq.begin();
-         p != wordFreq.end(); p++)
-      cout << "(" << p->first << ", " <<
-                     p->second << ")\n";
-    
+    for (p = wordFreq.begin(); p != wordFreq.end(); p++)
+      cout << "(" << p->first << ", " << p->second << ")\n";
     
     string nn;
     double gg;
