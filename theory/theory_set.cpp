@@ -2,7 +2,7 @@
 // order set container
 #include <iostream>
 #include <set>
-#include<unordered_set>
+#include <unordered_set>
 using namespace std;
 
 struct DescendingOrder{
@@ -121,6 +121,6 @@ int main()
      */
     
     
-    return EXIT_SUCCESS;
+    return 0;
 }
 

@@ -36,9 +36,6 @@ public:
 };
 
 
-
-
-
 // One function works for all data types. This would work
 // even for user defined types if operator '>' is overloaded
 template <typename T, int N>
@@ -77,7 +74,7 @@ void display(char* value){
 
 
 //C++20
-//concepts allow you to constrain tepalte parameters to specific parameters
+//concepts allow you to constrain template parameters to specific parameters
 //define a concept
 template<typename T>
 concept Numeric = std::is_arithmetic_v;
@@ -117,7 +114,7 @@ int main()
     display(99);
     display("Heheh");
     
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 
