@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <random>
 #include <algorithm>
+#include <map>
 #include <type_traits>
 
 void* operator new(size_t s) {
@@ -84,5 +85,24 @@ int main(){
     for (auto k:vec)
         std::cout <<k <<"\n";
     
+    
+    
+    // Example map with int keys and int values
+    std::map<int, int> m = {{1, 10}, {2, 30}, {3, 20}, {4, 50}, {5, 40}};
+
+    // Find the key-value pair with the maximum value
+    auto max_pair = *std::max_element(m.begin(), m.end(),
+                                      [](const std::pair<const int, int>& i,
+                                         const std::pair<const int, int>& j) {
+                                          return i.second < j.second;
+                                      });//use auto
+    // Print the result
+    std::cout << "Key-value pair with maximum value: {"
+              << max_pair.first << ", " << max_pair.second << "}\n";
+    
+    
     return 0;
 }
+
+
+
