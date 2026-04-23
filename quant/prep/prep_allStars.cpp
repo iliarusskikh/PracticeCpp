@@ -5,6 +5,7 @@
 #include <map>
 #include <type_traits>
 
+
 void* operator new(size_t s) {
     if (s == 0) s = 1;  // Fix zero-size
     std::cout << "Allocating " << s << " bytes\n";
