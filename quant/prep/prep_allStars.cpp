@@ -7,7 +7,7 @@
 
 
 void* operator new(size_t s) {
-    if (s == 0) s = 1;  // Fix zero-size
+    if (s == 0) s = 1;  // Fix zero-size - when int *ptr = new int[0]; - zero bytes allocated
     std::cout << "Allocating " << s << " bytes\n";
     if (void* p = std::malloc(s))
         return p;
