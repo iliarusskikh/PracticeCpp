@@ -1,0 +1,21 @@
+#include <iostream>
+
+struct C {
+  C() { std::cout << "1"; }
+  C(const C& other) { std::cout << "2"; }
+  C& operator=(const C& other) { std::cout << "3"; return *this;}
+};
+
+int main() {
+  C c1;
+  C c2 = c1;
+    //  c2 = c1;   // copy assignment -> prints 3
+
+}
+// Output: 12
+//On the first line, C c1;, the object c1 is default-initialized, so the default constructor is called, printing 1.
+
+
+//On the second line, C c2 = c1;, the object c2 is copy-initialized, so the copy constructor is called, printing 2. (Note that no assignment is taking place, even though there's a = involved.)
+//copy-initialised is the key
+
