@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stochastic Calculus & Processes — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #060c14;
+    --bg2:       #0a1420;
+    --bg3:       #0f1c2c;
+    --border:    #15293f;
+    --azure:     #38bdf8;
+    --azure2:    #7dd3fc;
+    --azure-dim: #1a4f6e;
+    --text:      #dbe6f0;
+    --text-dim:  #6e84a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --violet:    #a78bfa;
+    --green:     #4ade80;
+    --rose:      #fb7185;
+    --teal:      #2dd4bf;
+    --orange:    #fb923c;
+    --pink:      #f472b6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #38bdf822, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--azure-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--azure2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--azure);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--azure);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--azure2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--azure-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--azure2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--azure); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--azure);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.pink   { border-left-color: var(--pink); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #220e10; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140e22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #081826; border-left: 3px solid var(--azure); }
+  .callout.finance { background: #1c1608; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--azure); }
+  .callout.finance .ctitle { color: var(--gold); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--azure); border-bottom: 1px solid var(--azure-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--azure-dim); color: var(--azure2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── PROCESS CARD ── */
+  .process-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .process-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1rem; color: var(--azure2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── ITO TABLE ── */
+  .ito-table {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin: 1rem 0;
+    text-align: center;
+  }
+  .ito-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--azure2);
+  }
+  .ito-cell.head {
+    background: var(--bg2);
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--azure2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.55rem; }
+    .ito-table { grid-template-columns: repeat(3, 1fr); font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 5 of 9</div>
+  <h1>Stochastic Calculus &amp; Processes</h1>
+  <div class="subtitle">Markov Chains · Brownian Motion · Itô Calculus · Time Series</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Markov Chains</a>
+      <ul class="sub">
+        <li><a href="#s1-trans">Transition Matrix &amp; Chapman-Kolmogorov</a></li>
+        <li><a href="#s1-stat">Stationary Distribution π</a></li>
+        <li><a href="#s1-db">Detailed Balance</a></li>
+        <li><a href="#s1-abs">Absorbing States</a></li>
+        <li><a href="#s1-hit">Hitting Times &amp; Gambler's Ruin</a></li>
+        <li><a href="#s1-erg">Ergodic Chains</a></li>
+        <li><a href="#s1-rwg">Random Walks on Graphs</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Brownian Motion</a>
+      <ul class="sub">
+        <li><a href="#s2-def">Definition &amp; Basic Properties</a></li>
+        <li><a href="#s2-inc">Independent &amp; Stationary Increments</a></li>
+        <li><a href="#s2-qv">Quadratic Variation</a></li>
+        <li><a href="#s2-refl">Reflection Principle</a></li>
+        <li><a href="#s2-mart">Martingales</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Itô Calculus</a>
+      <ul class="sub">
+        <li><a href="#s3-int">The Itô Integral</a></li>
+        <li><a href="#s3-lemma">Itô's Lemma</a></li>
+        <li><a href="#s3-gbm">Geometric Brownian Motion</a></li>
+        <li><a href="#s3-sde">SDEs: Drift &amp; Diffusion</a></li>
+        <li><a href="#s3-girsanov">Girsanov's Theorem</a></li>
+        <li><a href="#s3-fk">Feynman-Kac Formula</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Time Series</a>
+      <ul class="sub">
+        <li><a href="#s4-arma">AR, MA, ARMA, ARIMA</a></li>
+        <li><a href="#s4-stat">Stationarity &amp; Unit Roots</a></li>
+        <li><a href="#s4-acf">Autocorrelation Function (ACF)</a></li>
+        <li><a href="#s4-garch">Volatility Clustering / GARCH</a></li>
+        <li><a href="#s4-ou">Mean Reversion (OU Process)</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: MARKOV CHAINS                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Markov Chains</div>
+  </div>
+
+  <p>A discrete-time stochastic process $\{X_n\}$ has the <strong>Markov property</strong> if the future depends on the past only through the present:</p>
+
+  <div class="fbox gold">
+    $$P(X_{n+1} = j \mid X_n = i, X_{n-1}, \ldots, X_0) = P(X_{n+1} = j \mid X_n = i)$$
+  </div>
+
+  <p>"Memorylessness at the level of the whole state" — this is the discrete-state, discrete-time analogue of the memoryless property seen in the Exponential and Geometric distributions (Section 2).</p>
+
+  <h3 id="s1-trans">1.1 Transition Matrix &amp; Chapman-Kolmogorov</h3>
+
+  <p>For a chain with state space $\{1, \ldots, k\}$, the <strong>transition matrix</strong> $P$ has entries:</p>
+
+  <div class="fbox gold">
+    $$P_{ij} = P(X_{n+1} = j \mid X_n = i), \qquad \sum_{j} P_{ij} = 1 \;\;\text{(each row sums to 1)}$$
+  </div>
+
+  <h4>Chapman-Kolmogorov Equation</h4>
+  <p>The $n$-step transition probabilities are given by matrix powers:</p>
+  <div class="fbox teal">
+    $$P^{(n)}_{ij} = (P^n)_{ij}, \qquad P^{(m+n)}_{ij} = \sum_k P^{(m)}_{ik}P^{(n)}_{kj}$$
+  </div>
+  <p>In words: to go from $i$ to $j$ in $m+n$ steps, pass through some intermediate state $k$ at time $m$ — sum over all possible intermediate states. This is literally the matrix multiplication rule.</p>
+
+  <h4>Classification of States</h4>
+  <table>
+    <tr><th>Property</th><th>Definition</th></tr>
+    <tr><td>Recurrent</td><td>Starting at $i$, the chain returns to $i$ with probability 1</td></tr>
+    <tr><td>Transient</td><td>Positive probability of never returning to $i$</td></tr>
+    <tr><td>Periodic (period $d$)</td><td>Returns to $i$ only at multiples of $d > 1$ steps</td></tr>
+    <tr><td>Aperiodic</td><td>$\gcd$ of possible return times is 1</td></tr>
+    <tr><td>Irreducible</td><td>Every state reachable from every other state</td></tr>
+    <tr><td>Communicating class</td><td>Set of states mutually reachable from each other</td></tr>
+  </table>
+
+  <h3 id="s1-stat">1.2 Stationary Distribution π</h3>
+
+  <p>A distribution $\pi$ (row vector, $\pi_i \geq 0$, $\sum_i \pi_i = 1$) is <strong>stationary</strong> if it is unchanged by one step of the chain:</p>
+
+  <div class="fbox gold">
+    $$\pi P = \pi$$
+  </div>
+
+  <p>Equivalently, $\pi$ is the left eigenvector of $P$ for eigenvalue 1 (normalised to sum to 1). Every finite, irreducible Markov chain has a <em>unique</em> stationary distribution.</p>
+
+  <h4>How to Find π — Three Equivalent Methods</h4>
+  <ol class="steps">
+    <li><strong>Solve the linear system:</strong> $\pi P = \pi$ together with $\sum_i \pi_i = 1$ — equivalent to $\pi(P - I) = 0$</li>
+    <li><strong>Left eigenvector:</strong> Find the eigenvector of $P^\top$ for eigenvalue $\lambda = 1$, normalise to sum to 1</li>
+    <li><strong>Power iteration:</strong> Compute $P^n$ for large $n$ — every row converges to $\pi$ (works when the chain is ergodic)</li>
+  </ol>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example</div>
+    $P = \begin{pmatrix}0.7&0.2&0.1\\0.3&0.5&0.2\\0.2&0.3&0.5\end{pmatrix}$<br><br>
+    Solving $\pi P = \pi$, $\sum\pi_i=1$ gives $\pi \approx (0.463,\ 0.317,\ 0.220)$.<br><br>
+    Verified three ways (linear solve, eigenvector, and $P^{200}$ row) — all agree to 4 decimal places.
+  </div>
+
+  <h3 id="s1-db">1.3 Detailed Balance</h3>
+
+  <p>A stronger, easier-to-check <em>sufficient</em> condition for stationarity:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Detailed Balance (Reversibility)</div>
+    $$\pi_i P_{ij} = \pi_j P_{ji} \qquad \text{for all } i, j$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Why detailed balance implies stationarity:</strong> Sum both sides over $i$: $\sum_i \pi_i P_{ij} = \sum_i \pi_j P_{ji} = \pi_j \sum_i P_{ji} = \pi_j$. The left side is exactly $(\pi P)_j$, so $\pi P = \pi$. ✓
+  </div>
+
+  <p><strong>Detailed balance is sufficient but not necessary</strong> — a chain can be stationary without being reversible (e.g.\ chains with directional "circulation," like a cyclic random walk). Detailed balance always holds for <strong>birth-death chains</strong> (chains that only move to adjacent states, like a 1-D random walk on $\{0,\ldots,N\}$).</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Physical Interpretation</div>
+    Detailed balance says: the "flow" of probability from $i\to j$ exactly equals the flow from $j\to i$ <em>for every pair</em> — a much stronger, microscopic condition than the macroscopic balance $\pi P = \pi$ (which only requires total flow in = total flow out for each state). It's the discrete analogue of thermodynamic equilibrium.
+  </div>
+
+  <h3 id="s1-abs">1.4 Absorbing States</h3>
+
+  <p>A state $i$ is <strong>absorbing</strong> if $P_{ii} = 1$ (once entered, never left). A chain with both absorbing and transient states can be reordered into canonical block form:</p>
+
+  <div class="fbox gold">
+    $$P = \begin{pmatrix} Q & R \\ 0 & I \end{pmatrix}$$
+    $Q$: transient→transient, $R$: transient→absorbing, $I$: absorbing states stay put
+  </div>
+
+  <h4>The Fundamental Matrix</h4>
+  <div class="fbox gold">
+    $$N = (I - Q)^{-1}$$
+  </div>
+  <p>$N_{ij}$ = expected number of visits to transient state $j$ starting from transient state $i$, before absorption.</p>
+
+  <table>
+    <tr><th>Quantity</th><th>Formula</th><th>Interpretation</th></tr>
+    <tr><td>Expected time to absorption</td><td>$\mathbf{t} = N\mathbf{1}$ (row sums of $N$)</td><td>Total expected steps before absorption</td></tr>
+    <tr><td>Absorption probabilities</td><td>$B = NR$</td><td>$B_{ij}$ = probability of absorption in state $j$, starting from $i$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example: Gambler's Ruin as Absorbing Chain</div>
+    Fair gambler's ruin, $N=3$ (states 0, 1, 2, 3; states 0 and 3 absorbing). Transient states $\{1,2\}$:<br><br>
+    $Q = \begin{pmatrix}0&0.5\\0.5&0\end{pmatrix}$, $\;N = (I-Q)^{-1} = \begin{pmatrix}1.333&0.667\\0.667&1.333\end{pmatrix}$<br><br>
+    Expected steps to absorption: $\mathbf{t} = N\mathbf{1} = (2, 2)$ — matches the formula $E[T\mid k] = k(N-k)$: $1\times2=2$, $2\times1=2$ ✓<br><br>
+    Absorption probabilities: $B = NR = \begin{pmatrix}0.667 & 0.333\\0.333&0.667\end{pmatrix}$ — matches $P(\text{absorb at }N\mid k)=k/N$: $1/3, 2/3$ ✓
+  </div>
+
+  <h3 id="s1-hit">1.5 Hitting Times &amp; Gambler's Ruin</h3>
+
+  <p>The <strong>hitting time</strong> $T_A = \min\{n \geq 0 : X_n \in A\}$ is the first time the chain enters set $A$. The standard tool is <strong>first-step analysis</strong>: condition on the first transition.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">First-Step Analysis for Expected Hitting Time</div>
+    $$h_i = E[T_A \mid X_0 = i] = 1 + \sum_j P_{ij}\,h_j \quad (i \notin A), \qquad h_i = 0 \;(i \in A)$$
+  </div>
+
+  <p>This recovers the Gambler's Ruin results from Section 1 (Probability) using the Markov chain machinery: with $P_{i,i+1}=p$, $P_{i,i-1}=q$ on states $\{0,\ldots,N\}$ with $0,N$ absorbing:</p>
+
+  <div class="fbox teal">
+    $$P(\text{absorb at }N \mid X_0=k) = \begin{cases}\dfrac{k}{N} & p=q=\tfrac{1}{2} \\[0.4em] \dfrac{1-(q/p)^k}{1-(q/p)^N} & p \neq q\end{cases} \qquad E[T \mid X_0=k] = k(N-k) \;\;(p=q=\tfrac12)$$
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ First-Step Analysis Recipe</div>
+    <ol class="steps">
+      <li>Define $h_i$ = quantity of interest starting from state $i$ (hitting probability or expected time)</li>
+      <li>Write the recursive equation conditioning on the first transition</li>
+      <li>Apply boundary conditions at absorbing states</li>
+      <li>Solve the resulting linear recurrence (often a simple difference equation)</li>
+    </ol>
+    This same technique solves hitting probabilities for any birth-death chain, not just symmetric gambler's ruin.
+  </div>
+
+  <h3 id="s1-erg">1.6 Ergodic Chains</h3>
+
+  <p>A chain is <strong>ergodic</strong> if it is <strong>irreducible</strong> (all states communicate) and <strong>aperiodic</strong> (no forced cyclic structure).</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Ergodic Theorem</div>
+    For an ergodic chain with stationary distribution $\pi$:
+    $$\lim_{n\to\infty} P^{(n)}_{ij} = \pi_j \quad \text{for all } i, j \;\;\text{(independent of starting state)}$$
+    $$\frac{1}{n}\sum_{t=1}^{n} \mathbf{1}[X_t = j] \xrightarrow{\text{a.s.}} \pi_j \quad \text{(time average = ensemble average)}$$
+  </div>
+
+  <p><strong>Why ergodicity matters:</strong> the long-run fraction of time spent in state $j$ equals $\pi_j$ — regardless of starting state. This justifies simulating <em>one long path</em> instead of many independent short paths to estimate $\pi$ (used in MCMC).</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Periodicity Breaks Convergence (not Stationarity)</div>
+    A periodic chain (e.g.\ a 2-cycle $0\leftrightarrow1$ with $P_{01}=P_{10}=1$) still has a unique stationary distribution $\pi=(0.5,0.5)$, but $P^{(n)}$ does <em>not</em> converge to $\pi$ — it oscillates between $\begin{pmatrix}1&0\\0&1\end{pmatrix}$ and $\begin{pmatrix}0&1\\1&0\end{pmatrix}$ forever. Stationarity (existence of $\pi$) and convergence of $P^n$ are different properties — irreducibility + aperiodicity is needed for the latter.
+  </div>
+
+  <h3 id="s1-rwg">1.7 Random Walks on Graphs</h3>
+
+  <p>For a connected, undirected graph $G=(V,E)$, the simple random walk moves to a uniformly random neighbour at each step: $P_{ij} = \frac{1}{\deg(i)}$ if $(i,j)\in E$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Stationary Distribution: Proportional to Degree</div>
+    $$\pi_i = \frac{\deg(i)}{2|E|}$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Proof via detailed balance:</strong> Check $\pi_i P_{ij} = \frac{\deg(i)}{2|E|}\cdot\frac{1}{\deg(i)} = \frac{1}{2|E|}$. By symmetry this equals $\pi_j P_{ji} = \frac{1}{2|E|}$ whenever $(i,j) \in E$. Detailed balance holds, so $\pi$ is stationary (and the walk is reversible).
+  </div>
+
+  <p>This connects graph theory directly to Markov chains: <strong>PageRank</strong> is a (damped) random walk on the web graph; the stationary distribution gives the page ranking.</p>
+
+  <h4>Expected Return Time</h4>
+  <div class="fbox teal">
+    $$E[\text{return time to } i] = \frac{1}{\pi_i} = \frac{2|E|}{\deg(i)}$$
+  </div>
+  <p>High-degree nodes ("hubs") are revisited more frequently — intuitive, since the walk is more likely to step into them.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: BROWNIAN MOTION                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Brownian Motion</div>
+  </div>
+
+  <h3 id="s2-def">2.1 Definition &amp; Basic Properties</h3>
+
+  <p><strong>Standard Brownian motion</strong> (Wiener process) $\{W_t\}_{t\geq0}$ is the continuous-time, continuous-path limit of a random walk. It is defined by four properties:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Defining Properties of Standard Brownian Motion</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li>$W_0 = 0$</li>
+      <li>Independent increments: for $0\leq s<t$, $W_t-W_s$ is independent of $\{W_u: u\leq s\}$</li>
+      <li>Stationary Gaussian increments: $W_t - W_s \sim N(0,\, t-s)$</li>
+      <li>Continuous sample paths (almost surely)</li>
+    </ol>
+  </div>
+
+  <p>From property 3 with $s=0$: $W_t \sim N(0, t)$ — the defining marginal distribution.</p>
+
+  <h4>Moments</h4>
+  <table>
+    <tr><th>Quantity</th><th>Formula</th></tr>
+    <tr><td>$E[W_t]$</td><td>$0$</td></tr>
+    <tr><td>$\text{Var}(W_t)$</td><td>$t$</td></tr>
+    <tr><td>$\text{Cov}(W_s, W_t)$</td><td>$\min(s,t)$</td></tr>
+    <tr><td>$\text{Corr}(W_s,W_t)$</td><td>$\sqrt{s/t}$ for $s<t$</td></tr>
+  </table>
+
+  <div class="callout proof">
+    <strong>Proof of $\text{Cov}(W_s,W_t)=\min(s,t)$ for $s<t$:</strong> Write $W_t = W_s + (W_t-W_s)$. Then $\text{Cov}(W_s,W_t) = \text{Cov}(W_s,W_s) + \text{Cov}(W_s, W_t-W_s) = \text{Var}(W_s) + 0 = s$ (using independent increments). In general: $\text{Cov}(W_s,W_t) = \min(s,t)$.
+  </div>
+
+  <h4>Self-Similarity (Scaling Property)</h4>
+  <div class="fbox teal">
+    For any $c>0$: $\quad \dfrac{1}{\sqrt{c}}W_{ct} \stackrel{d}{=} W_t \quad$ (same distribution as a process)
+  </div>
+  <p>Brownian motion "looks the same" at any time scale after rescaling — the origin of fractal-like path roughness, and the reason volatility scales as $\sqrt{T}$ in finance ("volatility scaling law").</p>
+
+  <h3 id="s2-inc">2.2 Independent &amp; Stationary Increments</h3>
+
+  <p><strong>Independent increments:</strong> non-overlapping time intervals give independent changes. This means $W_{t_2}-W_{t_1}$ and $W_{t_4}-W_{t_3}$ are independent for $t_1<t_2\leq t_3<t_4$.</p>
+
+  <p><strong>Stationary increments:</strong> the distribution of $W_{t+h}-W_t$ depends only on $h$, not on $t$ itself: $W_{t+h}-W_t \sim N(0,h)$ for any $t$.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why This Matters for Pricing</div>
+    Independent increments make Brownian motion a building block for modelling "shocks" that don't depend on history — consistent with weak-form market efficiency (future price changes are unpredictable from past changes). Stationary increments mean the statistical behaviour of returns doesn't depend on calendar time — the foundation of constant-volatility models like Black-Scholes.
+  </div>
+
+  <h3 id="s2-qv">2.3 Quadratic Variation — The Key to Itô Calculus</h3>
+
+  <p>For a partition $0=t_0<t_1<\cdots<t_n=t$ with mesh $\to 0$, the <strong>quadratic variation</strong> is:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Quadratic Variation of Brownian Motion</div>
+    $$[W,W]_t = \lim_{n\to\infty}\sum_{i=1}^n (W_{t_i}-W_{t_{i-1}})^2 = t \quad \text{(almost surely)}$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Sketch of proof:</strong> Let $\Delta_i = W_{t_i}-W_{t_{i-1}} \sim N(0,\Delta t_i)$ independently. Then $E\left[\sum \Delta_i^2\right] = \sum \Delta t_i = t$. The variance of the sum $\to 0$ as mesh $\to 0$ (since $\text{Var}(\Delta_i^2) = 2(\Delta t_i)^2$, and $\sum(\Delta t_i)^2 \to 0$ when $\sum\Delta t_i = t$ stays fixed but mesh shrinks). So the sum concentrates at its mean, $t$.
+  </div>
+
+  <p><strong>Contrast with ordinary calculus:</strong> for any differentiable function $f$, the quadratic variation is 0 (sum of squared increments vanishes as mesh $\to 0$, since each $\Delta_i = O(\Delta t_i)$, giving $\Delta_i^2 = O((\Delta t_i)^2)\to 0$ faster than $\Delta t_i$). For Brownian motion, $\Delta_i = O(\sqrt{\Delta t_i})$ — paths are "rough" — so $\Delta_i^2 = O(\Delta t_i)$, the same order as $\Delta t_i$, giving a non-zero limit.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">The Heuristic "Itô Multiplication Rule" — Memorise This</div>
+    $$dW \cdot dW = dt \qquad dW \cdot dt = 0 \qquad dt \cdot dt = 0$$
+  </div>
+
+  <p>This single fact — $(dW)^2 = dt$ — is the entire reason stochastic calculus differs from ordinary calculus and is the engine behind Itô's Lemma (§3.2).</p>
+
+  <p><strong>Total variation</strong> (sum of $|\Delta_i|$, not squared) of Brownian motion is <em>infinite</em> on any interval — Brownian paths are continuous everywhere but differentiable nowhere.</p>
+
+  <h3 id="s2-refl">2.4 Reflection Principle</h3>
+
+  <p>Let $M_t = \max_{0\leq s\leq t} W_s$ be the running maximum. The reflection principle relates the distribution of the maximum to the distribution of the endpoint:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Reflection Principle</div>
+    $$P(M_t \geq a) = 2\,P(W_t \geq a) \qquad \text{for } a > 0$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Proof sketch:</strong> By the strong Markov property, once $W$ hits level $a$ (at the first hitting time $\tau_a$), the path $W_{\tau_a + s} - a$ is itself a Brownian motion, independent of the past, and symmetric around 0. So paths that hit $a$ and end above $a$ are exactly as likely as paths that hit $a$ and end below $a$ (reflect the post-hitting path). Therefore:
+    $$P(W_t \geq a) = P(M_t \geq a, W_t \geq a) = \tfrac{1}{2}P(M_t \geq a)$$
+    since conditional on $M_t \geq a$, by symmetry of the reflected path, $W_t \geq a$ and $W_t < a$ are equally likely. Rearranging gives the result.
+  </div>
+
+  <p><strong>Distribution of the maximum:</strong></p>
+  <div class="fbox teal">
+    $$P(M_t \geq a) = 2\left(1 - \Phi\!\left(\frac{a}{\sqrt{t}}\right)\right) = 2P(W_t \geq a)$$
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Barrier Option Pricing</div>
+    The reflection principle is the core tool for pricing <strong>barrier options</strong> (knock-in/knock-out) and lookback options. The price of a down-and-out call depends on $P(\min_{0\leq s\leq T} S_s > B)$ for barrier $B$ — computed by mapping to Brownian motion via $\ln S_t$ and applying reflection.
+  </div>
+
+  <h3 id="s2-mart">2.5 Martingales</h3>
+
+  <p>A process $\{X_t\}$ is a <strong>martingale</strong> with respect to filtration $\mathcal{F}_t$ if:</p>
+
+  <div class="fbox gold">
+    $$E[X_t \mid \mathcal{F}_s] = X_s \qquad \text{for all } s < t \qquad \text{(and } E[|X_t|]<\infty\text{)}$$
+  </div>
+
+  <p>Intuition: "fair game" — your best prediction of the future value, given everything known now, is exactly the current value. No systematic drift.</p>
+
+  <h4>Key Martingales Built from Brownian Motion</h4>
+  <table>
+    <tr><th>Process</th><th>Martingale?</th><th>Proof Idea</th></tr>
+    <tr><td>$W_t$</td><td>✓ Yes</td><td>$E[W_t\mid\mathcal{F}_s] = W_s + E[W_t-W_s\mid\mathcal{F}_s] = W_s+0$</td></tr>
+    <tr><td>$W_t^2 - t$</td><td>✓ Yes</td><td>$E[W_t^2\mid\mathcal{F}_s] = W_s^2+(t-s)$, so $E[W_t^2-t\mid\mathcal{F}_s]=W_s^2-s$</td></tr>
+    <tr><td>$e^{\sigma W_t - \frac{1}{2}\sigma^2 t}$</td><td>✓ Yes (exponential martingale)</td><td>Uses MGF of normal: $E[e^{\sigma(W_t-W_s)}] = e^{\frac{1}{2}\sigma^2(t-s)}$</td></tr>
+    <tr><td>Discounted stock $e^{-rt}S_t$ (under $\mathbb{Q}$)</td><td>✓ Yes</td><td>Risk-neutral pricing requires this by construction</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The Exponential Martingale — Foundation of Girsanov</div>
+    $$Z_t = \exp\!\left(\sigma W_t - \tfrac{1}{2}\sigma^2 t\right), \qquad E[Z_t] = 1 \text{ for all } t$$
+    Because $E[Z_t]=1$ always, $Z_t$ can serve as a valid Radon-Nikodym derivative for a measure change — this is exactly the building block of Girsanov's theorem (§3.5).
+  </div>
+
+  <h4>Why Martingales Matter in Finance</h4>
+  <p>The <strong>Fundamental Theorem of Asset Pricing</strong>: a market is arbitrage-free if and only if there exists an equivalent martingale measure $\mathbb{Q}$ under which discounted asset prices are martingales. Pricing a derivative reduces to taking an expectation under $\mathbb{Q}$:</p>
+  <div class="fbox gold">
+    $$V_0 = E^{\mathbb{Q}}\left[e^{-rT}\,\text{Payoff}(S_T)\right]$$
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: ITÔ CALCULUS                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Itô Calculus</div>
+  </div>
+
+  <h3 id="s3-int">3.1 The Itô Integral</h3>
+
+  <p>For an adapted process $f_t$, the Itô integral $\int_0^T f_t\,dW_t$ is constructed as a limit of left-endpoint Riemann sums:</p>
+
+  <div class="fbox gold">
+    $$\int_0^T f_t\,dW_t = \lim_{n\to\infty}\sum_{i=0}^{n-1} f_{t_i}\,(W_{t_{i+1}}-W_{t_i})$$
+  </div>
+
+  <p><strong>Crucial detail:</strong> the integrand $f_{t_i}$ is evaluated at the <em>left</em> endpoint $t_i$, not the right endpoint or midpoint — this choice (non-anticipating / adapted) is what makes the Itô integral a martingale and is essential for the no-arbitrage interpretation: you cannot use future information to decide your current trading position.</p>
+
+  <h4>Key Properties</h4>
+  <table>
+    <tr><th>Property</th><th>Formula</th></tr>
+    <tr><td>Zero mean</td><td>$E\left[\int_0^T f_t\,dW_t\right] = 0$</td></tr>
+    <tr><td>Itô isometry</td><td>$E\left[\left(\int_0^T f_t\,dW_t\right)^2\right] = E\left[\int_0^T f_t^2\,dt\right]$</td></tr>
+    <tr><td>Martingale</td><td>$M_t = \int_0^t f_s\,dW_s$ is a martingale</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Itô Isometry — Why It's Useful</div>
+    The isometry converts a stochastic integral's variance into an ordinary (deterministic) time integral — this is how variance of complex SDE solutions is computed without ever simulating the path. For example, $\text{Var}\left(\int_0^T \sigma\,dW_t\right) = \sigma^2 T$.
+  </div>
+
+  <h3 id="s3-lemma">3.2 Itô's Lemma</h3>
+
+  <p>The single most important formula in quantitative finance. Suppose $X_t$ follows the SDE $dX_t = \mu\,dt + \sigma\,dW_t$, and let $f(X_t,t)$ be a twice-differentiable function. Then:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Itô's Lemma (one dimension)</div>
+    $$df = \left(\frac{\partial f}{\partial t} + \mu\frac{\partial f}{\partial x} + \frac{1}{2}\sigma^2\frac{\partial^2 f}{\partial x^2}\right)dt + \sigma\frac{\partial f}{\partial x}\,dW_t$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Derivation via Taylor expansion + Itô multiplication table:</strong> Taylor-expand $f(X+dX, t+dt)$ to second order:
+    $$df = f_t\,dt + f_x\,dX + \tfrac{1}{2}f_{xx}(dX)^2 + \ldots$$
+    Substitute $dX = \mu\,dt+\sigma\,dW$ and expand $(dX)^2 = \mu^2(dt)^2 + 2\mu\sigma\,dt\,dW + \sigma^2(dW)^2$.
+    Apply the multiplication table: $(dt)^2=0$, $dt\,dW=0$, $(dW)^2=dt$. So $(dX)^2 \to \sigma^2\,dt$.
+    Substituting back gives Itô's Lemma. <strong>The extra $\frac{1}{2}\sigma^2 f_{xx}\,dt$ term is what makes stochastic calculus different from ordinary calculus</strong> — in ordinary calculus this term would vanish.
+  </div>
+
+  <h4>The Itô Multiplication Table</h4>
+  <div class="ito-table">
+    <div class="ito-cell head">×</div><div class="ito-cell head">dt</div><div class="ito-cell head">dW</div>
+    <div class="ito-cell head">dt</div><div class="ito-cell">0</div><div class="ito-cell">0</div>
+    <div class="ito-cell head">dW</div><div class="ito-cell">0</div><div class="ito-cell">dt</div>
+  </div>
+
+  <h4>Multivariate Itô's Lemma</h4>
+  <p>For $f(X_t, Y_t, t)$ with two correlated diffusions $dX = \mu_X dt + \sigma_X dW_1$, $dY = \mu_Y dt + \sigma_Y dW_2$, $dW_1\,dW_2 = \rho\,dt$:</p>
+  <div class="fbox teal">
+    $$df = f_t\,dt + f_x\,dX + f_y\,dY + \tfrac{1}{2}f_{xx}\sigma_X^2\,dt + \tfrac{1}{2}f_{yy}\sigma_Y^2\,dt + f_{xy}\,\rho\sigma_X\sigma_Y\,dt$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Classic Application: $d(\ln S_t)$ for GBM</div>
+    Let $dS = \mu S\,dt + \sigma S\,dW$ and $f(S) = \ln S$. Then $f_S = 1/S$, $f_{SS} = -1/S^2$.<br><br>
+    $$d(\ln S) = \left(0 + \mu S\cdot\frac{1}{S} + \frac{1}{2}\sigma^2 S^2\cdot\left(-\frac{1}{S^2}\right)\right)dt + \sigma S\cdot\frac{1}{S}\,dW$$
+    $$d(\ln S) = \left(\mu - \frac{1}{2}\sigma^2\right)dt + \sigma\,dW$$
+    The famous "$-\sigma^2/2$" correction — the log-price drifts <em>slower</em> than the naive $\mu$ because of volatility drag (Jensen's inequality, Section 2).
+  </div>
+
+  <h3 id="s3-gbm">3.3 Geometric Brownian Motion (GBM)</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">GBM SDE</div>
+    $$dS_t = \mu S_t\,dt + \sigma S_t\,dW_t$$
+  </div>
+
+  <p><strong>Solving the SDE:</strong> from $d(\ln S) = (\mu-\frac{1}{2}\sigma^2)dt + \sigma\,dW$ (just derived), integrate both sides from 0 to $t$:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Closed-Form Solution</div>
+    $$S_t = S_0\exp\!\left(\left(\mu-\frac{1}{2}\sigma^2\right)t + \sigma W_t\right)$$
+  </div>
+
+  <p>$S_t$ is log-normally distributed (Section 2): $\ln S_t \sim N\!\left(\ln S_0 + (\mu-\frac{1}{2}\sigma^2)t,\ \sigma^2 t\right)$.</p>
+
+  <table>
+    <tr><th>Quantity</th><th>Formula</th><th>Note</th></tr>
+    <tr><td>$E[S_t]$</td><td>$S_0 e^{\mu t}$</td><td>Uses Jensen / log-normal mean formula: NOT $S_0e^{(\mu-\sigma^2/2)t}$</td></tr>
+    <tr><td>$\text{Median}(S_t)$</td><td>$S_0 e^{(\mu-\sigma^2/2)t}$</td><td>The "typical" path; below the mean</td></tr>
+    <tr><td>$\text{Var}(S_t)$</td><td>$S_0^2 e^{2\mu t}(e^{\sigma^2 t}-1)$</td><td>From log-normal variance formula</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Mean vs Median — Classic Interview Trap</div>
+    A simulated GBM path almost always ends up <em>below</em> $S_0e^{\mu t}$ because the median ($S_0e^{(\mu-\sigma^2/2)t}$) is what a "typical" path looks like, but the mean is pulled up by a small probability of extremely large outcomes (right-skewed log-normal). This is exactly volatility drag from Jensen's inequality.
+  </div>
+
+  <h3 id="s3-sde">3.4 SDEs: Drift &amp; Diffusion</h3>
+
+  <p>The general stochastic differential equation:</p>
+
+  <div class="fbox gold">
+    $$dX_t = \underbrace{\mu(X_t,t)}_{\text{drift}}\,dt + \underbrace{\sigma(X_t,t)}_{\text{diffusion}}\,dW_t$$
+  </div>
+
+  <p><strong>Drift</strong> $\mu(X,t)$: deterministic component, "where the process tends to go on average."<br>
+  <strong>Diffusion</strong> $\sigma(X,t)$: scales the randomness, controls the magnitude of fluctuations.</p>
+
+  <h4>Catalogue of Important SDEs in Finance</h4>
+  <table>
+    <tr><th>Model</th><th>SDE</th><th>Use</th></tr>
+    <tr><td>Brownian motion with drift</td><td>$dX = \mu\,dt + \sigma\,dW$</td><td>Simplest model; arithmetic returns</td></tr>
+    <tr><td>GBM</td><td>$dS = \mu S\,dt + \sigma S\,dW$</td><td>Black-Scholes stock price model</td></tr>
+    <tr><td>Ornstein-Uhlenbeck (Vasicek)</td><td>$dX = \theta(\mu-X)dt + \sigma\,dW$</td><td>Mean-reverting rates, pairs trading</td></tr>
+    <tr><td>CIR process</td><td>$dX = \theta(\mu-X)dt + \sigma\sqrt{X}\,dW$</td><td>Non-negative rates / variance (Heston vol)</td></tr>
+    <tr><td>Jump-diffusion (Merton)</td><td>$dS/S = \mu\,dt + \sigma\,dW + dJ$</td><td>Models crashes / discontinuities</td></tr>
+  </table>
+
+  <h4>Existence &amp; Uniqueness</h4>
+  <p>Solutions exist and are unique if $\mu, \sigma$ satisfy Lipschitz and linear growth conditions — virtually always true for the models used in practice. The CIR process needs the Feller condition $2\theta\mu \geq \sigma^2$ to stay strictly positive.</p>
+
+  <h3 id="s3-girsanov">3.5 Girsanov's Theorem</h3>
+
+  <p>Girsanov's theorem describes how Brownian motion transforms under a change of probability measure — the mathematical machinery behind <strong>risk-neutral pricing</strong>.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Girsanov's Theorem (constant drift case)</div>
+    Let $W_t$ be Brownian motion under measure $\mathbb{P}$. Define a new measure $\mathbb{Q}$ via the Radon-Nikodym derivative:
+    $$\frac{d\mathbb{Q}}{d\mathbb{P}} = \exp\!\left(-\theta W_T - \tfrac{1}{2}\theta^2 T\right)$$
+    Then under $\mathbb{Q}$, the process $\tilde{W}_t = W_t + \theta t$ is a standard Brownian motion.
+  </div>
+
+  <p><strong>In words:</strong> a Brownian motion with drift under one measure is a driftless Brownian motion under another (equivalent) measure — you can "shift away" the drift by reweighting probabilities, while the volatility $\sigma$ is unchanged.</p>
+
+  <h4>Application: From Real-World to Risk-Neutral Measure</h4>
+  <p>Under the real-world (physical) measure $\mathbb{P}$: $dS = \mu S\,dt + \sigma S\,dW^{\mathbb{P}}$.</p>
+  <p>Choose $\theta = \frac{\mu - r}{\sigma}$ (the <strong>market price of risk</strong>). By Girsanov, $W_t^{\mathbb{Q}} = W_t^{\mathbb{P}} + \theta t$ is $\mathbb{Q}$-Brownian motion, and:</p>
+
+  <div class="fbox gold">
+    $$dS = r S\,dt + \sigma S\,dW^{\mathbb{Q}} \qquad \text{(risk-neutral dynamics)}$$
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why This Is the Engine of Derivative Pricing</div>
+    Girsanov lets us replace the real-world drift $\mu$ (unobservable, requires estimating risk premia) with the risk-free rate $r$ (observable) — <em>without changing the volatility $\sigma$</em>. This is why Black-Scholes option prices don't depend on $\mu$: it gets "Girsanov'd away," leaving only $\sigma$, $r$, $S$, $K$, $T$ as inputs.
+  </div>
+
+  <h3 id="s3-fk">3.6 Feynman-Kac Formula</h3>
+
+  <p>The Feynman-Kac formula is the bridge between <strong>PDEs</strong> and <strong>expectations</strong> — it formalises why solving the Black-Scholes PDE (Calculus, Section 4) is equivalent to computing a risk-neutral expectation.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Feynman-Kac Theorem</div>
+    Suppose $V(x,t)$ solves the PDE:
+    $$\frac{\partial V}{\partial t} + \mu(x,t)\frac{\partial V}{\partial x} + \frac{1}{2}\sigma^2(x,t)\frac{\partial^2 V}{\partial x^2} - r\,V = 0, \qquad V(x,T) = \Phi(x)$$
+    Then $V(x,t)$ has the probabilistic representation:
+    $$V(x,t) = E\left[e^{-r(T-t)}\,\Phi(X_T) \;\middle|\; X_t = x\right]$$
+    where $X_t$ follows $dX = \mu(X,t)\,dt + \sigma(X,t)\,dW$ under the expectation measure.
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Feynman-Kac ⟺ Black-Scholes</div>
+    Apply Feynman-Kac with $\mu(x,t)=rx$ (risk-neutral drift), $\sigma(x,t)=\sigma x$, and terminal condition $\Phi(S) = \max(S-K,0)$ (call payoff). This recovers exactly the Black-Scholes PDE from the Calculus section, and confirms:
+    $$C(S,t) = E^{\mathbb{Q}}\left[e^{-r(T-t)}\max(S_T-K,0) \mid S_t=S\right]$$
+    This is precisely how the Black-Scholes formula is derived via the risk-neutral expectation route (as opposed to the delta-hedging PDE route) — <strong>both arrive at the same answer because of Feynman-Kac</strong>.
+  </div>
+
+  <h4>The Two Equivalent Routes to Option Pricing</h4>
+  <table>
+    <tr><th>Route</th><th>Method</th><th>Tool</th></tr>
+    <tr><td>PDE route</td><td>Delta-hedge, derive PDE, solve with boundary conditions</td><td>Itô's Lemma + no-arbitrage</td></tr>
+    <tr><td>Probabilistic route</td><td>Change to risk-neutral measure, compute discounted expectation</td><td>Girsanov + Feynman-Kac</td></tr>
+  </table>
+  <p>Monte Carlo pricing exploits the probabilistic route directly: simulate $S_T$ under $\mathbb{Q}$, average discounted payoffs — this <em>is</em> a Monte Carlo estimate of the Feynman-Kac expectation.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: TIME SERIES                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Time Series</div>
+  </div>
+
+  <h3 id="s4-arma">4.1 AR, MA, ARMA, ARIMA Models</h3>
+
+  <div class="process-card">
+    <h4>Autoregressive: AR(p)</h4>
+    <div class="fbox gold">
+      $$X_t = c + \phi_1 X_{t-1} + \phi_2 X_{t-2} + \cdots + \phi_p X_{t-p} + \varepsilon_t, \qquad \varepsilon_t \sim \text{WN}(0,\sigma^2)$$
+    </div>
+    <p>Current value depends linearly on its own past values plus white noise. <strong>AR(1):</strong> $X_t = c + \phi X_{t-1} + \varepsilon_t$ — the workhorse model; stationary iff $|\phi|<1$.</p>
+  </div>
+
+  <div class="process-card">
+    <h4>Moving Average: MA(q)</h4>
+    <div class="fbox gold">
+      $$X_t = \mu + \varepsilon_t + \theta_1\varepsilon_{t-1} + \cdots + \theta_q\varepsilon_{t-q}$$
+    </div>
+    <p>Current value is a linear combination of current and past <em>shocks</em> (not past values of $X$ itself). MA processes are <strong>always stationary</strong> regardless of $\theta$ values (finite sum of stationary terms) — unlike AR processes.</p>
+  </div>
+
+  <div class="process-card">
+    <h4>ARMA(p,q)</h4>
+    <div class="fbox gold">
+      $$X_t = c + \sum_{i=1}^p \phi_i X_{t-i} + \varepsilon_t + \sum_{j=1}^q \theta_j \varepsilon_{t-j}$$
+    </div>
+    <p>Combines both: autoregressive part captures persistence, moving-average part captures shock propagation. An AR($\infty$) process can often be well-approximated by a low-order ARMA($p$,$q$) — parsimony.</p>
+  </div>
+
+  <div class="process-card">
+    <h4>ARIMA(p,d,q)</h4>
+    <p>For <em>non-stationary</em> series, difference $d$ times until stationary, then fit ARMA(p,q) to the differenced series:</p>
+    <div class="fbox teal">
+      $$(1-L)^d X_t \sim \text{ARMA}(p,q) \qquad \text{where } L \text{ is the lag operator: } LX_t = X_{t-1}$$
+    </div>
+    <p>$d=1$ (first differencing) handles a unit root / stochastic trend — the most common case for asset prices, which are typically I(1) (integrated of order 1) while log-returns are I(0) (stationary).</p>
+  </div>
+
+  <h3 id="s4-stat">4.2 Stationarity &amp; Unit Roots</h3>
+
+  <h4>Weak (Covariance) Stationarity</h4>
+  <div class="fbox gold">
+    A process is weakly stationary if:
+    <ol style="margin-top:0.4rem;">
+      <li>$E[X_t] = \mu$ (constant, independent of $t$)</li>
+      <li>$\text{Var}(X_t) = \sigma^2 < \infty$ (constant, finite)</li>
+      <li>$\text{Cov}(X_t, X_{t+k}) = \gamma(k)$ depends only on lag $k$, not on $t$</li>
+    </ol>
+  </div>
+
+  <h4>AR(1) Stationarity Condition</h4>
+  <p>For $X_t = \phi X_{t-1} + \varepsilon_t$: stationary iff $|\phi| < 1$. The stationary (unconditional) variance is:</p>
+  <div class="fbox teal">
+    $$\text{Var}(X_t) = \frac{\sigma_\varepsilon^2}{1-\phi^2}$$
+  </div>
+  <p>As $\phi \to 1$, variance blows up — the boundary case $\phi=1$ is a <strong>random walk</strong> ($X_t = X_{t-1}+\varepsilon_t$), which is non-stationary (variance grows linearly in $t$: $\text{Var}(X_t) = t\sigma^2$).</p>
+
+  <h4>Unit Root Testing</h4>
+  <p>$\phi = 1$ is called a <strong>unit root</strong> (the characteristic equation $1-\phi z = 0$ has root $z=1$). The <strong>Augmented Dickey-Fuller (ADF) test</strong> tests $H_0: \phi=1$ (unit root, non-stationary) vs $H_1: |\phi|<1$ (stationary):</p>
+  <div class="fbox">
+    $$\Delta X_t = \alpha + \beta t + \gamma X_{t-1} + \sum_{i=1}^p \delta_i \Delta X_{t-i} + \varepsilon_t, \qquad H_0: \gamma = 0$$
+  </div>
+  <p>Note the test statistic does <em>not</em> follow a standard $t$-distribution under $H_0$ — special Dickey-Fuller critical values are needed (the distribution is skewed due to the non-stationarity under the null).</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Why This Matters for Pairs Trading</div>
+    A pairs-trading strategy bets that the spread between two cointegrated assets is stationary (mean-reverting) even though each individual price series has a unit root (is non-stationary). The <strong>Engle-Granger</strong> two-step method: (1) regress one price on the other, (2) ADF-test the residuals for stationarity. If residuals are stationary, the pair is cointegrated and tradeable.
+  </div>
+
+  <h3 id="s4-acf">4.3 Autocorrelation Function (ACF)</h3>
+
+  <div class="fbox gold">
+    $$\rho(k) = \text{Corr}(X_t, X_{t-k}) = \frac{\gamma(k)}{\gamma(0)} = \frac{\text{Cov}(X_t,X_{t-k})}{\text{Var}(X_t)}$$
+  </div>
+
+  <table>
+    <tr><th>Model</th><th>ACF Behaviour</th><th>PACF Behaviour</th></tr>
+    <tr><td>AR(1), $\phi$</td><td>Decays geometrically: $\rho(k) = \phi^{|k|}$</td><td>Cuts off after lag 1</td></tr>
+    <tr><td>AR(p)</td><td>Decays (geometrically or in damped sinusoid)</td><td>Cuts off after lag $p$</td></tr>
+    <tr><td>MA(q)</td><td>Cuts off after lag $q$ (zero beyond)</td><td>Decays gradually (tails off)</td></tr>
+    <tr><td>ARMA(p,q)</td><td>Tails off (mixture of decay patterns)</td><td>Tails off</td></tr>
+    <tr><td>White noise</td><td>$\rho(k)=0$ for all $k\neq0$</td><td>$\rho(k)=0$ for all $k\neq0$</td></tr>
+  </table>
+
+  <p><strong>PACF (Partial ACF):</strong> correlation between $X_t$ and $X_{t-k}$ after removing the linear effect of $X_{t-1},\ldots,X_{t-k+1}$. The ACF/PACF "cutoff vs. tail-off" pattern is the classic visual tool (Box-Jenkins methodology) for identifying AR vs MA order.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Example: AR(1) with $\phi=0.7$</div>
+    Simulated 200,000 observations: $\hat\rho(1)=0.700$, $\hat\rho(2)=0.489$, $\hat\rho(3)=0.343$, $\hat\rho(5)=0.166$, $\hat\rho(10)=0.026$.<br>
+    Theory $\phi^k$: $0.700, 0.490, 0.343, 0.168, 0.028$ — matches almost exactly. ✓
+  </div>
+
+  <h3 id="s4-garch">4.4 Volatility Clustering / GARCH</h3>
+
+  <p><strong>Volatility clustering</strong>: large price changes tend to be followed by large changes (of either sign), and small changes by small changes — variance is autocorrelated even when returns themselves are not (a key stylised fact of financial returns).</p>
+
+  <h4>ARCH(1) — Building Block</h4>
+  <div class="fbox gold">
+    $$r_t = \sigma_t \varepsilon_t, \qquad \varepsilon_t \sim \text{i.i.d. } N(0,1), \qquad \sigma_t^2 = \omega + \alpha\,r_{t-1}^2$$
+  </div>
+
+  <h4>GARCH(1,1) — The Industry Standard</h4>
+  <div class="fbox gold">
+    <div class="flabel">GARCH(1,1) Variance Equation</div>
+    $$\sigma_t^2 = \omega + \alpha\,r_{t-1}^2 + \beta\,\sigma_{t-1}^2$$
+  </div>
+
+  <p>$\omega>0$, $\alpha,\beta\geq0$, and stationarity requires $\alpha+\beta<1$.</p>
+
+  <table>
+    <tr><th>Quantity</th><th>Formula</th><th>Interpretation</th></tr>
+    <tr><td>Unconditional variance</td><td>$\sigma^2 = \dfrac{\omega}{1-\alpha-\beta}$</td><td>Long-run average variance</td></tr>
+    <tr><td>Persistence</td><td>$\alpha+\beta$</td><td>How long volatility shocks last; close to 1 ⟹ highly persistent</td></tr>
+    <tr><td>Half-life of shock</td><td>$\dfrac{\ln(0.5)}{\ln(\alpha+\beta)}$</td><td>Time for a vol shock to decay by half</td></tr>
+    <tr><td>$\alpha$</td><td>"ARCH effect"</td><td>Sensitivity to most recent squared shock</td></tr>
+    <tr><td>$\beta$</td><td>"GARCH effect"</td><td>Persistence of past variance level</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Simulation: GARCH(1,1), $\omega=0.05,\alpha=0.10,\beta=0.85$</div>
+    Persistence $\alpha+\beta = 0.95$ (close to 1: realistic high persistence as seen in real markets).<br>
+    Theoretical unconditional variance: $\omega/(1-\alpha-\beta) = 1.00$; simulated: $1.009$ — matches.<br>
+    ACF of squared returns: lag 1 = 0.160, lag 5 = 0.138, lag 10 = 0.108, lag 20 = 0.065 — all positive and slowly decaying, confirming volatility clustering (returns themselves have ACF ≈ 0, but squared returns are autocorrelated).
+  </div>
+
+  <h4>Forecasting Volatility with GARCH</h4>
+  <div class="fbox teal">
+    $$E_t[\sigma_{t+h}^2] = \sigma^2 + (\alpha+\beta)^{h-1}(\sigma_{t+1}^2-\sigma^2)$$
+  </div>
+  <p>Volatility forecasts mean-revert geometrically to the long-run level $\sigma^2$, at rate $(\alpha+\beta)$ — directly analogous to the AR(1) and OU mean-reversion structure.</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: GARCH vs Implied Volatility</div>
+    GARCH models volatility from the historical return time series (statistical/physical measure). Implied volatility comes from option prices (risk-neutral measure) via inverting Black-Scholes. They generally differ — implied vol embeds a variance risk premium, typically running above GARCH-forecasted realised volatility, especially before known events.
+  </div>
+
+  <h3 id="s4-ou">4.5 Mean Reversion: The Ornstein-Uhlenbeck (OU) Process</h3>
+
+  <p>The OU process is the <strong>continuous-time limit of AR(1)</strong> — the natural model for mean-reverting quantities (interest rates, volatility, spreads, pairs-trading residuals).</p>
+
+  <div class="fbox gold">
+    <div class="flabel">OU Process SDE</div>
+    $$dX_t = \theta(\mu - X_t)\,dt + \sigma\,dW_t$$
+  </div>
+
+  <p>$\mu$: long-run mean. $\theta>0$: speed of mean reversion. $\sigma$: volatility.</p>
+
+  <h4>Closed-Form Solution</h4>
+  <div class="fbox teal">
+    $$X_t = \mu + (X_0-\mu)e^{-\theta t} + \sigma\int_0^t e^{-\theta(t-s)}\,dW_s$$
+  </div>
+
+  <p>$X_t$ is Gaussian (since it's a linear functional of $W$):</p>
+  <table>
+    <tr><th>Quantity</th><th>Formula</th></tr>
+    <tr><td>$E[X_t]$</td><td>$\mu + (X_0-\mu)e^{-\theta t} \;\to\; \mu$ as $t\to\infty$</td></tr>
+    <tr><td>$\text{Var}(X_t)$</td><td>$\dfrac{\sigma^2}{2\theta}\left(1-e^{-2\theta t}\right) \;\to\; \dfrac{\sigma^2}{2\theta}$ as $t\to\infty$</td></tr>
+    <tr><td>Stationary distribution</td><td>$X_\infty \sim N\!\left(\mu,\ \dfrac{\sigma^2}{2\theta}\right)$</td></tr>
+    <tr><td>Half-life of mean reversion</td><td>$\dfrac{\ln 2}{\theta}$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Simulation: $\theta=2,\ \mu=0.05,\ \sigma=0.1$</div>
+    After long time $T=50$: simulated mean $=0.048$ (theory $\mu=0.05$), simulated variance $=0.00243$ (theory $\sigma^2/2\theta = 0.0025$). Matches closely.
+  </div>
+
+  <h4>OU as the Continuous Limit of AR(1)</h4>
+  <p>Discretise the OU SDE with step $\Delta t$: $X_{t+\Delta t} - X_t \approx \theta(\mu-X_t)\Delta t + \sigma\sqrt{\Delta t}\,\varepsilon_t$, giving:</p>
+  <div class="fbox">
+    $$X_{t+\Delta t} = \underbrace{(1-\theta\Delta t)}_{\phi}X_t + \theta\mu\Delta t + \sigma\sqrt{\Delta t}\,\varepsilon_t$$
+  </div>
+  <p>This is exactly AR(1) with $\phi = 1-\theta\Delta t$. As $\Delta t \to 0$ with $\theta$ fixed, $\phi\to 1$ from below — connecting discrete AR(1) persistence directly to continuous mean-reversion speed.</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Where OU Shows Up</div>
+    <ul>
+      <li><strong>Vasicek interest rate model:</strong> $dr_t = \theta(\mu-r_t)dt+\sigma dW_t$ — exactly OU; rates mean-revert to long-run level $\mu$</li>
+      <li><strong>Pairs trading:</strong> the spread between two cointegrated stocks is modelled as OU; entry/exit thresholds set in units of $\sigma/\sqrt{2\theta}$ (the stationary standard deviation)</li>
+      <li><strong>Heston / SABR stochastic volatility:</strong> variance often follows a (square-root-modified) OU-type mean-reverting process</li>
+      <li><strong>Optimal trading speed:</strong> in Almgren-Chriss style execution problems, alpha signals are often modelled as OU processes decaying at rate $\theta$</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Core Formulas at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Formula</th><th>Key Fact</th></tr>
+    <tr><td>Markov stationary dist.</td><td>$\pi P = \pi$</td><td>Unique if irreducible</td></tr>
+    <tr><td>Detailed balance</td><td>$\pi_i P_{ij} = \pi_j P_{ji}$</td><td>Sufficient, not necessary, for stationarity</td></tr>
+    <tr><td>Fundamental matrix</td><td>$N=(I-Q)^{-1}$</td><td>$N\mathbf{1}$ = expected steps to absorption</td></tr>
+    <tr><td>Random walk on graph</td><td>$\pi_i = \deg(i)/2|E|$</td><td>Always reversible</td></tr>
+    <tr><td>BM variance</td><td>$\text{Var}(W_t)=t$</td><td>$\text{Cov}(W_s,W_t)=\min(s,t)$</td></tr>
+    <tr><td>Quadratic variation</td><td>$[W,W]_t = t$</td><td>Foundation of Itô calculus</td></tr>
+    <tr><td>Itô multiplication</td><td>$(dW)^2=dt,\ dW\,dt=0,\ (dt)^2=0$</td><td>Memorise this table</td></tr>
+    <tr><td>Reflection principle</td><td>$P(M_t\geq a) = 2P(W_t\geq a)$</td><td>Barrier/lookback option pricing</td></tr>
+    <tr><td>Itô's Lemma</td><td>$df = (f_t+\mu f_x+\frac{1}{2}\sigma^2f_{xx})dt+\sigma f_x\,dW$</td><td>2nd-order Taylor + $(dW)^2=dt$</td></tr>
+    <tr><td>GBM solution</td><td>$S_t=S_0e^{(\mu-\sigma^2/2)t+\sigma W_t}$</td><td>$d(\ln S)=(\mu-\sigma^2/2)dt+\sigma dW$</td></tr>
+    <tr><td>Itô isometry</td><td>$E[(\int f\,dW)^2]=E[\int f^2\,dt]$</td><td>Computes variance of stochastic integrals</td></tr>
+    <tr><td>Girsanov shift</td><td>$\tilde{W}_t=W_t+\theta t$ is $\mathbb{Q}$-BM</td><td>$\theta=(\mu-r)/\sigma$: market price of risk</td></tr>
+    <tr><td>Feynman-Kac</td><td>$V=E^{\mathbb{Q}}[e^{-r(T-t)}\Phi(X_T)]$</td><td>PDE ⟺ expectation duality</td></tr>
+    <tr><td>AR(1) stationary var</td><td>$\sigma_\varepsilon^2/(1-\phi^2)$</td><td>Requires $|\phi|<1$</td></tr>
+    <tr><td>AR(1) ACF</td><td>$\rho(k)=\phi^{|k|}$</td><td>Geometric decay</td></tr>
+    <tr><td>GARCH(1,1) uncond. var</td><td>$\omega/(1-\alpha-\beta)$</td><td>Stationary iff $\alpha+\beta<1$</td></tr>
+    <tr><td>OU stationary dist.</td><td>$N(\mu,\ \sigma^2/2\theta)$</td><td>Continuous-time AR(1)</td></tr>
+  </table>
+
+  <h3>Discrete ↔ Continuous Dictionary</h3>
+  <table>
+    <tr><th>Discrete-Time Concept</th><th>Continuous-Time Analogue</th><th>Connection</th></tr>
+    <tr><td>Random walk (symmetric)</td><td>Brownian motion</td><td>Scaling limit (Donsker's theorem)</td></tr>
+    <tr><td>AR(1) process</td><td>Ornstein-Uhlenbeck process</td><td>$\phi = 1-\theta\Delta t$ as $\Delta t\to0$</td></tr>
+    <tr><td>Geometric random walk</td><td>Geometric Brownian motion</td><td>Log-increments converge to Gaussian</td></tr>
+    <tr><td>Markov chain transition matrix $P$</td><td>Generator matrix $Q$ (infinitesimal)</td><td>$P(\Delta t) \approx I + Q\Delta t$</td></tr>
+    <tr><td>GARCH(1,1)</td><td>Stochastic volatility (Heston-type)</td><td>Both capture vol clustering / mean-reverting variance</td></tr>
+  </table>
+
+  <h3>The Stochastic Calculus → Derivatives Pricing Pipeline</h3>
+  <table>
+    <tr><th>Step</th><th>Tool</th><th>Result</th></tr>
+    <tr><td>1. Model the asset</td><td>SDE: $dS=\mu S\,dt+\sigma S\,dW$</td><td>GBM under physical measure $\mathbb{P}$</td></tr>
+    <tr><td>2. Change measure</td><td>Girsanov's theorem</td><td>$dS=rS\,dt+\sigma S\,dW^{\mathbb{Q}}$ under risk-neutral $\mathbb{Q}$</td></tr>
+    <tr><td>3. Apply Itô's Lemma</td><td>$d(\ln S)=(r-\sigma^2/2)dt+\sigma dW^{\mathbb{Q}}$</td><td>Closed-form $S_T$ distribution</td></tr>
+    <tr><td>4. Price via PDE</td><td>Delta-hedge + no-arbitrage</td><td>Black-Scholes PDE</td></tr>
+    <tr><td>4'. Price via expectation</td><td>Feynman-Kac formula</td><td>$C_0 = E^{\mathbb{Q}}[e^{-rT}\max(S_T-K,0)]$</td></tr>
+    <tr><td>5. Monte Carlo (if no closed form)</td><td>Simulate $S_T$ under $\mathbb{Q}$, average payoffs</td><td>Numerical estimate of Feynman-Kac expectation</td></tr>
+    <tr><td>6. Volatility input</td><td>GARCH (historical) or implied vol (market)</td><td>Calibrate $\sigma$ for pricing/risk</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 5 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Transition Matrix · Stationary Distribution · Detailed Balance · Absorbing States · Hitting Times · Gambler's Ruin · Ergodic Chains · Random Walks on Graphs · Brownian Motion · Quadratic Variation · Reflection Principle · Martingales · Itô Integral · Itô's Lemma · GBM · SDEs · Girsanov's Theorem · Feynman-Kac · AR/MA/ARMA/ARIMA · Stationarity &amp; Unit Roots · ACF · GARCH · Ornstein-Uhlenbeck Process
+</footer>
+
+</body>
+</html>

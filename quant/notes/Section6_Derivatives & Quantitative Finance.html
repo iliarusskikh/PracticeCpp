@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivatives & Quantitative Finance — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #060f0b;
+    --bg2:        #0a1812;
+    --bg3:        #0f2218;
+    --border:     #163d27;
+    --emerald:    #34d399;
+    --emerald2:   #6ee7b7;
+    --emerald-dim:#065f46;
+    --text:       #d8f0e6;
+    --text-dim:   #6b9e84;
+    --gold:       #c9a84c;
+    --gold2:      #e8c97a;
+    --gold-dim:   #7a6030;
+    --violet:     #a78bfa;
+    --rose:       #fb7185;
+    --sky:        #38bdf8;
+    --teal:       #2dd4bf;
+    --orange:     #fb923c;
+    --amber:      #fbbf24;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #34d39918, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--emerald-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--emerald2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--emerald);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--emerald);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--emerald2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--emerald-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--emerald2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--emerald); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--emerald);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #071e12; border-left: 3px solid var(--emerald); }
+  .callout.trap    { background: #1e0808; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #100a1e; border-left: 3px solid var(--violet); }
+  .callout.example { background: #06131e; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1a1408; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--emerald); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--emerald); border-bottom: 1px solid var(--emerald-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--emerald-dim); color: var(--emerald2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── GREEK CARD ── */
+  .greek-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .greek-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.05rem; color: var(--emerald2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--emerald2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 6 of 9</div>
+  <h1>Derivatives &amp; Quantitative Finance</h1>
+  <div class="subtitle">Options Pricing · The Greeks · Fixed Income · Interest Rate Models</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Options Pricing</a>
+      <ul class="sub">
+        <li><a href="#s1-arb">No-Arbitrage Principle</a></li>
+        <li><a href="#s1-rn">Risk-Neutral Pricing</a></li>
+        <li><a href="#s1-bs">Black-Scholes Formula</a></li>
+        <li><a href="#s1-pde">Black-Scholes PDE</a></li>
+        <li><a href="#s1-pcp">Put-Call Parity</a></li>
+        <li><a href="#s1-bin">Binomial Tree Model</a></li>
+        <li><a href="#s1-mc">Monte Carlo Option Pricing</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">The Greeks</a>
+      <ul class="sub">
+        <li><a href="#s2-delta">Delta Δ</a></li>
+        <li><a href="#s2-gamma">Gamma Γ</a></li>
+        <li><a href="#s2-theta">Theta Θ</a></li>
+        <li><a href="#s2-vega">Vega ν</a></li>
+        <li><a href="#s2-rho">Rho ρ</a></li>
+        <li><a href="#s2-hedge">Delta Hedging</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Fixed Income &amp; Interest Rates</a>
+      <ul class="sub">
+        <li><a href="#s3-bond">Bond Pricing &amp; Yield</a></li>
+        <li><a href="#s3-dur">Duration &amp; Convexity</a></li>
+        <li><a href="#s3-models">Interest Rate Models</a></li>
+        <li><a href="#s3-swap">Swap Pricing Basics</a></li>
+        <li><a href="#s3-term">Term Structure of Interest Rates</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: OPTIONS PRICING                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Options Pricing</div>
+  </div>
+
+  <h3 id="s1-arb">1.1 No-Arbitrage Principle</h3>
+
+  <p>An <strong>arbitrage</strong> is a trading strategy that: (1) costs nothing to set up, (2) has zero probability of loss, and (3) has positive probability of profit. Equivalently: a risk-free profit with no initial capital.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Law of One Price</div>
+    Two portfolios with identical future payoffs in every possible state of the world must have the same price today. If they don't, an arbitrage exists.
+  </div>
+
+  <p><strong>Why it anchors all derivatives pricing:</strong> the law of one price lets us replicate derivative payoffs using traded assets (stocks + bonds), then price the derivative by the cost of the replicating portfolio — no assumptions about investor preferences or risk aversion needed.</p>
+
+  <h4>Key No-Arbitrage Bounds (European Options)</h4>
+  <table>
+    <tr><th>Bound</th><th>Call $C$</th><th>Put $P$</th><th>Reasoning</th></tr>
+    <tr><td>Lower bound</td><td>$C \geq \max(S - Ke^{-rT},\,0)$</td><td>$P \geq \max(Ke^{-rT} - S,\,0)$</td><td>Can always exercise or sell; early exercise value</td></tr>
+    <tr><td>Upper bound</td><td>$C \leq S$</td><td>$P \leq Ke^{-rT}$</td><td>Call never worth more than stock; put bounded by PV of strike</td></tr>
+    <tr><td>Non-negativity</td><td>$C \geq 0$</td><td>$P \geq 0$</td><td>Limited liability</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ American vs European</div>
+    For a <em>European call</em> on a <em>non-dividend-paying</em> stock, early exercise is never optimal — it is always better to sell the call than exercise it (you give up the time value). Therefore $C_\text{American} = C_\text{European}$. This is NOT true for American puts or for options on dividend-paying stocks.
+  </div>
+
+  <h3 id="s1-rn">1.2 Risk-Neutral Pricing</h3>
+
+  <p>The key insight: in a complete, arbitrage-free market, there exists a unique <strong>risk-neutral measure</strong> $\mathbb{Q}$ under which all asset prices, when discounted at the risk-free rate, are martingales.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Fundamental Theorem of Asset Pricing</div>
+    A market is <em>arbitrage-free</em> iff there exists an equivalent martingale measure $\mathbb{Q}$.<br>
+    A market is <em>complete</em> iff this measure is unique.<br><br>
+    Under $\mathbb{Q}$: $\quad e^{-rt}S_t$ is a martingale $\Rightarrow$ $E^{\mathbb{Q}}[S_T \mid \mathcal{F}_t] = S_t e^{r(T-t)}$
+  </div>
+
+  <p>This gives the <strong>risk-neutral pricing formula</strong> for any derivative with payoff $\Phi(S_T)$:</p>
+
+  <div class="fbox gold">
+    $$V_t = e^{-r(T-t)}\,E^{\mathbb{Q}}\!\left[\Phi(S_T) \mid \mathcal{F}_t\right]$$
+  </div>
+
+  <p><strong>Intuition:</strong> under $\mathbb{Q}$, all assets grow at the risk-free rate (investors are "risk-neutral" — they don't require a premium for risk). Real-world probabilities and investor preferences drop out completely. The real-world drift $\mu$ is replaced by $r$ via Girsanov's theorem (Section 5).</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Risk-Neutral ≠ Real-World Probabilities</div>
+    The risk-neutral measure $\mathbb{Q}$ is a mathematical construction — not what investors actually believe. Under $\mathbb{Q}$, a stock's expected return is $r$ (the risk-free rate). In reality (under $\mathbb{P}$), the expected return is $\mu > r$ to compensate for risk. The difference $\theta = (\mu-r)/\sigma$ is the <em>market price of risk</em>.
+  </div>
+
+  <h3 id="s1-bs">1.3 Black-Scholes Formula</h3>
+
+  <p>Assume $S_t$ follows GBM: $dS = \mu S\,dt + \sigma S\,dW$ under $\mathbb{P}$, or $dS = rS\,dt + \sigma S\,dW^{\mathbb{Q}}$ under $\mathbb{Q}$. The closed-form price of a European call is:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Black-Scholes Call Formula</div>
+    $$C = S\,\Phi(d_1) - K e^{-rT}\,\Phi(d_2)$$
+    $$d_1 = \frac{\ln(S/K) + (r + \frac{1}{2}\sigma^2)T}{\sigma\sqrt{T}}, \qquad d_2 = d_1 - \sigma\sqrt{T}$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Black-Scholes Put Formula</div>
+    $$P = K e^{-rT}\,\Phi(-d_2) - S\,\Phi(-d_1)$$
+  </div>
+
+  <h4>Notation</h4>
+  <ul>
+    <li>$S$ = current stock price, $K$ = strike, $T$ = time to expiry (years)</li>
+    <li>$r$ = continuously compounded risk-free rate, $\sigma$ = annualised volatility</li>
+    <li>$\Phi(\cdot)$ = standard normal CDF, $\phi(\cdot)$ = standard normal PDF</li>
+  </ul>
+
+  <h4>Interpretation of Terms</h4>
+  <table>
+    <tr><th>Term</th><th>Economic interpretation</th></tr>
+    <tr><td>$S\,\Phi(d_1)$</td><td>PV of receiving the stock conditional on exercise (risk-neutral probability of exercise × forward stock price)</td></tr>
+    <tr><td>$Ke^{-rT}\Phi(d_2)$</td><td>PV of paying the strike — $\Phi(d_2)$ is the risk-neutral probability of the option expiring in-the-money</td></tr>
+    <tr><td>$\Phi(d_2)$</td><td>Risk-neutral probability that $S_T > K$ at expiry</td></tr>
+    <tr><td>$\Phi(d_1)$</td><td>Delta of the call (also related to the stock's contribution, not a pure probability)</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example (Verified)</div>
+    $S=100$, $K=100$ (ATM), $T=1\text{yr}$, $r=5\%$, $\sigma=20\%$:<br><br>
+    $d_1 = \frac{\ln(1) + (0.05+0.02)\times1}{0.20} = \frac{0.07}{0.20} = 0.35$<br>
+    $d_2 = 0.35 - 0.20 = 0.15$<br>
+    $\Phi(0.35) = 0.6368$, $\Phi(0.15) = 0.5596$<br><br>
+    $C = 100 \times 0.6368 - 100 \times e^{-0.05} \times 0.5596 = 63.68 - 53.22 = \mathbf{10.45}$<br>
+    $P = 100 \times e^{-0.05} \times (1-0.5596) - 100\times(1-0.6368) = \mathbf{5.57}$ ✓ (put-call parity: $C-P=4.88=S-Ke^{-rT}$)
+  </div>
+
+  <h4>BS Model Assumptions</h4>
+  <ul>
+    <li>Log-returns are normally distributed (constant $\sigma$)</li>
+    <li>No dividends, no transaction costs, continuous trading</li>
+    <li>Constant risk-free rate $r$</li>
+    <li>Arbitrage-free market; short selling allowed</li>
+  </ul>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ BS Limitations — What Interviewers Probe</div>
+    <ul>
+      <li><strong>Volatility smile:</strong> Implied vol varies with strike — BS assumes constant $\sigma$. OTM puts trade at higher implied vol (skew) due to crash risk and demand for protection.</li>
+      <li><strong>Fat tails:</strong> Real return distributions have excess kurtosis — BS underprices tail options.</li>
+      <li><strong>No jumps:</strong> BS paths are continuous; crashes (discrete jumps) are not modelled.</li>
+      <li><strong>Constant rates:</strong> For long-dated options, stochastic interest rates matter.</li>
+    </ul>
+  </div>
+
+  <h3 id="s1-pde">1.4 Black-Scholes PDE</h3>
+
+  <p>The BS formula is the unique solution to the <strong>Black-Scholes PDE</strong> with the appropriate boundary condition. The PDE is derived via delta hedging (Section 4, §4.4 of the Calculus notes):</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Black-Scholes PDE</div>
+    $$\frac{\partial V}{\partial t} + \frac{1}{2}\sigma^2 S^2\frac{\partial^2 V}{\partial S^2} + rS\frac{\partial V}{\partial S} - rV = 0$$
+    $$\text{Terminal condition: } V(S,T) = \text{Payoff}(S)$$
+  </div>
+
+  <p>In Greeks notation (call options): $\quad \Theta + \frac{1}{2}\sigma^2 S^2\Gamma + rS\Delta - rC = 0$</p>
+
+  <p>This identity holds at every point on the option surface and is a <em>testable interview question</em>: given any three of $\{\Theta, \Gamma, \Delta, C\}$, compute the fourth.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 BS PDE Numerical Check (ATM call above)</div>
+    $\Delta=0.6368$, $\Gamma=0.01876$, $\Theta=-6.414$/yr, $C=10.45$:<br><br>
+    $\Theta + \frac{1}{2}(0.04)(10000)(0.01876) + (0.05)(100)(0.6368) - (0.05)(10.45)$<br>
+    $= -6.414 + 3.752 + 3.184 - 0.523 = \mathbf{-0.001} \approx 0$ ✓
+  </div>
+
+  <h3 id="s1-pcp">1.5 Put-Call Parity</h3>
+
+  <p>For European options on a non-dividend-paying stock, one of the most important relationships in all of derivatives:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Put-Call Parity</div>
+    $$C - P = S - K e^{-rT}$$
+    equivalently: $C + Ke^{-rT} = P + S$
+  </div>
+
+  <div class="callout proof">
+    <strong>Proof (no-arbitrage):</strong> Consider two portfolios at time 0:
+    <ul>
+      <li>Portfolio A: long call + invest $Ke^{-rT}$ at risk-free rate</li>
+      <li>Portfolio B: long put + long stock</li>
+    </ul>
+    At expiry $T$: both pay $\max(S_T, K)$ in all states. Therefore they cost the same today: $C + Ke^{-rT} = P + S$.
+  </div>
+
+  <h4>Applications of Put-Call Parity</h4>
+  <table>
+    <tr><th>Application</th><th>Formula</th></tr>
+    <tr><td>Implied put from call price</td><td>$P = C - S + Ke^{-rT}$</td></tr>
+    <tr><td>Synthetic forward (long call, short put)</td><td>$C - P = F\cdot e^{-rT}$ where $F=Se^{rT}$</td></tr>
+    <tr><td>Implied forward rate</td><td>$F = (C-P)e^{rT} + K$ — detects mispricing</td></tr>
+    <tr><td>Implied dividends</td><td>Dividend-adjusted: $C - P = S e^{-qT} - Ke^{-rT}$ where $q$ is continuous dividend yield</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Practical Use in Trading</div>
+    Put-call parity is used to check for mispricings: if $C - P \neq S - Ke^{-rT}$, an arbitrage exists. In practice, deviations occur due to bid-ask spreads, borrowing costs (for short selling), and hard-to-borrow stocks. The "implied forward" from call and put prices is often more accurate than the listed forward price.
+  </div>
+
+  <h3 id="s1-bin">1.6 Binomial Tree Model</h3>
+
+  <p>The binomial tree discretises time and stock price movement into up/down steps, providing a simple, intuitive path to option pricing without stochastic calculus.</p>
+
+  <h4>One-Step Model</h4>
+  <p>Over a single period of length $T$: stock goes to $uS$ (up) with probability $p_u$ or $dS$ (down) with probability $p_d = 1-p_u$. No-arbitrage requires $d < e^{rT} < u$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Risk-Neutral Probability</div>
+    $$p = \frac{e^{r\Delta t} - d}{u - d}$$
+    $$V_0 = e^{-r\Delta t}\left[p\,V_u + (1-p)\,V_d\right]$$
+  </div>
+
+  <p><strong>Note:</strong> the risk-neutral probability $p$ is uniquely determined by no-arbitrage — no estimate of the true probability $p_u$ is needed.</p>
+
+  <h4>Cox-Ross-Rubinstein (CRR) Parameterisation</h4>
+  <p>For $N$ steps over time $T$ with $\Delta t = T/N$:</p>
+
+  <div class="fbox teal">
+    $$u = e^{\sigma\sqrt{\Delta t}}, \qquad d = e^{-\sigma\sqrt{\Delta t}} = \frac{1}{u}$$
+    $$p = \frac{e^{r\Delta t} - d}{u - d}$$
+  </div>
+
+  <p>As $N \to \infty$: the CRR binomial tree converges to the Black-Scholes formula.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 CRR Convergence (Verified)</div>
+    ATM call: $S=K=100$, $T=1$yr, $r=5\%$, $\sigma=20\%$. BS exact price: 10.4506.<br>
+    <table>
+      <tr><th>$N$ steps</th><th>CRR price</th><th>Error</th></tr>
+      <tr><td>5</td><td>10.81</td><td>+0.36</td></tr>
+      <tr><td>25</td><td>10.52</td><td>+0.07</td></tr>
+      <tr><td>100</td><td>10.43</td><td>−0.02</td></tr>
+      <tr><td>500</td><td>10.45</td><td>−0.004</td></tr>
+    </table>
+    Convergence is $O(1/N)$ — alternating above/below the BS price (even/odd step oscillation).
+  </div>
+
+  <h4>Backward Induction Algorithm</h4>
+  <ol class="steps">
+    <li>Build stock price lattice: $S_{i,j} = S_0\,u^{N-j}\,d^{j}$ at node $(i,j)$ (step $i$, $j$ down-moves)</li>
+    <li>Compute terminal payoffs at $t=T$: $V_{N,j} = \max(S_{N,j}-K, 0)$ for a call</li>
+    <li>Work backwards: $V_{i,j} = e^{-r\Delta t}\left[p\,V_{i+1,j} + (1-p)\,V_{i+1,j+1}\right]$</li>
+    <li>For American options: at each node, also check early-exercise value $\max(V_{i,j}, \text{intrinsic})$</li>
+    <li>$V_{0,0}$ is the option price</li>
+  </ol>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why the Binomial Tree Matters Beyond BS</div>
+    The binomial tree is the standard method for pricing American options (where early exercise can be optimal — no closed-form BS equivalent exists). It also naturally handles path-dependent features and discrete dividends, and is widely used in practice for equity derivatives.
+  </div>
+
+  <h3 id="s1-mc">1.7 Monte Carlo Option Pricing</h3>
+
+  <p>Monte Carlo exploits the risk-neutral pricing formula directly: simulate many paths of $S_T$ under $\mathbb{Q}$, compute the payoff for each path, and average.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Monte Carlo Pricing Algorithm</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li>Simulate $N$ paths: $S_T^{(i)} = S_0\exp\!\left((r-\tfrac{1}{2}\sigma^2)T + \sigma\sqrt{T}\,Z^{(i)}\right)$ where $Z^{(i)}\sim N(0,1)$ i.i.d.</li>
+      <li>Compute payoff for each path: $\Phi_i = \max(S_T^{(i)}-K, 0)$ (European call)</li>
+      <li>Estimate price: $\hat{V} = e^{-rT}\,\frac{1}{N}\sum_{i=1}^N \Phi_i$</li>
+    </ol>
+    Standard error: $\text{SE} = e^{-rT}\,\dfrac{\text{std}(\Phi)}{\sqrt{N}}$
+  </div>
+
+  <p>The MC error decreases as $O(1/\sqrt{N})$ — to halve the error, quadruple the number of paths.</p>
+
+  <h4>Variance Reduction Techniques</h4>
+
+  <table>
+    <tr><th>Technique</th><th>Idea</th><th>Typical VR factor</th></tr>
+    <tr><td><strong>Antithetic variates</strong></td><td>For each $Z^{(i)}$, also use $-Z^{(i)}$. Average the two payoffs. Exploits negative correlation.</td><td>2–10×</td></tr>
+    <tr><td><strong>Control variates</strong></td><td>Use a correlated quantity with known expectation (e.g.\ stock price under $\mathbb{Q}$) to reduce variance of the estimator.</td><td>10–100×</td></tr>
+    <tr><td><strong>Importance sampling</strong></td><td>Shift the sampling distribution toward the "important" region (e.g.\ in-the-money paths for deep OTM options).</td><td>100–1000×</td></tr>
+    <tr><td><strong>Quasi-Monte Carlo</strong></td><td>Use low-discrepancy sequences (Sobol, Halton) instead of pseudo-random numbers. Convergence $O(1/N)$ vs $O(1/\sqrt{N})$.</td><td>10–100×</td></tr>
+    <tr><td><strong>Stratified sampling</strong></td><td>Divide probability space into strata and sample from each. Reduces variance by removing sampling fluctuations across strata.</td><td>2–5×</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Antithetic Variates (Verified)</div>
+    100,000 paths, ATM call ($S=K=100$, $\sigma=20\%$, $r=5\%$, $T=1$yr):<br><br>
+    Plain MC: price $= 10.42$, SE $= 0.047$ (95% CI: [10.33, 10.51])<br>
+    Antithetic MC: price $= 10.48$, SE $= 0.023$ — variance reduction factor $\approx 4\times$ ✓<br>
+    BS exact: 10.45
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 When to Use Each Method</div>
+    <ul>
+      <li><strong>Closed-form BS:</strong> European vanilla options — always fastest and exact</li>
+      <li><strong>Binomial tree:</strong> American options, discrete dividends, simple path-dependence</li>
+      <li><strong>PDE finite difference:</strong> American options, local vol models, fast calibration</li>
+      <li><strong>Monte Carlo:</strong> Exotic/path-dependent options (Asian, barrier, basket), multi-asset options, high-dimensional problems</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: THE GREEKS                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">The Greeks</div>
+  </div>
+
+  <p>The Greeks measure the sensitivity of an option's price to changes in its underlying parameters. They are the partial derivatives of the option pricing function and the primary tools for risk management.</p>
+
+  <p>All formulas below assume European options under Black-Scholes with $d_1$ and $d_2$ as defined in §1.3. $\phi(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}$ denotes the standard normal PDF.</p>
+
+  <h3 id="s2-delta">2.1 Delta Δ — Price Sensitivity to Underlying</h3>
+
+  <div class="greek-card">
+    <h4>Delta Δ = ∂V/∂S</h4>
+    <div class="fbox gold">
+      $$\Delta_\text{call} = \Phi(d_1) \qquad \Delta_\text{put} = \Phi(d_1) - 1 = -\Phi(-d_1)$$
+    </div>
+    <p><strong>Range:</strong> Call delta $\in (0,1)$; Put delta $\in (-1,0)$.</p>
+    <p><strong>Interpretation:</strong> $\Delta$ is approximately the number of shares of stock needed to replicate the option. A delta-0.63 call behaves like holding 0.63 shares.</p>
+    <p><strong>At key moneyness levels:</strong></p>
+    <ul>
+      <li>Deep ITM call: $\Delta \to 1$ (behaves like stock)</li>
+      <li>ATM call: $\Delta \approx 0.5$ (slightly above due to the $+\frac{1}{2}\sigma^2T$ in $d_1$)</li>
+      <li>Deep OTM call: $\Delta \to 0$</li>
+    </ul>
+    <p>Also: $\Phi(d_2)$ = risk-neutral probability of expiring ITM. $\Delta = \Phi(d_1) \neq \Phi(d_2)$ (they differ by the volatility drag term).</p>
+    <div class="callout tip">
+      <div class="ctitle">✓ Relationship between call and put delta</div>
+      $\Delta_\text{call} - \Delta_\text{put} = 1$ (from put-call parity: differentiate $C - P = S - Ke^{-rT}$ with respect to $S$).
+    </div>
+  </div>
+
+  <h3 id="s2-gamma">2.2 Gamma Γ — Convexity in the Underlying</h3>
+
+  <div class="greek-card">
+    <h4>Gamma Γ = ∂²V/∂S²</h4>
+    <div class="fbox gold">
+      $$\Gamma = \frac{\phi(d_1)}{S\,\sigma\sqrt{T}}$$
+    </div>
+    <p>Gamma is the same for calls and puts (from put-call parity). It is always non-negative — options are convex in the stock price.</p>
+    <p><strong>Interpretation:</strong> $\Gamma$ measures how fast $\Delta$ changes as $S$ moves. A high-gamma option requires frequent rebalancing to stay delta-hedged.</p>
+    <p><strong>Key features:</strong></p>
+    <ul>
+      <li>Gamma is maximised when the option is ATM and near expiry ($T\to0$)</li>
+      <li>Far from ATM or far from expiry: gamma is low</li>
+      <li>Gamma "spikes" near expiry for ATM options — dangerous for short-gamma positions</li>
+    </ul>
+    <div class="callout finance">
+      <div class="ctitle">📈 Gamma vs Theta Trade-off</div>
+      Long options (long gamma) benefit from large moves in either direction but pay theta (time decay) every day. Short options (short gamma) earn theta but are hurt by large moves. The BS PDE makes this precise: $\Theta = -\frac{1}{2}\sigma^2 S^2 \Gamma - rS\Delta + rV$. For an ATM call near expiry, $\Theta \approx -\frac{1}{2}\sigma^2 S^2 \Gamma$.
+    </div>
+  </div>
+
+  <h3 id="s2-theta">2.3 Theta Θ — Time Decay</h3>
+
+  <div class="greek-card">
+    <h4>Theta Θ = ∂V/∂t</h4>
+    <div class="fbox gold">
+      $$\Theta_\text{call} = -\frac{S\,\phi(d_1)\,\sigma}{2\sqrt{T}} - rKe^{-rT}\Phi(d_2)$$
+      $$\Theta_\text{put} = -\frac{S\,\phi(d_1)\,\sigma}{2\sqrt{T}} + rKe^{-rT}\Phi(-d_2)$$
+    </div>
+    <p><strong>Sign:</strong> $\Theta_\text{call} < 0$ always (long calls lose value as time passes). $\Theta_\text{put}$ can be positive (deep ITM puts may gain value from interest rate effect).</p>
+    <p><strong>Convention:</strong> Theta is usually quoted as loss per calendar day: divide by 365 (or 252 for trading days).</p>
+    <p><strong>ATM example:</strong> $S=K=100$, $\sigma=20\%$, $T=1$yr, $r=5\%$: $\Theta = -6.41$/yr $= -\mathbf{0.0176}$/day.</p>
+    <p><strong>Theta decay is non-linear in time:</strong> $\Theta \propto 1/\sqrt{T}$ near expiry — options lose time value fastest in the last few weeks.</p>
+  </div>
+
+  <h3 id="s2-vega">2.4 Vega ν — Volatility Sensitivity</h3>
+
+  <div class="greek-card">
+    <h4>Vega ν = ∂V/∂σ</h4>
+    <div class="fbox gold">
+      $$\mathcal{V} = S\,\phi(d_1)\,\sqrt{T}$$
+    </div>
+    <p>Vega is the same for calls and puts (from put-call parity). Always positive — options always increase in value with volatility.</p>
+    <p><strong>ATM example:</strong> $\mathcal{V} = 37.52$ for our standard example, meaning a 1% rise in $\sigma$ (from 20% to 21%) increases the call price by approximately $0.3752$.</p>
+    <p><strong>Key features:</strong></p>
+    <ul>
+      <li>Vega is maximised for ATM options with long time to expiry ($\mathcal{V} \propto \sqrt{T}$)</li>
+      <li>Deep ITM or OTM options have low vega</li>
+      <li>Vega is a primary risk in options books — "vega risk" from changes in implied vol</li>
+    </ul>
+    <div class="callout trap">
+      <div class="ctitle">⚠ Vega is not a Greek Letter</div>
+      "Vega" is not actually a Greek letter — it was invented for convenience. The Greek letter often used in formal texts is $\kappa$ or $\nu$ (nu). Despite this, "vega" is universal in practice. Also note: vega in BS assumes a <em>parallel shift</em> in the vol surface — in reality, different strikes/maturities have different vega exposures.
+    </div>
+  </div>
+
+  <h3 id="s2-rho">2.5 Rho ρ — Interest Rate Sensitivity</h3>
+
+  <div class="greek-card">
+    <h4>Rho ρ = ∂V/∂r</h4>
+    <div class="fbox gold">
+      $$\rho_\text{call} = KTe^{-rT}\Phi(d_2) \qquad \rho_\text{put} = -KTe^{-rT}\Phi(-d_2)$$
+    </div>
+    <p><strong>Sign:</strong> $\rho_\text{call} > 0$ (higher rates increase call value — stock borrowing is "cheaper" relative to holding cash). $\rho_\text{put} < 0$.</p>
+    <p><strong>Magnitude:</strong> Rho is typically the smallest of the major Greeks for short-dated options. For long-dated options (LEAPS), rho becomes significant.</p>
+    <p><strong>ATM example:</strong> $\rho_\text{call} = 53.23$, meaning a 1% rise in $r$ increases the call by $\approx 0.5323$.</p>
+    <p><strong>Rho is often ignored for equity options</strong> but matters for: (1) long-dated options, (2) currencies (interest rate differential), (3) interest rate derivatives where rho is the primary risk.</p>
+  </div>
+
+  <h4>Greeks Summary Table</h4>
+  <table>
+    <tr><th>Greek</th><th>Definition</th><th>Call formula (BS)</th><th>Put formula (BS)</th><th>Sign (long)</th></tr>
+    <tr><td>Delta $\Delta$</td><td>$\partial V/\partial S$</td><td>$\Phi(d_1)$</td><td>$\Phi(d_1)-1$</td><td>Call: +, Put: −</td></tr>
+    <tr><td>Gamma $\Gamma$</td><td>$\partial^2 V/\partial S^2$</td><td colspan="2">$\phi(d_1)/(S\sigma\sqrt{T})$</td><td>Always +</td></tr>
+    <tr><td>Theta $\Theta$</td><td>$\partial V/\partial t$</td><td>$-\frac{S\phi(d_1)\sigma}{2\sqrt{T}}-rKe^{-rT}\Phi(d_2)$</td><td>$-\frac{S\phi(d_1)\sigma}{2\sqrt{T}}+rKe^{-rT}\Phi(-d_2)$</td><td>Call: −, Put: ±</td></tr>
+    <tr><td>Vega $\mathcal{V}$</td><td>$\partial V/\partial\sigma$</td><td colspan="2">$S\phi(d_1)\sqrt{T}$</td><td>Always +</td></tr>
+    <tr><td>Rho $\rho$</td><td>$\partial V/\partial r$</td><td>$KTe^{-rT}\Phi(d_2)$</td><td>$-KTe^{-rT}\Phi(-d_2)$</td><td>Call: +, Put: −</td></tr>
+  </table>
+
+  <h3 id="s2-hedge">2.6 Delta Hedging</h3>
+
+  <p>Delta hedging is the continuous rebalancing of a portfolio to eliminate first-order exposure to movements in $S$.</p>
+
+  <h4>The Delta-Hedged Portfolio</h4>
+  <div class="fbox gold">
+    $$\Pi = V - \Delta \cdot S \qquad \text{(long option, short }\Delta\text{ shares)}$$
+    $$d\Pi = dV - \Delta\,dS$$
+  </div>
+
+  <p>By Itô's lemma: $dV = \Theta\,dt + \Delta\,dS + \frac{1}{2}\Gamma(dS)^2$. Substituting and using $(dS)^2 = \sigma^2 S^2\,dt$:</p>
+
+  <div class="fbox teal">
+    $$d\Pi = \left(\Theta + \frac{1}{2}\sigma^2 S^2\Gamma\right)dt$$
+  </div>
+
+  <p>The $dS$ terms cancel — the portfolio is instantaneously risk-free. No-arbitrage then forces $d\Pi = r\Pi\,dt$, leading directly to the BS PDE.</p>
+
+  <h4>P&amp;L Decomposition of a Delta-Hedged Position</h4>
+  <p>Over a small time interval $\Delta t$ with stock move $\Delta S$, the P&amp;L of a long option delta-hedged position is:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Gamma P&amp;L = Realised Variance vs Implied Variance</div>
+    $$\text{P\&L} \approx \frac{1}{2}\Gamma(\Delta S)^2 + \Theta\,\Delta t = \frac{1}{2}\Gamma S^2\left[\left(\frac{\Delta S}{S}\right)^2 - \sigma_\text{impl}^2\,\Delta t\right]$$
+  </div>
+
+  <p>The trader profits when realised variance $(\Delta S/S)^2$ exceeds implied variance $\sigma_\text{impl}^2\,\Delta t$ and loses otherwise. This is the fundamental "long gamma" trade: buying options and delta-hedging profits if actual volatility exceeds what you paid for in implied vol.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Vega vs Gamma: Two Ways to Trade Volatility</div>
+    <strong>Vega trade:</strong> Buy options, wait for implied vol to rise, sell. Profit from a change in the market's vol expectation. <br>
+    <strong>Gamma trade:</strong> Buy options, delta-hedge continuously, profit from large daily moves (realised vol above implied vol). <br>
+    The key difference: vega profits from changes in <em>implied</em> vol; gamma profits from <em>realised</em> vol exceeding implied vol — even if implied vol stays constant.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: FIXED INCOME & INTEREST RATES                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Fixed Income &amp; Interest Rates</div>
+  </div>
+
+  <h3 id="s3-bond">3.1 Bond Pricing &amp; Yield</h3>
+
+  <h4>Bond Price from Cash Flows</h4>
+  <p>A bond pays a coupon $C$ at times $t_1, \ldots, t_n$ and a face value $F$ at maturity $T = t_n$. Its price is the present value of all cash flows:</p>
+
+  <div class="fbox gold">
+    $$P = \sum_{i=1}^{n} \frac{C}{(1+y/m)^{m t_i}} + \frac{F}{(1+y/m)^{mT}}$$
+  </div>
+
+  <p>where $y$ is the <strong>yield to maturity (YTM)</strong> and $m$ is the payment frequency (e.g.\ $m=2$ for semi-annual). If using continuously compounded rates:</p>
+
+  <div class="fbox gold">
+    $$P = \sum_{i=1}^{n} C_i\,e^{-r_i t_i} + F\,e^{-r_T T}$$
+  </div>
+
+  <p>where $r_i$ is the spot rate for maturity $t_i$ (from the yield curve).</p>
+
+  <h4>Yield to Maturity (YTM)</h4>
+  <p>The YTM $y$ is the single discount rate that equates the bond price to the present value of all cash flows — it's the bond's internal rate of return (IRR). There is no closed form; solve numerically (e.g.\ Newton-Raphson or bisection).</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example (Verified)</div>
+    Face=$1000$, coupon rate=$5\%$ (semi-annual, coupon=$25$), maturity=3yr, YTM=$4\%$:<br><br>
+    $P = 25\sum_{t=1}^{6}\frac{1}{1.02^t} + \frac{1000}{1.02^6} = 25\times5.601 + \frac{1000}{1.1262} = 140.03 + 888.00 = \mathbf{1028.01}$<br><br>
+    Bond trades at a <em>premium</em> to par (coupon rate 5% > YTM 4%). ✓
+  </div>
+
+  <h4>Price-Yield Relationship</h4>
+  <ul>
+    <li>Price and yield move in <em>opposite directions</em> (inverse relationship)</li>
+    <li>When coupon rate = YTM: bond trades <em>at par</em> ($P = F$)</li>
+    <li>When coupon rate > YTM: bond trades at a <em>premium</em> ($P > F$)</li>
+    <li>When coupon rate < YTM: bond trades at a <em>discount</em> ($P < F$)</li>
+  </ul>
+
+  <h3 id="s3-dur">3.2 Duration &amp; Convexity</h3>
+
+  <h4>Macaulay Duration</h4>
+  <p>The weighted average time to receive cash flows, where weights are the PV of each cash flow as a fraction of total price:</p>
+
+  <div class="fbox gold">
+    $$D_\text{Mac} = \frac{1}{P}\sum_{i=1}^{n} t_i \cdot PV(C_i) = \frac{1}{P}\left[\sum_{i=1}^{n} \frac{t_i \cdot C_i}{(1+y/m)^{m t_i}} + \frac{T \cdot F}{(1+y/m)^{mT}}\right]$$
+  </div>
+
+  <p>For a zero-coupon bond: $D_\text{Mac} = T$ (all cash flow at maturity).</p>
+
+  <h4>Modified Duration</h4>
+  <p>The first-order price sensitivity to yield changes:</p>
+
+  <div class="fbox gold">
+    $$D_\text{mod} = \frac{D_\text{Mac}}{1 + y/m} \qquad \Rightarrow \qquad \frac{dP}{dy} = -D_\text{mod} \cdot P$$
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Price Change Approximation (First Order)</div>
+    $$\frac{\Delta P}{P} \approx -D_\text{mod} \cdot \Delta y$$
+  </div>
+
+  <p>For a small parallel shift $\Delta y$ in yields, a bond with $D_\text{mod} = 5$ years loses approximately 5% of its value per 1% rise in rates.</p>
+
+  <h4>DV01 (Dollar Value of a Basis Point)</h4>
+  <div class="fbox teal">
+    $$\text{DV01} = -\frac{dP}{dy}\cdot 0.0001 = D_\text{mod} \cdot P \cdot 0.0001$$
+  </div>
+  <p>DV01 is the dollar change in price for a 1 basis point (0.01%) change in yield. Primary risk measure for fixed income traders.</p>
+
+  <h4>Convexity</h4>
+  <p>Second-order correction to the duration approximation:</p>
+
+  <div class="fbox gold">
+    $$\text{Convexity} = \frac{1}{P}\frac{d^2P}{dy^2} = \frac{1}{P(1+y/m)^2}\sum_{i=1}^n \frac{t_i(t_i+1/m)\,PV(C_i)}{1}$$
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Price Change with Convexity Correction</div>
+    $$\Delta P \approx -D_\text{mod} \cdot P \cdot \Delta y + \frac{1}{2}\cdot\text{Convexity}\cdot P\cdot(\Delta y)^2$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Duration + Convexity (Verified)</div>
+    Our 3yr bond: $D_\text{Mac} = 2.826$yr, $D_\text{mod} = 2.770$yr, Convexity $= 9.31$.<br>
+    For a +100bp (1%) yield rise:<br>
+    Duration-only: $\Delta P \approx -2.770\times1028\times0.01 = -28.47$<br>
+    Duration + Convexity: $\Delta P \approx -28.47 + \frac{1}{2}(9.31)(1028)(0.0001) = -28.47 + 0.48 = -28.00$<br>
+    Actual: $\Delta P = -28.01$ ✓
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Convexity is Always Positive (for Plain Bonds)</div>
+    Convexity is always positive for standard fixed-rate bonds — this means the price-yield curve is convex: bonds fall less than duration predicts when rates rise, and rise more than duration predicts when rates fall. This asymmetry is a desirable property and investors pay for it. Callable bonds and mortgage-backed securities can have negative convexity.
+  </div>
+
+  <h3 id="s3-models">3.3 Interest Rate Models</h3>
+
+  <p>Interest rate models describe the evolution of the short rate $r_t$ under the risk-neutral measure $\mathbb{Q}$.</p>
+
+  <h4>Vasicek Model</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Vasicek SDE</div>
+    $$dr_t = \kappa(\theta - r_t)\,dt + \sigma\,dW_t$$
+  </div>
+
+  <p>$\theta$: long-run mean rate. $\kappa>0$: speed of mean reversion. $\sigma$: volatility of rate changes.</p>
+
+  <p><strong>Solution:</strong> $r_t$ is Gaussian (OU process — see Section 5, §4.5):</p>
+  <div class="fbox teal">
+    $$r_t = \theta + (r_0 - \theta)e^{-\kappa t} + \sigma\int_0^t e^{-\kappa(t-s)}\,dW_s$$
+    $$E[r_t] = \theta + (r_0-\theta)e^{-\kappa t}, \qquad \text{Var}(r_t) = \frac{\sigma^2}{2\kappa}(1-e^{-2\kappa t})$$
+  </div>
+
+  <p><strong>Zero-coupon bond price:</strong> Vasicek has a closed-form affine bond price $P(0,T) = A(T)e^{-B(T)r_0}$ where:</p>
+  <div class="fbox">
+    $$B(T) = \frac{1-e^{-\kappa T}}{\kappa}, \qquad \ln A(T) = \left(\theta - \frac{\sigma^2}{2\kappa^2}\right)(B(T)-T) - \frac{\sigma^2 B(T)^2}{4\kappa}$$
+  </div>
+
+  <table>
+    <tr><th>Property</th><th>Vasicek</th></tr>
+    <tr><td>Mean reversion</td><td>✓ — rates revert to $\theta$</td></tr>
+    <tr><td>Negative rates possible</td><td>✓ — a limitation</td></tr>
+    <tr><td>Closed-form bond prices</td><td>✓ — affine structure</td></tr>
+    <tr><td>Fitting current term structure</td><td>✗ — fits a model curve, not exact market</td></tr>
+    <tr><td>Number of parameters</td><td>3 ($\kappa, \theta, \sigma$)</td></tr>
+  </table>
+
+  <h4>Hull-White Model</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Hull-White SDE</div>
+    $$dr_t = [\theta(t) - \kappa r_t]\,dt + \sigma\,dW_t$$
+  </div>
+
+  <p>The key difference from Vasicek: $\theta$ is replaced by a <em>time-dependent function</em> $\theta(t)$, chosen to exactly reproduce the observed yield curve (calibrate to market prices). This is the "one-factor Hull-White" model.</p>
+
+  <p>$\theta(t)$ is determined by:</p>
+  <div class="fbox teal">
+    $$\theta(t) = \frac{\partial f^M(0,t)}{\partial t} + \kappa f^M(0,t) + \frac{\sigma^2}{2\kappa}(1-e^{-2\kappa t})$$
+  </div>
+  <p>where $f^M(0,t)$ is the market-observed instantaneous forward rate at time 0 for maturity $t$.</p>
+
+  <table>
+    <tr><th>Property</th><th>Hull-White</th></tr>
+    <tr><td>Mean reversion</td><td>✓ — reverts to $\theta(t)/\kappa$</td></tr>
+    <tr><td>Negative rates possible</td><td>✓ — same Gaussian structure</td></tr>
+    <tr><td>Closed-form bond prices</td><td>✓ — affine structure</td></tr>
+    <tr><td>Fitting current term structure</td><td>✓ — exact fit by design</td></tr>
+    <tr><td>Typical use</td><td>Exotic interest rate derivatives, swaption hedging</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Vasicek vs Hull-White in Practice</div>
+    Vasicek is pedagogically clean but cannot match today's yield curve exactly. Hull-White adds the time-dependent drift $\theta(t)$ to fit the current market term structure perfectly, making it the industry standard for short-rate modelling in pricing desks. Both share the convenient property that bond prices, caps, floors, and swaptions have closed-form solutions.
+  </div>
+
+  <h3 id="s3-swap">3.4 Swap Pricing Basics</h3>
+
+  <p>An <strong>interest rate swap</strong> is an agreement to exchange fixed cash flows for floating cash flows (or vice versa) on a notional principal $N$ over a set of payment dates.</p>
+
+  <h4>Structure</h4>
+  <ul>
+    <li><strong>Fixed leg:</strong> Pays $N \cdot s \cdot \Delta t$ at each payment date, where $s$ is the fixed (swap) rate and $\Delta t$ is the accrual period</li>
+    <li><strong>Floating leg:</strong> Pays $N \cdot L(t_{i-1}, t_i) \cdot \Delta t$ at $t_i$, where $L$ is the LIBOR/SOFR rate set at the start of each period</li>
+  </ul>
+
+  <h4>Pricing at Inception (Par Swap)</h4>
+  <p>At inception, a fair swap has zero value. The <strong>swap rate</strong> $s$ is set so that:</p>
+
+  <div class="fbox gold">
+    $$\text{PV fixed leg} = \text{PV floating leg}$$
+    $$s \cdot \Delta t \sum_{i=1}^n P(0,t_i) = 1 - P(0,t_n)$$
+  </div>
+
+  <p>This gives the swap rate:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Swap Rate Formula</div>
+    $$s = \frac{1 - P(0,t_n)}{\Delta t \sum_{i=1}^n P(0,t_i)} = \frac{1 - \text{DF}(T)}{\text{Annuity factor}}$$
+  </div>
+
+  <p>where $P(0,t_i)$ are zero-coupon discount factors (from the yield curve) and the denominator is the present value of \$1 per period (the "annuity factor").</p>
+
+  <div class="callout proof">
+    <strong>Why PV floating = $1 - P(0,t_n)$:</strong> The floating leg replicates a strategy of investing \$1 now, rolling it at LIBOR each period, and receiving the interest at each payment date. At time $t_n$ you recover \$1 (the principal). So the PV of all floating payments equals $1 - P(0,t_n)$ (the current price of \$1 at $t_n$).
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example (Verified)</div>
+    3yr annual swap, spot rates: 1yr=3%, 2yr=4%, 3yr=5%.<br>
+    Discount factors: $P(0,1)=0.9709$, $P(0,2)=0.9246$, $P(0,3)=0.8638$.<br><br>
+    Annuity = $0.9709+0.9246+0.8638 = 2.7593$<br>
+    Swap rate $= \dfrac{1 - 0.8638}{2.7593} = \dfrac{0.1362}{2.7593} = \mathbf{4.93\%}$<br><br>
+    Intuition: upward-sloping curve (3-5%) ⟹ swap rate (4.93%) lies between the 1yr and 3yr spot rates. ✓
+  </div>
+
+  <h4>Mark-to-Market Value of an Existing Swap</h4>
+  <p>For a <em>pay-fixed, receive-floating</em> swap with remaining payment dates $t_1,\ldots,t_n$ and fixed rate $s_0$ (agreed at inception):</p>
+  <div class="fbox teal">
+    $$V_\text{swap} = (s_\text{current} - s_0)\cdot \Delta t \cdot N \cdot \sum_{i=1}^n P(\text{now},t_i)$$
+  </div>
+  <p>If current rates have risen (swap rate $s_\text{current} > s_0$), the fixed receiver loses value; if rates have fallen, they gain.</p>
+
+  <h3 id="s3-term">3.5 Term Structure of Interest Rates</h3>
+
+  <h4>Key Rate Definitions</h4>
+  <table>
+    <tr><th>Rate type</th><th>Definition</th><th>Formula (continuous)</th></tr>
+    <tr><td>Spot (zero) rate $r(0,T)$</td><td>Rate for lending from 0 to $T$ agreed today</td><td>$P(0,T) = e^{-r(0,T)\cdot T}$</td></tr>
+    <tr><td>Forward rate $f(T_1,T_2)$</td><td>Rate locked in today for lending from $T_1$ to $T_2$</td><td>$f = \frac{r(0,T_2)T_2 - r(0,T_1)T_1}{T_2-T_1}$</td></tr>
+    <tr><td>Instantaneous forward $f(0,T)$</td><td>$\lim_{T_2\to T_1}f(T_1,T_2)$</td><td>$f(0,T) = r(0,T) + T\frac{\partial r(0,T)}{\partial T}$</td></tr>
+    <tr><td>Par yield</td><td>Coupon rate that makes bond price = par</td><td>Solve bond price = 100 for coupon</td></tr>
+  </table>
+
+  <h4>Theories of the Term Structure</h4>
+  <table>
+    <tr><th>Theory</th><th>Core claim</th><th>Implication</th></tr>
+    <tr><td>Expectations hypothesis</td><td>Forward rates = expected future spot rates</td><td>Upward curve ⟹ market expects rising rates; no term premium</td></tr>
+    <tr><td>Liquidity preference</td><td>Investors prefer short maturities; demand a premium for long bonds</td><td>Yield curve normally upward-sloping even with flat expectations</td></tr>
+    <tr><td>Market segmentation</td><td>Different investor clienteles operate at different maturities</td><td>Supply/demand at each maturity drives rates independently</td></tr>
+    <tr><td>Preferred habitat</td><td>Investors have preferred maturities but can be moved by yield differentials</td><td>Blend of segmentation and expectations</td></tr>
+  </table>
+
+  <h4>Yield Curve Shapes and Implications</h4>
+  <table>
+    <tr><th>Shape</th><th>Description</th><th>Typical implication</th></tr>
+    <tr><td>Normal (upward)</td><td>Long rates > short rates</td><td>Healthy economy; expected rate rises</td></tr>
+    <tr><td>Inverted</td><td>Short rates > long rates</td><td>Recession signal; central bank tightening</td></tr>
+    <tr><td>Flat</td><td>All maturities similar rates</td><td>Transition period; uncertainty</td></tr>
+    <tr><td>Humped</td><td>Medium rates highest</td><td>Temporary supply/demand distortions</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 PCA on the Yield Curve (from Section 3 LA notes)</div>
+    Empirically, the first three principal components of daily yield curve changes explain >95% of all moves:
+    <ul>
+      <li><strong>PC1 (level, ~85%):</strong> Parallel shift of the entire curve</li>
+      <li><strong>PC2 (slope, ~10%):</strong> Steepening vs flattening (short vs long rates)</li>
+      <li><strong>PC3 (curvature, ~3%):</strong> Butterfly — medium-term rates vs short and long</li>
+    </ul>
+    This decomposition is the foundation of risk factor analysis in rates trading and DV01 hedging.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Black-Scholes at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Formula</th><th>Key Fact</th></tr>
+    <tr><td>$d_1$</td><td>$[\ln(S/K)+(r+\sigma^2/2)T]/(\sigma\sqrt{T})$</td><td>$\Phi(d_1)$ = delta of call</td></tr>
+    <tr><td>$d_2$</td><td>$d_1 - \sigma\sqrt{T}$</td><td>$\Phi(d_2)$ = risk-neutral prob ITM</td></tr>
+    <tr><td>Call price</td><td>$S\Phi(d_1) - Ke^{-rT}\Phi(d_2)$</td><td>Verified: 10.45 for ATM, $\sigma$=20%</td></tr>
+    <tr><td>Put price</td><td>$Ke^{-rT}\Phi(-d_2) - S\Phi(-d_1)$</td><td>Verified: 5.57</td></tr>
+    <tr><td>Put-call parity</td><td>$C - P = S - Ke^{-rT}$</td><td>No-arbitrage; holds always</td></tr>
+    <tr><td>BS PDE identity</td><td>$\Theta + \frac{1}{2}\sigma^2S^2\Gamma + rS\Delta - rV = 0$</td><td>Greeks are not independent</td></tr>
+    <tr><td>Delta hedge P&amp;L</td><td>$\frac{1}{2}\Gamma S^2[(\Delta S/S)^2 - \sigma^2\Delta t]$</td><td>Long gamma profits from realised vol</td></tr>
+  </table>
+
+  <h3>Greeks at a Glance</h3>
+  <table>
+    <tr><th>Greek</th><th>BS Formula</th><th>ATM ($S$=100) value</th><th>Key behaviour</th></tr>
+    <tr><td>$\Delta_\text{call}$</td><td>$\Phi(d_1)$</td><td>0.637</td><td>$\in(0,1)$; 0.5 ATM; 1 deep ITM</td></tr>
+    <tr><td>$\Gamma$</td><td>$\phi(d_1)/(S\sigma\sqrt{T})$</td><td>0.0188</td><td>Max ATM near expiry; same call/put</td></tr>
+    <tr><td>$\Theta_\text{call}$/yr</td><td>$-S\phi(d_1)\sigma/(2\sqrt{T})-rKe^{-rT}\Phi(d_2)$</td><td>−6.41</td><td>Always negative for calls; $\propto1/\sqrt{T}$ near expiry</td></tr>
+    <tr><td>$\mathcal{V}$</td><td>$S\phi(d_1)\sqrt{T}$</td><td>37.52</td><td>Max ATM; $\propto\sqrt{T}$; always positive</td></tr>
+    <tr><td>$\rho_\text{call}$</td><td>$KTe^{-rT}\Phi(d_2)$</td><td>53.23</td><td>Positive for calls; small for short-dated</td></tr>
+  </table>
+
+  <h3>Fixed Income at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Formula</th><th>Key Fact</th></tr>
+    <tr><td>Bond price</td><td>$\sum C_i e^{-r_i t_i} + Fe^{-r_T T}$</td><td>Price↑ when yield↓ (inverse)</td></tr>
+    <tr><td>YTM</td><td>Solve $P = \sum C/(1+y/m)^{mt}$</td><td>IRR of bond; solve numerically</td></tr>
+    <tr><td>Macaulay duration</td><td>$D_\text{Mac} = \frac{1}{P}\sum t\cdot PV(C_t)$</td><td>Zero-coupon: $D_\text{Mac}=T$</td></tr>
+    <tr><td>Modified duration</td><td>$D_\text{mod} = D_\text{Mac}/(1+y/m)$</td><td>$\Delta P/P \approx -D_\text{mod}\Delta y$</td></tr>
+    <tr><td>DV01</td><td>$D_\text{mod}\cdot P\cdot 0.0001$</td><td>Dollar change per 1bp yield shift</td></tr>
+    <tr><td>Price with convexity</td><td>$\Delta P \approx -D_\text{mod}P\Delta y + \frac{1}{2}\text{Conv}\cdot P(\Delta y)^2$</td><td>Convexity always positive for plain bonds</td></tr>
+    <tr><td>Forward rate</td><td>$f(T_1,T_2) = [r(T_2)T_2-r(T_1)T_1]/(T_2-T_1)$</td><td>Locked-in rate for future period</td></tr>
+    <tr><td>Swap rate</td><td>$s = (1-P(0,T_n))/(\Delta t\sum P(0,t_i))$</td><td>Par rate equalising fixed/float legs</td></tr>
+    <tr><td>Vasicek</td><td>$dr=\kappa(\theta-r)dt+\sigma\,dW$</td><td>Affine bond prices; Gaussian rates; negative rates possible</td></tr>
+    <tr><td>Hull-White</td><td>$dr=[\theta(t)-\kappa r]dt+\sigma\,dW$</td><td>Exact calibration to current yield curve</td></tr>
+  </table>
+
+  <h3>Option Strategy Cheat Sheet</h3>
+  <table>
+    <tr><th>Strategy</th><th>Construction</th><th>View</th><th>Max Profit</th><th>Max Loss</th></tr>
+    <tr><td>Long call</td><td>Buy call</td><td>Bullish, long vol</td><td>Unlimited</td><td>Premium</td></tr>
+    <tr><td>Long put</td><td>Buy put</td><td>Bearish, long vol</td><td>$K - \text{prem}$</td><td>Premium</td></tr>
+    <tr><td>Covered call</td><td>Long stock + short call</td><td>Mild bullish, short vol</td><td>$K-S+C$</td><td>$S-C$ (vs stock loss)</td></tr>
+    <tr><td>Protective put</td><td>Long stock + long put</td><td>Bullish with protection</td><td>Unlimited</td><td>$S-K+P$</td></tr>
+    <tr><td>Straddle</td><td>Long call + long put (same $K,T$)</td><td>Neutral on direction, long vol</td><td>Unlimited</td><td>$C+P$ (both premiums)</td></tr>
+    <tr><td>Bull spread</td><td>Buy low-$K$ call, sell high-$K$ call</td><td>Mild bullish</td><td>Spread − net prem</td><td>Net premium</td></tr>
+    <tr><td>Butterfly</td><td>Buy $K_1$, sell 2$K_2$, buy $K_3$ calls</td><td>Low vol, spot near $K_2$</td><td>$K_2-K_1 - \text{prem}$</td><td>Net premium</td></tr>
+    <tr><td>Calendar spread</td><td>Buy long-$T$, sell short-$T$ (same $K$)</td><td>Short-term vol < long-term vol</td><td>Limited</td><td>Net premium</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 6 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: No-Arbitrage · Risk-Neutral Pricing · Black-Scholes Formula &amp; PDE · Put-Call Parity · Binomial Tree · Monte Carlo · Greeks (Δ,Γ,Θ,ν,ρ) · Delta Hedging · Bond Pricing · Duration &amp; Convexity · Vasicek · Hull-White · Swap Pricing · Term Structure
+</footer>
+
+</body>
+</html>

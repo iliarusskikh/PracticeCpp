@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Probability — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0f14;
+    --bg2:       #13161e;
+    --bg3:       #1a1e2a;
+    --border:    #252c3f;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --gold-dim:  #7a6030;
+    --text:      #dde1ec;
+    --text-dim:  #8a91a8;
+    --accent:    #5b8af0;
+    --accent2:   #a78bfa;
+    --green:     #4ade80;
+    --red:       #f87171;
+    --teal:      #2dd4bf;
+    --orange:    #fb923c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── HEADER ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, #c9a84c18, transparent);
+    pointer-events: none;
+  }
+  .masthead .label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: var(--gold2);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+  .masthead .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    font-style: italic;
+  }
+  .section-num {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 0.15rem 0.6rem;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.3rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.95rem; }
+  .toc a:hover { color: var(--gold2); }
+  .toc .sub { padding-left: 1rem; font-size: 0.88rem; color: var(--text-dim); list-style-type: disc; }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 4rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--gold-dim);
+    min-width: 2.5rem;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.55rem;
+    color: var(--gold2);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    color: var(--text);
+    margin: 2.2rem 0 0.9rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  h4 {
+    font-size: 1rem;
+    color: var(--gold);
+    margin: 1.5rem 0 0.5rem;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .formula-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1.1rem 0;
+    overflow-x: auto;
+  }
+  .formula-box.gold { border-left-color: var(--gold); }
+  .formula-box.teal { border-left-color: var(--teal); }
+  .formula-box.purple { border-left-color: var(--accent2); }
+  .formula-box.orange { border-left-color: var(--orange); }
+
+  .formula-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 4px;
+    padding: 1rem 1.4rem;
+    margin: 1.2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.tip {
+    background: #1a2a1a;
+    border-left: 3px solid var(--green);
+  }
+  .callout.trap {
+    background: #2a1a1a;
+    border-left: 3px solid var(--red);
+  }
+  .callout.insight {
+    background: #1a1a2a;
+    border-left: 3px solid var(--accent2);
+  }
+  .callout.example {
+    background: #1a2230;
+    border-left: 3px solid var(--teal);
+  }
+  .callout-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .callout.tip .callout-title    { color: var(--green); }
+  .callout.trap .callout-title   { color: var(--red); }
+  .callout.insight .callout-title { color: var(--accent2); }
+  .callout.example .callout-title { color: var(--teal); }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2rem 0;
+    font-size: 0.93rem;
+  }
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    background: var(--bg2);
+  }
+  td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.84em;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+    color: var(--teal);
+  }
+
+  /* ── STEP LIST ── */
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding: 0;
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 1rem;
+    margin: 0.7rem 0;
+  }
+  .steps li::before {
+    content: counter(step);
+    background: var(--gold-dim);
+    color: var(--gold2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    min-width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  /* ── PROOF BLOCK ── */
+  .proof {
+    background: var(--bg2);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.4rem;
+    margin: 0.8rem 0;
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .proof strong { color: var(--text); font-style: normal; }
+
+  /* ── PROBLEM CARD ── */
+  .problem-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.6rem 2rem;
+    margin: 2rem 0;
+  }
+  .problem-card h3 {
+    margin-top: 0;
+    color: var(--gold2);
+    font-size: 1.15rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ── KEY RESULT TAG ── */
+  .key-result {
+    display: inline-block;
+    background: var(--gold-dim);
+    color: var(--gold2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    margin-right: 0.4rem;
+  }
+
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ MASTHEAD ═══════════════════════ -->
+<div class="masthead">
+  <div class="label">Quantitative Finance · Interview Preparation</div>
+  <h1>Section 1: Probability</h1>
+  <div class="subtitle">Foundations · Conditional Probability · Combinatorics · Classic Problems</div>
+</div>
+
+<!-- ═══════════════════════ TABLE OF CONTENTS ═══════════════════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#foundations">Foundations &amp; Axioms</a>
+      <ul class="sub">
+        <li><a href="#sample-spaces">Sample Spaces &amp; Events</a></li>
+        <li><a href="#axioms">Kolmogorov Axioms</a></li>
+        <li><a href="#inclusion-exclusion">Inclusion-Exclusion Principle</a></li>
+      </ul>
+    </li>
+    <li><a href="#conditional">Conditional Probability &amp; Independence</a>
+      <ul class="sub">
+        <li><a href="#conditional-def">Definition &amp; Law of Total Probability</a></li>
+        <li><a href="#bayes">Bayes' Theorem &amp; Bayesian Updating</a></li>
+        <li><a href="#independence">Independence</a></li>
+      </ul>
+    </li>
+    <li><a href="#combinatorics">Counting &amp; Combinatorics</a>
+      <ul class="sub">
+        <li><a href="#perms-combs">Permutations &amp; Combinations</a></li>
+        <li><a href="#stars-bars">Stars &amp; Bars</a></li>
+        <li><a href="#double-factorial">Double Factorial</a></li>
+        <li><a href="#pigeonhole">Pigeonhole Principle</a></li>
+        <li><a href="#binomial-theorem">Binomial &amp; Multinomial Theorems</a></li>
+        <li><a href="#ie-general">Inclusion-Exclusion: General Form</a></li>
+      </ul>
+    </li>
+    <li><a href="#classic">Classic Problems</a>
+      <ul class="sub">
+        <li><a href="#birthday">Birthday Problem</a></li>
+        <li><a href="#gamblers-ruin">Gambler's Ruin</a></li>
+        <li><a href="#coupon">Coupon Collector</a></li>
+        <li><a href="#chords">Non-Intersecting Chords (Catalan Numbers)</a></li>
+        <li><a href="#monty-hall">Monty Hall Problem</a></li>
+        <li><a href="#secretary">Secretary Problem (Optimal Stopping)</a></li>
+        <li><a href="#derangements">Derangements &amp; Matching</a></li>
+      </ul>
+    </li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════ SECTION 1: FOUNDATIONS ═══════════════════════ -->
+<div class="section" id="foundations">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Foundations &amp; Axioms</div>
+  </div>
+
+  <h3 id="sample-spaces">1.1 Sample Spaces &amp; Events</h3>
+
+  <p>Every probability problem begins by defining a <em>probability space</em>, a triple $(\Omega, \mathcal{F}, P)$:</p>
+
+  <table>
+    <tr><th>Object</th><th>Symbol</th><th>Meaning</th><th>Example (fair die)</th></tr>
+    <tr><td>Sample space</td><td>$\Omega$</td><td>Set of all possible outcomes</td><td>$\{1,2,3,4,5,6\}$</td></tr>
+    <tr><td>Event</td><td>$A \subseteq \Omega$</td><td>A set of outcomes we care about</td><td>$A = \{2,4,6\}$ (even)</td></tr>
+    <tr><td>Complement</td><td>$A^c = \Omega \setminus A$</td><td>Outcomes not in $A$</td><td>$\{1,3,5\}$</td></tr>
+    <tr><td>Union</td><td>$A \cup B$</td><td>$A$ or $B$ (or both)</td><td>$\{2,4,5,6\}$</td></tr>
+    <tr><td>Intersection</td><td>$A \cap B$</td><td>$A$ and $B$ simultaneously</td><td>$\{4,6\}$</td></tr>
+  </table>
+
+  <p><strong>Mutually exclusive (disjoint):</strong> $A \cap B = \emptyset$. They cannot both occur. The events "roll a 1" and "roll a 6" are mutually exclusive.</p>
+
+  <div class="callout trap">
+    <div class="callout-title">⚠ Common Trap</div>
+    Mutually exclusive does <em>not</em> mean independent. In fact, two events with non-zero probability that are mutually exclusive are <em>never</em> independent (knowing one occurred tells you the other didn't).
+  </div>
+
+  <h3 id="axioms">1.2 Kolmogorov Axioms of Probability</h3>
+
+  <p>Three axioms define a valid probability measure $P$:</p>
+
+  <div class="formula-box gold">
+    <div class="formula-label">Axiom 1 — Non-negativity</div>
+    $$P(A) \geq 0 \quad \text{for all events } A$$
+  </div>
+
+  <div class="formula-box gold">
+    <div class="formula-label">Axiom 2 — Normalisation</div>
+    $$P(\Omega) = 1$$
+  </div>
+
+  <div class="formula-box gold">
+    <div class="formula-label">Axiom 3 — Countable Additivity (σ-additivity)</div>
+    $$\text{If } A_1, A_2, \ldots \text{ are mutually exclusive:} \quad P\!\left(\bigcup_{i=1}^{\infty} A_i\right) = \sum_{i=1}^{\infty} P(A_i)$$
+  </div>
+
+  <p>Everything else follows from these three axioms. Key derived results:</p>
+
+  <ul>
+    <li><strong>Complement rule:</strong> $P(A^c) = 1 - P(A)$</li>
+    <li><strong>Probability of empty set:</strong> $P(\emptyset) = 0$</li>
+    <li><strong>Monotonicity:</strong> If $A \subseteq B$ then $P(A) \leq P(B)$</li>
+    <li><strong>Finite additivity:</strong> $P(A \cup B) = P(A) + P(B)$ when $A \cap B = \emptyset$</li>
+  </ul>
+
+  <div class="callout tip">
+    <div class="callout-title">✓ Interview Technique</div>
+    When a probability is hard to compute directly, use the complement: $P(A) = 1 - P(A^c)$. This is the key trick in the Birthday Problem, Coupon Collector, and many more.
+  </div>
+
+  <h3 id="inclusion-exclusion">1.3 Inclusion-Exclusion Principle</h3>
+
+  <p>For <strong>two events</strong>:</p>
+
+  <div class="formula-box">
+    $$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+  </div>
+
+  <p>For <strong>three events</strong>:</p>
+
+  <div class="formula-box">
+    $$P(A \cup B \cup C) = P(A)+P(B)+P(C) - P(A\cap B) - P(A\cap C) - P(B\cap C) + P(A\cap B\cap C)$$
+  </div>
+
+  <p>The pattern: add singles, subtract pairs, add triples, subtract quadruples, ...</p>
+
+  <p>For <strong>$n$ events</strong> (general form — see also §3.6):</p>
+
+  <div class="formula-box">
+    $$P\!\left(\bigcup_{i=1}^n A_i\right) = \sum_{k=1}^{n} (-1)^{k+1} \sum_{1 \le i_1 < \cdots < i_k \le n} P(A_{i_1} \cap \cdots \cap A_{i_k})$$
+  </div>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Worked Example</div>
+    <strong>Problem:</strong> What is the probability that a card drawn from a standard 52-card deck is a Heart or a Face card?<br><br>
+    Let $H$ = Heart ($P(H) = 13/52$), $F$ = Face card ($P(F) = 12/52$), $H \cap F$ = Heart face card ($P = 3/52$).<br>
+    $$P(H \cup F) = \frac{13}{52} + \frac{12}{52} - \frac{3}{52} = \frac{22}{52} = \frac{11}{26}$$
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ SECTION 2: CONDITIONAL PROBABILITY ═══════════════════════ -->
+<div class="section" id="conditional">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Conditional Probability &amp; Independence</div>
+  </div>
+
+  <h3 id="conditional-def">2.1 Conditional Probability</h3>
+
+  <p>The probability of $A$ <em>given</em> that $B$ has occurred, assuming $P(B) > 0$:</p>
+
+  <div class="formula-box gold">
+    $$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$$
+  </div>
+
+  <p><strong>Intuition:</strong> We restrict the sample space to $B$ and ask how much of it is covered by $A$. Conditioning is <em>renormalising</em> the probability measure to the sub-universe where $B$ is true.</p>
+
+  <p><strong>Chain rule (multiplication rule):</strong> Rearranging the definition:</p>
+
+  <div class="formula-box">
+    $$P(A \cap B) = P(A \mid B)\,P(B) = P(B \mid A)\,P(A)$$
+  </div>
+
+  <p>Extended to $n$ events:</p>
+
+  <div class="formula-box">
+    $$P(A_1 \cap A_2 \cap \cdots \cap A_n) = P(A_1)\,P(A_2 \mid A_1)\,P(A_3 \mid A_1 \cap A_2)\cdots$$
+  </div>
+
+  <h4>Law of Total Probability (LOTP)</h4>
+
+  <p>If $\{B_1, B_2, \ldots, B_n\}$ is a <em>partition</em> of $\Omega$ (they are mutually exclusive and exhaustive: $\bigcup B_i = \Omega$), then for any event $A$:</p>
+
+  <div class="formula-box gold">
+    $$P(A) = \sum_{i=1}^{n} P(A \mid B_i)\,P(B_i)$$
+  </div>
+
+  <p><strong>Intuition:</strong> We can compute $P(A)$ by conditioning on which "scenario" $B_i$ occurred and summing. This is essential when direct computation is hard.</p>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Example: Factory Defects</div>
+    Machine A produces 60% of parts (2% defective), Machine B produces 40% (5% defective). A part is chosen at random. What is $P(\text{defective})$?
+    $$P(D) = P(D \mid A)P(A) + P(D \mid B)P(B) = 0.02 \times 0.6 + 0.05 \times 0.4 = 0.012 + 0.020 = 0.032$$
+  </div>
+
+  <h3 id="bayes">2.2 Bayes' Theorem &amp; Bayesian Updating</h3>
+
+  <p>Combining the definition of conditional probability with the chain rule gives <strong>Bayes' Theorem</strong>:</p>
+
+  <div class="formula-box gold">
+    $$\boxed{P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)}}$$
+  </div>
+
+  <p>Using LOTP to expand $P(B)$ in the denominator (partition on $A$ vs $A^c$):</p>
+
+  <div class="formula-box">
+    $$P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B \mid A)\,P(A) + P(B \mid A^c)\,P(A^c)}$$
+  </div>
+
+  <h4>Bayesian Language</h4>
+
+  <table>
+    <tr><th>Term</th><th>Symbol</th><th>Meaning</th></tr>
+    <tr><td>Prior</td><td>$P(A)$</td><td>Belief in $A$ before observing evidence $B$</td></tr>
+    <tr><td>Likelihood</td><td>$P(B \mid A)$</td><td>How likely is $B$ if $A$ is true?</td></tr>
+    <tr><td>Marginal / Evidence</td><td>$P(B)$</td><td>Overall probability of evidence (normalising constant)</td></tr>
+    <tr><td>Posterior</td><td>$P(A \mid B)$</td><td>Updated belief in $A$ after observing $B$</td></tr>
+  </table>
+
+  <p><strong>Bayesian Updating (Sequential):</strong> When new evidence $B_1, B_2, \ldots$ arrives sequentially, the posterior from step $k$ becomes the prior for step $k+1$:</p>
+
+  <div class="formula-box">
+    $$\underbrace{P(A \mid B_1, B_2)}_{\text{posterior}} \propto \underbrace{P(B_2 \mid A, B_1)}_{\text{new likelihood}} \times \underbrace{P(A \mid B_1)}_{\text{previous posterior (now prior)}}$$
+  </div>
+
+  <p>If observations are conditionally independent given $A$, this simplifies to multiplying likelihoods:</p>
+  $$P(A \mid B_1,\ldots,B_n) \propto P(A) \prod_{i=1}^n P(B_i \mid A)$$
+
+  <div class="callout example">
+    <div class="callout-title">📋 Classic Bayes Example — Medical Testing</div>
+    <strong>Setup:</strong> Disease prevalence $P(D) = 1\%$. Test sensitivity $P(+\mid D) = 99\%$. Test specificity $P(-\mid D^c) = 95\%$, so $P(+\mid D^c) = 5\%$. What is $P(D \mid +)$?<br><br>
+    $$P(D \mid +) = \frac{0.99 \times 0.01}{0.99 \times 0.01 + 0.05 \times 0.99} = \frac{0.0099}{0.0099 + 0.0495} \approx \mathbf{16.7\%}$$
+    <br>Despite a 99% accurate test, only 16.7% of positives actually have the disease — the prior (base rate) dominates because the disease is rare. <strong>This is a favourite quant interview problem.</strong>
+  </div>
+
+  <div class="callout trap">
+    <div class="callout-title">⚠ Base Rate Neglect</div>
+    Interviewers love asking Bayes problems where the answer is counter-intuitive because people forget to weight by the prior $P(A)$. Always write out LOTP for the denominator explicitly.
+  </div>
+
+  <h3 id="independence">2.3 Independence</h3>
+
+  <h4>Definition</h4>
+
+  <p>Events $A$ and $B$ are <strong>independent</strong> if and only if:</p>
+
+  <div class="formula-box gold">
+    $$P(A \cap B) = P(A) \cdot P(B)$$
+  </div>
+
+  <p>Equivalently (when $P(B)>0$): $P(A \mid B) = P(A)$. Knowing $B$ occurred gives no information about $A$.</p>
+
+  <p><strong>Pairwise vs Mutual Independence:</strong> For three events $A, B, C$, pairwise independence ($P(A\cap B)=P(A)P(B)$, etc.) does <em>not</em> imply mutual independence. We also need $P(A\cap B\cap C) = P(A)P(B)P(C)$.</p>
+
+  <h4>Conditional Independence</h4>
+
+  <p>$A$ and $B$ are conditionally independent given $C$ if:</p>
+
+  <div class="formula-box">
+    $$P(A \cap B \mid C) = P(A \mid C) \cdot P(B \mid C)$$
+  </div>
+
+  <p>This is different from (unconditional) independence and is the foundation of Bayesian networks and many financial models.</p>
+
+  <div class="callout insight">
+    <div class="callout-title">💡 Key Insight</div>
+    Independence and mutual exclusivity are almost opposites (for non-zero probability events). Mutual exclusivity means knowing one occurred <em>rules out</em> the other — maximum dependence. Independence means knowing one tells you <em>nothing</em> about the other.
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ SECTION 3: COMBINATORICS ═══════════════════════ -->
+<div class="section" id="combinatorics">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Counting &amp; Combinatorics</div>
+  </div>
+
+  <h3 id="perms-combs">3.1 Permutations &amp; Combinations</h3>
+
+  <h4>Fundamental Counting Principle</h4>
+  <p>If task 1 can be done in $m$ ways and task 2 in $n$ ways, together they can be done in $m \times n$ ways.</p>
+
+  <h4>Permutations — ordered arrangements</h4>
+  <p>The number of ways to arrange $r$ items chosen from $n$ distinct items, <em>order matters</em>:</p>
+
+  <div class="formula-box gold">
+    $$P(n,r) = {}_n P_r = \frac{n!}{(n-r)!} = n(n-1)(n-2)\cdots(n-r+1)$$
+  </div>
+
+  <p>Special cases: $_nP_n = n!$ (arrange all $n$ items). $_nP_1 = n$.</p>
+
+  <h4>Combinations — unordered selections</h4>
+  <p>The number of ways to choose $r$ items from $n$ distinct items, <em>order does not matter</em>:</p>
+
+  <div class="formula-box gold">
+    $$\binom{n}{r} = C(n,r) = \frac{n!}{r!\,(n-r)!} = \frac{{}_nP_r}{r!}$$
+  </div>
+
+  <p>Division by $r!$ removes the over-counting of identical arrangements.</p>
+
+  <table>
+    <tr><th>Key identities</th><th>Formula</th></tr>
+    <tr><td>Symmetry</td><td>$\binom{n}{r} = \binom{n}{n-r}$</td></tr>
+    <tr><td>Pascal's identity</td><td>$\binom{n}{r} = \binom{n-1}{r-1} + \binom{n-1}{r}$</td></tr>
+    <tr><td>Sum of row</td><td>$\sum_{r=0}^{n}\binom{n}{r} = 2^n$</td></tr>
+    <tr><td>Alternating sum</td><td>$\sum_{r=0}^{n}(-1)^r\binom{n}{r} = 0$</td></tr>
+    <tr><td>Vandermonde</td><td>$\sum_{k=0}^{r}\binom{m}{k}\binom{n}{r-k} = \binom{m+n}{r}$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Interview: Choosing &amp; Arranging</div>
+    A poker hand: $\binom{52}{5} = 2{,}598{,}960$ possible hands. Number of full houses: choose the triple rank ($13$ ways), choose 3 suits from 4 ($\binom{4}{3}$), choose the pair rank ($12$ remaining), choose 2 suits ($\binom{4}{2}$) $= 13 \times 4 \times 12 \times 6 = 3{,}744$.
+  </div>
+
+  <h3 id="stars-bars">3.2 Stars and Bars</h3>
+
+  <p>How many ways can we distribute $n$ identical objects into $k$ distinct bins?</p>
+
+  <div class="formula-box gold">
+    <div class="formula-label">Stars and Bars — non-negative integers $x_1 + x_2 + \cdots + x_k = n$</div>
+    $$\text{Number of solutions} = \binom{n+k-1}{k-1}$$
+  </div>
+
+  <div class="proof">
+    <strong>Intuition:</strong> Represent $n$ objects as stars $\bigstar\bigstar\cdots$ and use $k-1$ bars to separate them into $k$ groups. We arrange $n+(k-1)$ objects in total, choosing positions for the $k-1$ bars from $n+k-1$ positions.
+  </div>
+
+  <table>
+    <tr><th>Variant</th><th>Constraint</th><th>Formula</th></tr>
+    <tr><td>Basic</td><td>$x_i \geq 0$</td><td>$\binom{n+k-1}{k-1}$</td></tr>
+    <tr><td>Positive integers</td><td>$x_i \geq 1$</td><td>$\binom{n-1}{k-1}$ (substitute $y_i = x_i - 1$)</td></tr>
+    <tr><td>Upper bound $x_i \leq m$</td><td>—</td><td>Use inclusion-exclusion on top of basic formula</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Example</div>
+    Distribute 10 identical tokens among 4 players (each player can get 0 or more): $\binom{10+3}{3} = \binom{13}{3} = 286$.
+  </div>
+
+  <h3 id="double-factorial">3.3 Double Factorial</h3>
+
+  <p>The double factorial of an odd number:</p>
+
+  <div class="formula-box gold">
+    $$(2n-1)!! = 1 \cdot 3 \cdot 5 \cdots (2n-1) = \frac{(2n)!}{2^n \, n!}$$
+  </div>
+
+  <p>This counts the number of ways to pair up $2n$ objects into $n$ pairs (where pairing is unordered within each pair and the pairs themselves are unordered):</p>
+
+  <div class="formula-box">
+    $$\text{Number of ways to pair } 2n \text{ objects} = (2n-1)!! = \frac{(2n)!}{2^n \, n!}$$
+  </div>
+
+  <div class="proof">
+    <strong>Proof:</strong> Choose a partner for object 1 in $(2n-1)$ ways, then partner for the next unpaired object in $(2n-3)$ ways, ... giving $(2n-1)(2n-3)\cdots 1 = (2n-1)!!$.
+  </div>
+
+  <p>This appears in the Non-Intersecting Chords problem (§4.4), Gaussian integrals, and the moments of a normal distribution: $E[X^{2n}] = (2n-1)!!$ for $X \sim N(0,1)$.</p>
+
+  <table>
+    <tr><th>$n$</th><th>$2n$ objects</th><th>$(2n-1)!!$</th></tr>
+    <tr><td>1</td><td>2</td><td>1</td></tr>
+    <tr><td>2</td><td>4</td><td>3</td></tr>
+    <tr><td>3</td><td>6</td><td>15</td></tr>
+    <tr><td>4</td><td>8</td><td>105</td></tr>
+    <tr><td>5</td><td>10</td><td>945</td></tr>
+  </table>
+
+  <h3 id="pigeonhole">3.4 Pigeonhole Principle</h3>
+
+  <div class="formula-box gold">
+    <div class="formula-label">Pigeonhole Principle</div>
+    If $n+1$ items are placed into $n$ containers, then at least one container holds $\geq 2$ items.
+  </div>
+
+  <p><strong>Generalised:</strong> If $m$ items are placed into $n$ containers, at least one container holds $\geq \lceil m/n \rceil$ items.</p>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Quant Interview Examples</div>
+    <ul>
+      <li>Among any 13 people, at least 2 share a birth month.</li>
+      <li>In a group of 367 people, at least 2 share a birthday (365 possible days + Feb 29).</li>
+      <li>Any sequence of $n^2 + 1$ distinct numbers contains a monotone subsequence of length $n+1$ (Erdős-Szekeres).</li>
+      <li>In a stock with daily returns, if there are $n$ trading days and returns take one of $n-1$ values, two days must share the same return.</li>
+    </ul>
+  </div>
+
+  <h3 id="binomial-theorem">3.5 Binomial &amp; Multinomial Theorems</h3>
+
+  <h4>Binomial Theorem</h4>
+
+  <div class="formula-box gold">
+    $$(x+y)^n = \sum_{k=0}^{n} \binom{n}{k} x^k y^{n-k}$$
+  </div>
+
+  <p>Key special cases:</p>
+  <ul>
+    <li>$x=y=1$: $\sum_{k=0}^{n}\binom{n}{k} = 2^n$</li>
+    <li>$x=1, y=-1$: $\sum_{k=0}^{n}(-1)^k\binom{n}{k} = 0$</li>
+    <li>$x=1, y=x$: gives the generating function of the binomial distribution</li>
+  </ul>
+
+  <h4>Multinomial Theorem</h4>
+
+  <p>For $k$ variables and non-negative integers $n_1 + n_2 + \cdots + n_k = n$:</p>
+
+  <div class="formula-box gold">
+    $$(x_1 + x_2 + \cdots + x_k)^n = \sum_{\substack{n_1,\ldots,n_k \geq 0 \\ n_1+\cdots+n_k = n}} \frac{n!}{n_1!\,n_2!\cdots n_k!}\, x_1^{n_1} x_2^{n_2}\cdots x_k^{n_k}$$
+  </div>
+
+  <p>The coefficient $\frac{n!}{n_1!\cdots n_k!}$ is the <strong>multinomial coefficient</strong>, counting the number of ways to arrange $n$ objects where $n_i$ are of type $i$.</p>
+
+  <div class="callout example">
+    <div class="callout-title">📋 Example</div>
+    How many ways can the letters in MISSISSIPPI be arranged? $\frac{11!}{1!\,4!\,4!\,2!} = \frac{39916800}{48} = 34650$.
+  </div>
+
+  <h3 id="ie-general">3.6 Inclusion-Exclusion: General Form</h3>
+
+  <p>The full statement for counting $|A_1 \cup \cdots \cup A_n|$ (number of elements in at least one set):</p>
+
+  <div class="formula-box gold">
+    $$\left|\bigcup_{i=1}^{n} A_i\right| = \sum_{i}|A_i| - \sum_{i<j}|A_i \cap A_j| + \sum_{i<j<k}|A_i \cap A_j \cap A_k| - \cdots + (-1)^{n+1}|A_1 \cap \cdots \cap A_n|$$
+  </div>
+
+  <p>As a probability statement:</p>
+
+  <div class="formula-box">
+    $$P\!\left(\bigcup_{i=1}^{n} A_i\right) = \sum_{k=1}^{n} (-1)^{k+1} \!\!\!\sum_{1\le i_1 < \cdots < i_k \le n}\!\!\! P(A_{i_1} \cap \cdots \cap A_{i_k})$$
+  </div>
+
+  <p><strong>Application — Derangements:</strong> Count of permutations with <em>no fixed points</em> uses inclusion-exclusion with $A_i$ = event that element $i$ is fixed (see §4.7).</p>
+
+  <p><strong>Application — At Least One:</strong> Bonferroni inequalities give bounds by truncating the sum:</p>
+  <ul>
+    <li><strong>Union bound (upper):</strong> $P(\bigcup A_i) \leq \sum P(A_i)$</li>
+    <li><strong>Lower bound:</strong> $P(\bigcup A_i) \geq \sum P(A_i) - \sum_{i<j} P(A_i \cap A_j)$</li>
+  </ul>
+
+</div>
+
+<!-- ═══════════════════════ SECTION 4: CLASSIC PROBLEMS ═══════════════════════ -->
+<div class="section" id="classic">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Classic Problems</div>
+  </div>
+
+  <!-- ─── BIRTHDAY ─── -->
+  <div class="problem-card" id="birthday">
+    <h3>4.1 The Birthday Problem</h3>
+
+    <p><strong>Question:</strong> How many people $n$ do you need in a room so that the probability at least two share a birthday exceeds 50%?</p>
+
+    <h4>Exact Formula</h4>
+    <p>Let $A$ = "at least two people share a birthday". By complement:</p>
+
+    <div class="formula-box">
+      $$P(A^c) = P(\text{all birthdays distinct}) = \frac{365}{365} \cdot \frac{364}{365} \cdot \frac{363}{365} \cdots \frac{365-n+1}{365} = \frac{365!}{(365-n)! \cdot 365^n}$$
+    </div>
+
+    <div class="formula-box gold">
+      $$P(\text{shared birthday}) = 1 - \prod_{k=0}^{n-1}\frac{365-k}{365}$$
+    </div>
+
+    <h4>Approximation</h4>
+    <p>Use $\ln(1-x) \approx -x$ for small $x$:</p>
+    $$\ln P(A^c) = \sum_{k=1}^{n-1} \ln\!\left(1 - \frac{k}{365}\right) \approx -\sum_{k=1}^{n-1}\frac{k}{365} = -\frac{n(n-1)}{2 \cdot 365}$$
+
+    <div class="formula-box teal">
+      $$P(\text{shared birthday}) \approx 1 - e^{-n(n-1)/730}$$
+    </div>
+
+    <table>
+      <tr><th>$n$ (people)</th><th>$P(\text{match})$</th></tr>
+      <tr><td>10</td><td>11.7%</td></tr>
+      <tr><td>20</td><td>41.1%</td></tr>
+      <tr><td>23</td><td>50.7%</td></tr>
+      <tr><td>30</td><td>70.6%</td></tr>
+      <tr><td>40</td><td>89.1%</td></tr>
+      <tr><td>57</td><td>99.0%</td></tr>
+      <tr><td>70</td><td>99.9%</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Why 23 Feels So Small</div>
+      The number of pairs grows as $\binom{n}{2} = \frac{n(n-1)}{2}$. With 23 people there are 253 pairs — each has a $\frac{1}{365}$ chance of matching, so we'd <em>expect</em> about 0.69 matches. The counter-intuitive result comes from thinking linearly about people but the collision probability grows <em>quadratically</em> in pairs.
+    </div>
+
+    <div class="callout trap">
+      <div class="callout-title">⚠ Interview Variant: Same birthday as YOU</div>
+      If you're already in the room and want the probability someone shares <em>your specific</em> birthday, that's different: $P(\text{at least one match with you}) = 1 - (364/365)^{n-1}$. You need $n \approx 253$ people for 50% — a linear (not quadratic) problem.
+    </div>
+  </div>
+
+  <!-- ─── GAMBLER'S RUIN ─── -->
+  <div class="problem-card" id="gamblers-ruin">
+    <h3>4.2 Gambler's Ruin</h3>
+
+    <p><strong>Setup:</strong> A gambler starts with $\$k$ and plays against an opponent who starts with $\$(N-k)$. At each round, the gambler wins $\$1$ with probability $p$ and loses $\$1$ with probability $q = 1-p$. The game ends when one player is bankrupt. What is the probability the gambler reaches $\$N$ (opponent goes bankrupt)?</p>
+
+    <h4>Solution via Linear Recurrence</h4>
+
+    <p>Let $P_k = P(\text{reach } N \mid \text{start at } k)$. By conditioning on the first step:</p>
+    $$P_k = p \cdot P_{k+1} + q \cdot P_{k-1}, \quad P_0 = 0, \quad P_N = 1$$
+
+    <p>This is a second-order linear recurrence. The characteristic equation is $p r^2 - r + q = 0$ with roots $r = 1$ and $r = q/p$.</p>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Biased Game $p \neq q$</div>
+      $$P_k = \frac{1 - (q/p)^k}{1 - (q/p)^N}$$
+    </div>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Fair Game $p = q = \frac{1}{2}$</div>
+      $$P_k = \frac{k}{N}$$
+    </div>
+
+    <h4>Expected Duration</h4>
+
+    <p>Let $E_k$ = expected number of rounds. For the fair game:</p>
+
+    <div class="formula-box">
+      $$E_k = k(N-k) \quad \text{(fair game)}$$
+    </div>
+
+    <p>For the biased game, the formula is more complex:</p>
+    $$E_k = \frac{k}{q-p} - \frac{N}{q-p} \cdot \frac{1-(q/p)^k}{1-(q/p)^N} \quad (p < q)$$
+
+    <div class="callout example">
+      <div class="callout-title">📋 Worked Example</div>
+      <strong>Casino game:</strong> $p = 18/38$ (roulette red), $q = 20/38$. Gambler starts with $\$10$, casino has effectively infinite wealth ($N \to \infty$).<br><br>
+      As $N \to \infty$: $P_k \to 1 - (q/p)^k = 1 - (20/18)^{10} \approx 1 - 3.25 = $ negative — so reframe: $P(\text{ruin}) = (q/p)^k = (10/9)^{10} \approx 2.37$... wait, ruin probability when $q > p$ and $N=\infty$ is $P(\text{ruin}) = 1$ (certain ruin). When $p < q$ and $N \to \infty$: $P(\text{reach N}) \to 0$, so $P(\text{ruin}) = 1$.
+    </div>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Key Insights</div>
+      <ul>
+        <li><strong>Fair game:</strong> The probability of winning is simply the fraction of total wealth you start with: $k/N$. This makes intuitive sense — it's a martingale.</li>
+        <li><strong>Biased against you ($p &lt; q$):</strong> Ruin probability increases exponentially fast as the house edge grows.</li>
+        <li><strong>Finance link:</strong> Gambler's ruin is equivalent to a random walk hitting a barrier — fundamental to first-passage time problems and barrier option pricing.</li>
+        <li><strong>If $p &lt; q$ and $N = \infty$:</strong> Ruin is certain ($P_k = 0$ for all finite $k$). With any house edge, you will eventually go broke with probability 1.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─── COUPON COLLECTOR ─── -->
+  <div class="problem-card" id="coupon">
+    <h3>4.3 Coupon Collector's Problem</h3>
+
+    <p><strong>Setup:</strong> There are $n$ distinct coupons. Each time you buy a box of cereal, you get one coupon uniformly at random (with replacement). How many boxes $T$ do you need to buy in expectation to collect all $n$ coupons?</p>
+
+    <h4>Solution via Geometric Decomposition</h4>
+
+    <p>Break the collection into <em>phases</em>. Phase $i$ starts when you have $i-1$ distinct coupons and ends when you get your $i$-th new coupon.</p>
+
+    <p>During phase $i$, the probability of getting a <em>new</em> coupon is:</p>
+    $$p_i = \frac{n-(i-1)}{n} = \frac{n-i+1}{n}$$
+
+    <p>The number of draws in phase $i$ follows a Geometric distribution with parameter $p_i$, so $E[T_i] = 1/p_i = \frac{n}{n-i+1}$.</p>
+
+    <p>Total $T = T_1 + T_2 + \cdots + T_n$, and by linearity of expectation:</p>
+
+    $$E[T] = \sum_{i=1}^{n} \frac{n}{n-i+1} = n \sum_{j=1}^{n} \frac{1}{j} = n \cdot H_n$$
+
+    <div class="formula-box gold">
+      $$E[T] = n \cdot H_n = n\!\left(1 + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{n}\right) \approx n\ln n + \gamma n + \frac{1}{2}$$
+    </div>
+
+    <p>where $H_n$ is the $n$-th harmonic number and $\gamma \approx 0.5772$ (Euler-Mascheroni constant).</p>
+
+    <h4>Variance</h4>
+
+    <p>Since the $T_i$ are independent (geometric draws in each phase), $\text{Var}(T) = \sum_{i=1}^{n}\text{Var}(T_i)$. For geometric with success probability $p$: $\text{Var} = (1-p)/p^2$.</p>
+
+    $$\text{Var}(T) = \sum_{i=1}^{n}\frac{1-p_i}{p_i^2} = n^2 \sum_{j=1}^{n}\frac{j-1}{j^2} \cdot \frac{1}{n^2} \approx n^2 \cdot \frac{\pi^2}{6} - n \cdot H_n$$
+
+    <div class="formula-box">
+      $$\text{Var}(T) \sim \frac{\pi^2}{6}\,n^2 \quad \text{(dominant term as } n \to \infty)$$
+    </div>
+
+    <table>
+      <tr><th>$n$ (coupons)</th><th>$E[T]$ (exact)</th><th>$n \ln n$ approx</th></tr>
+      <tr><td>5</td><td>11.42</td><td>8.05</td></tr>
+      <tr><td>10</td><td>29.29</td><td>23.03</td></tr>
+      <tr><td>50</td><td>224.5</td><td>195.6</td></tr>
+      <tr><td>100</td><td>519.0</td><td>460.5</td></tr>
+      <tr><td>365</td><td>2364</td><td>2153</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Connection to Birthday Problem</div>
+      The coupon collector and birthday problem are "dual": the birthday problem asks how many draws until a <em>collision</em> (answer: $O(\sqrt{n})$), while coupon collector asks until you've seen <em>every</em> element (answer: $O(n \ln n)$). Both use the same geometric/complement framework.
+    </div>
+  </div>
+
+  <!-- ─── CHORDS / CATALAN ─── -->
+  <div class="problem-card" id="chords">
+    <h3>4.4 Non-Intersecting Chords &amp; Catalan Numbers</h3>
+
+    <p><strong>Problem:</strong> Place $2n$ points on a circle. Connect them in pairs (creating $n$ chords). In how many ways can this be done so that no two chords intersect?</p>
+
+    <h4>Total Number of Pairings</h4>
+
+    <p>The total number of ways to pair up $2n$ points is the double factorial (§3.3):</p>
+    $$\text{Total pairings} = (2n-1)!! = 1 \cdot 3 \cdot 5 \cdots (2n-1)$$
+
+    <h4>Non-Crossing Pairings</h4>
+
+    <p>The number of non-crossing pairings is the $n$-th <strong>Catalan number</strong>:</p>
+
+    <div class="formula-box gold">
+      $$C_n = \frac{1}{n+1}\binom{2n}{n} = \frac{(2n)!}{(n+1)!\,n!}$$
+    </div>
+
+    <div class="proof">
+      <strong>Proof (Recurrence):</strong> Label the points $1, 2, \ldots, 2n$ clockwise. Point 1 must be paired with some point $2k$ (must be even, to leave an even number of points on each arc). Points $2, 3, \ldots, 2k-1$ must pair among themselves ($C_{k-1}$ ways) and points $2k+1, \ldots, 2n$ among themselves ($C_{n-k}$ ways). Summing over $k = 1, \ldots, n$:<br>
+      $$C_n = \sum_{k=1}^{n} C_{k-1}\,C_{n-k}, \quad C_0 = C_1 = 1$$
+    </div>
+
+    <table>
+      <tr><th>$n$</th><th>$2n$ points</th><th>$C_n$ (non-crossing)</th><th>$(2n-1)!!$ (total)</th></tr>
+      <tr><td>1</td><td>2</td><td>1</td><td>1</td></tr>
+      <tr><td>2</td><td>4</td><td>2</td><td>3</td></tr>
+      <tr><td>3</td><td>6</td><td>5</td><td>15</td></tr>
+      <tr><td>4</td><td>8</td><td>14</td><td>105</td></tr>
+      <tr><td>5</td><td>10</td><td>42</td><td>945</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Catalan Numbers are Everywhere</div>
+      The same $C_n$ counts: balanced parenthesisations of $n$ pairs, the number of full binary trees with $n+1$ leaves, the number of monotone lattice paths from $(0,0)$ to $(n,n)$ not crossing the diagonal, the number of triangulations of a convex $(n+2)$-gon. Whenever you see a problem with a "non-crossing" or "balanced nesting" constraint, think Catalan.
+    </div>
+
+    <h4>Probability of Random Pairing Being Non-Crossing</h4>
+
+    <div class="formula-box teal">
+      $$P(\text{non-crossing}) = \frac{C_n}{(2n-1)!!} = \frac{\binom{2n}{n}}{(n+1)(2n-1)!!} = \frac{2^n}{(n+1)\binom{2n}{n}^{-1}(2n)!/n!} \cdots$$
+    </div>
+
+    <p>For large $n$: using Stirling, $C_n \sim \frac{4^n}{n^{3/2}\sqrt{\pi}}$ and $(2n-1)!! \sim \frac{(2n)!}{2^n n!} \sim \frac{2^n \sqrt{n}}{\sqrt{\pi}} \cdot \frac{4^n}{2^n \sqrt{2\pi n}} \cdot \ldots$ — the fraction decays to 0, so a random pairing is almost never non-crossing for large $n$.</p>
+  </div>
+
+  <!-- ─── MONTY HALL ─── -->
+  <div class="problem-card" id="monty-hall">
+    <h3>4.5 The Monty Hall Problem</h3>
+
+    <p><strong>Setup:</strong> There are 3 doors. Behind one is a car, behind two are goats. You choose door 1. The host (who knows where the car is) opens one of the other doors to reveal a goat. Should you switch?</p>
+
+    <h4>Solution via Bayes' Theorem</h4>
+
+    <p>Let $C_i$ = car is behind door $i$, $H_j$ = host opens door $j$. Assume you chose door 1 and host opens door 3.</p>
+
+    <table>
+      <tr><th>Car location</th><th>$P(C_i)$</th><th>$P(H_3 \mid C_i)$</th><th>$P(C_i \cap H_3)$</th></tr>
+      <tr><td>Door 1</td><td>1/3</td><td>1/2 (host's choice)</td><td>1/6</td></tr>
+      <tr><td>Door 2</td><td>1/3</td><td>1 (must open 3)</td><td>1/3</td></tr>
+      <tr><td>Door 3</td><td>1/3</td><td>0 (can't open car)</td><td>0</td></tr>
+    </table>
+
+    <p>$P(H_3) = 1/6 + 1/3 = 1/2$. By Bayes:</p>
+
+    <div class="formula-box gold">
+      $$P(C_1 \mid H_3) = \frac{1/6}{1/2} = \frac{1}{3}, \qquad P(C_2 \mid H_3) = \frac{1/3}{1/2} = \frac{2}{3}$$
+    </div>
+
+    <p><strong>Switch and win with probability 2/3. Stay and win with probability 1/3.</strong></p>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Intuitive Explanation</div>
+      Think of 1,000,000 doors. You pick one. The host opens 999,998 doors with goats. Should you switch to the one remaining door? Clearly yes — the host's information is concentrated into that other door. The 3-door case is the same logic at smaller scale.
+    </div>
+
+    <div class="callout trap">
+      <div class="callout-title">⚠ Key Assumptions</div>
+      <ul>
+        <li>The host <em>always</em> opens a goat door (the host has a strategy).</li>
+        <li>If the host randomly opened a door and it happened to be a goat, the calculation changes (staying and switching are equal).</li>
+        <li>If the host only opens a door when you've chosen correctly, never switch!</li>
+      </ul>
+      This is a lesson in specifying the problem precisely before computing.
+    </div>
+
+    <h4>Generalisation to $n$ Doors</h4>
+
+    <div class="formula-box">
+      <p>$n$ doors, host opens $k$ goat doors. Probability of winning by switching:</p>
+      $$P(\text{win by switching}) = \frac{n-1}{n} \cdot \frac{1}{n-1-k} = \frac{1}{n-1-k}$$
+      For $n=3, k=1$: $\frac{1}{3-1-1} = \frac{1}{1} \cdot \frac{2}{3} = 2/3$ ✓
+    </div>
+  </div>
+
+  <!-- ─── SECRETARY ─── -->
+  <div class="problem-card" id="secretary">
+    <h3>4.6 The Secretary Problem (Optimal Stopping)</h3>
+
+    <p><strong>Setup:</strong> $n$ candidates are interviewed one by one in uniformly random order. After each interview you must immediately decide to hire or pass (no recall). You observe only relative rankings. Maximize the probability of hiring the <em>best</em> candidate.</p>
+
+    <h4>Optimal Strategy</h4>
+
+    <p>The optimal strategy is a <strong>threshold rule</strong>:</p>
+
+    <ol class="steps">
+      <li>Reject the first $r-1$ candidates, recording the best seen (the "calibration phase").</li>
+      <li>From candidate $r$ onward, hire the first candidate who is better than all previously seen candidates. If none, hire the last candidate.</li>
+    </ol>
+
+    <h4>Computing the Optimal $r$</h4>
+
+    <p>The probability of success with threshold $r$ is:</p>
+
+    $$P(\text{success} \mid r) = \sum_{k=r}^{n} P(\text{best is at position } k) \cdot P(\text{we select position } k)$$
+
+    $$= \sum_{k=r}^{n} \frac{1}{n} \cdot \frac{r-1}{k-1} = \frac{r-1}{n} \sum_{k=r}^{n} \frac{1}{k-1}$$
+
+    <div class="proof">
+      <strong>Why $\frac{r-1}{k-1}$?</strong> Given the best candidate is at position $k$, we select them if and only if the best among the first $k-1$ candidates is in the first $r-1$ positions (so we don't prematurely hire anyone). The probability of this is $(r-1)/(k-1)$.
+    </div>
+
+    <p>For large $n$, approximate the sum by an integral with $x = r/n$:</p>
+
+    $$P(\text{success}) \approx x \int_{x}^{1} \frac{dt}{t} = -x \ln x$$
+
+    <p>Maximise: $\frac{d}{dx}(-x\ln x) = -\ln x - 1 = 0 \implies x^* = e^{-1}$.</p>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Optimal Threshold</div>
+      $$r^* = \left\lfloor \frac{n}{e} \right\rfloor + 1 \approx \frac{n}{e} \approx 0.368n$$
+    </div>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Optimal Success Probability</div>
+      $$P^*(\text{hire best}) \to \frac{1}{e} \approx 36.8\% \quad \text{as } n \to \infty$$
+    </div>
+
+    <table>
+      <tr><th>$n$</th><th>Optimal $r^*$</th><th>$P^*(\text{success})$</th></tr>
+      <tr><td>3</td><td>2</td><td>50.0%</td></tr>
+      <tr><td>4</td><td>2</td><td>45.8%</td></tr>
+      <tr><td>5</td><td>3</td><td>43.3%</td></tr>
+      <tr><td>10</td><td>4</td><td>39.9%</td></tr>
+      <tr><td>20</td><td>8</td><td>38.4%</td></tr>
+      <tr><td>100</td><td>38</td><td>37.1%</td></tr>
+      <tr><td>$\infty$</td><td>$\lfloor n/e \rfloor + 1$</td><td>$1/e \approx 36.8\%$</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Why $e$ Appears</div>
+      The trade-off is: reject too few candidates and you don't calibrate well; reject too many and the best candidate has likely already passed. The optimal balance occurs at $1/e$ of the way through, a classic result that appears in optimal stopping theory throughout finance (American options, stopping rules).
+    </div>
+
+    <div class="callout trap">
+      <div class="callout-title">⚠ Variants Interviewers Ask</div>
+      <ul>
+        <li><strong>"Accept top-50% not just the best":</strong> The optimal threshold and success probability both change.</li>
+        <li><strong>"Rank-based vs. cardinal":</strong> If you observe actual scores (not just relative ranks), the problem is different.</li>
+        <li><strong>"What if you can go back?":</strong> With one recall allowed, the optimal strategy and $1/e$ threshold shift.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ─── DERANGEMENTS ─── -->
+  <div class="problem-card" id="derangements">
+    <h3>4.7 Derangements &amp; Matching</h3>
+
+    <p><strong>Definition:</strong> A derangement is a permutation of $\{1, 2, \ldots, n\}$ where <em>no element appears in its original position</em> — no fixed points.</p>
+
+    <p><strong>Classic problem:</strong> $n$ people each put their hat in a box. The hats are returned at random. What is the probability no one gets their own hat?</p>
+
+    <h4>Formula via Inclusion-Exclusion</h4>
+
+    <p>Let $A_i$ = event that person $i$ gets their own hat. We want $P\left(\bigcap_i A_i^c\right)= 1 - P\left(\bigcup_i A_i\right)$.</p>
+
+    <p>By inclusion-exclusion: $P\left(\bigcup_{i=1}^n A_i\right) = \sum_{k=1}^n (-1)^{k+1}\binom{n}{k}\frac{(n-k)!}{n!} = \sum_{k=1}^n \frac{(-1)^{k+1}}{k!}$</p>
+
+    <p>Therefore:</p>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Probability of Derangement</div>
+      $$P(\text{derangement}) = \sum_{k=0}^{n} \frac{(-1)^k}{k!} = 1 - 1 + \frac{1}{2!} - \frac{1}{3!} + \cdots$$
+    </div>
+
+    <div class="formula-box gold">
+      <div class="formula-label">Number of Derangements</div>
+      $$D_n = n! \sum_{k=0}^{n} \frac{(-1)^k}{k!} = n!\left(1 - 1 + \frac{1}{2!} - \frac{1}{3!} + \cdots + \frac{(-1)^n}{n!}\right)$$
+    </div>
+
+    <div class="formula-box teal">
+      <div class="formula-label">Key Limiting Result</div>
+      $$P(\text{derangement}) \xrightarrow{n\to\infty} e^{-1} \approx 0.3679$$
+    </div>
+
+    <p>This convergence is <em>extremely fast</em> — already for $n = 5$ the probability is $\approx 36.67\%$, essentially $1/e$.</p>
+
+    <h4>Recurrence Relations</h4>
+
+    <div class="formula-box">
+      <div class="formula-label">Recurrences (useful for computation)</div>
+      $$D_n = (n-1)\bigl(D_{n-1} + D_{n-2}\bigr) \quad \text{(standard)}$$
+      $$D_n = n \cdot D_{n-1} + (-1)^n$$
+    </div>
+
+    <div class="proof">
+      <strong>Proof of $(n-1)(D_{n-1}+D_{n-2})$:</strong> Consider where element $n$ goes. Suppose it goes to position $k$ ($n-1$ choices). Now element $k$ can either:
+      <br>• Go to position $n$ → remaining $n-2$ elements must be deranged: $D_{n-2}$ ways.
+      <br>• Not go to position $n$ → this is equivalent to deranging $n-1$ elements (relabel position $n$ as "$k$"): $D_{n-1}$ ways.
+      <br>Hence $D_n = (n-1)(D_{n-1}+D_{n-2})$.
+    </div>
+
+    <table>
+      <tr><th>$n$</th><th>$n!$</th><th>$D_n$</th><th>$P = D_n/n!$</th></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>0.000</td></tr>
+      <tr><td>2</td><td>2</td><td>1</td><td>0.500</td></tr>
+      <tr><td>3</td><td>6</td><td>2</td><td>0.333</td></tr>
+      <tr><td>4</td><td>24</td><td>9</td><td>0.375</td></tr>
+      <tr><td>5</td><td>120</td><td>44</td><td>0.367</td></tr>
+      <tr><td>6</td><td>720</td><td>265</td><td>0.368</td></tr>
+      <tr><td>10</td><td>3628800</td><td>1334961</td><td>0.3679</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="callout-title">💡 Why $1/e$ Again?</div>
+      The sum $\sum_{k=0}^{n}(-1)^k/k!$ is the Taylor series for $e^{-1}$ truncated at $k=n$. Since the series converges rapidly and alternates, the truncated sum is incredibly close to $e^{-1}$ even for small $n$. The connection is: each element is "excluded from its home" independently with probability approaching $1/e$ in the Poisson limit.
+    </div>
+
+    <div class="callout example">
+      <div class="callout-title">📋 Interview Variant: Expected Number of Fixed Points</div>
+      <strong>Question:</strong> In a random permutation of $n$ elements, what is the expected number of fixed points (elements in their correct position)?<br><br>
+      Let $X_i = \mathbf{1}[\text{element } i \text{ is fixed}]$. Then $E[X_i] = 1/n$ (by symmetry, each element is equally likely to be in any position).<br><br>
+      $$E\!\left[\sum_{i=1}^n X_i\right] = \sum_{i=1}^n E[X_i] = n \cdot \frac{1}{n} = \mathbf{1}$$
+      <br>The expected number of fixed points is always exactly 1, regardless of $n$. This uses linearity of expectation — the $X_i$ are not independent but linearity still applies!
+    </div>
+
+    <div class="callout trap">
+      <div class="callout-title">⚠ Partial Derangements</div>
+      <strong>Exactly $k$ fixed points:</strong> Choose which $k$ elements are fixed ($\binom{n}{k}$ ways), then derange the remaining $n-k$ elements ($D_{n-k}$ ways):
+      $$P(\text{exactly } k \text{ fixed points}) = \frac{\binom{n}{k} D_{n-k}}{n!} = \frac{1}{k!}\sum_{j=0}^{n-k}\frac{(-1)^j}{j!} \approx \frac{e^{-1}}{k!}$$
+      This is approximately a Poisson$(1)$ distribution — the number of fixed points in a random permutation converges in distribution to Poisson$(1)$.
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ QUICK REFERENCE ═══════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Formula Sheet</div>
+  </div>
+
+  <table>
+    <tr><th>Topic</th><th>Formula</th><th>Key Insight</th></tr>
+    <tr>
+      <td>Inclusion-Exclusion</td>
+      <td>$P(A\cup B) = P(A)+P(B)-P(A\cap B)$</td>
+      <td>Correct for double-counting</td>
+    </tr>
+    <tr>
+      <td>Conditional Prob</td>
+      <td>$P(A|B)=P(A\cap B)/P(B)$</td>
+      <td>Restricts sample space to $B$</td>
+    </tr>
+    <tr>
+      <td>Bayes' Theorem</td>
+      <td>$P(A|B)=P(B|A)P(A)/P(B)$</td>
+      <td>Flip the conditioning</td>
+    </tr>
+    <tr>
+      <td>LOTP</td>
+      <td>$P(A)=\sum_i P(A|B_i)P(B_i)$</td>
+      <td>Marginalise over partition</td>
+    </tr>
+    <tr>
+      <td>Independence</td>
+      <td>$P(A\cap B)=P(A)P(B)$</td>
+      <td>$\neq$ mutually exclusive</td>
+    </tr>
+    <tr>
+      <td>Permutations</td>
+      <td>$_nP_r = n!/(n-r)!$</td>
+      <td>Order matters</td>
+    </tr>
+    <tr>
+      <td>Combinations</td>
+      <td>$\binom{n}{r}=n!/(r!(n-r)!)$</td>
+      <td>Order doesn't matter</td>
+    </tr>
+    <tr>
+      <td>Stars &amp; Bars</td>
+      <td>$\binom{n+k-1}{k-1}$</td>
+      <td>Distribute $n$ into $k$ bins</td>
+    </tr>
+    <tr>
+      <td>Double Factorial</td>
+      <td>$(2n-1)!! = (2n)!/(2^n n!)$</td>
+      <td>Pairings of $2n$ items</td>
+    </tr>
+    <tr>
+      <td>Catalan Number</td>
+      <td>$C_n=\binom{2n}{n}/(n+1)$</td>
+      <td>Non-crossing pairings; balanced structure</td>
+    </tr>
+    <tr>
+      <td>Birthday Approx</td>
+      <td>$1-e^{-n(n-1)/730}$</td>
+      <td>$n=23$ gives $\approx 50\%$</td>
+    </tr>
+    <tr>
+      <td>Gambler's Ruin (fair)</td>
+      <td>$P_k = k/N$</td>
+      <td>Fraction of total wealth</td>
+    </tr>
+    <tr>
+      <td>Gambler's Ruin (biased)</td>
+      <td>$P_k=(1-(q/p)^k)/(1-(q/p)^N)$</td>
+      <td>Geometric series ratio</td>
+    </tr>
+    <tr>
+      <td>Coupon Collector</td>
+      <td>$E[T]=n H_n \approx n\ln n$</td>
+      <td>Sum of geometric expectations</td>
+    </tr>
+    <tr>
+      <td>Secretary Problem</td>
+      <td>$r^* \approx n/e,\quad P^* \to 1/e$</td>
+      <td>Reject first 37%, then take first best</td>
+    </tr>
+    <tr>
+      <td>Derangements</td>
+      <td>$D_n = n!\sum_{k=0}^n (-1)^k/k!$</td>
+      <td>$P(\text{derangement}) \to 1/e$</td>
+    </tr>
+    <tr>
+      <td>Fixed Points (expected)</td>
+      <td>$E[\text{fixed pts}] = 1$</td>
+      <td>Linearity of expectation; always 1</td>
+    </tr>
+    <tr>
+      <td>Monty Hall</td>
+      <td>$P(\text{win by switching}) = 2/3$</td>
+      <td>Bayes: host's action carries information</td>
+    </tr>
+  </table>
+
+  <h3>The $1/e$ Leitmotif</h3>
+  <p>Remarkably, $e^{-1} \approx 0.368$ appears throughout probability:</p>
+  <ul>
+    <li><strong>Derangements:</strong> $P(\text{no fixed points}) \to 1/e$</li>
+    <li><strong>Secretary problem:</strong> Optimal threshold is $n/e$; optimal success probability $1/e$</li>
+    <li><strong>Coupon collector:</strong> $E[T] \approx n \ln(n) + \gamma n$ where $\gamma = -\ln(e^{-\gamma})$</li>
+    <li><strong>Poisson distribution:</strong> $P(X=0) = e^{-\lambda}$ — the limiting distribution of rare events</li>
+  </ul>
+  <p>These connections reflect the underlying <em>Poisson approximation</em>: when many rare independent events each have small probability $1/n$ and there are $n$ of them, the count converges to Poisson$(1)$ with $P(0) = e^{-1}$.</p>
+
+</div>
+
+<footer>
+  Section 1 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Foundations · Conditional Probability · Combinatorics · Birthday · Gambler's Ruin · Coupon Collector · Catalan Numbers · Monty Hall · Secretary Problem · Derangements
+</footer>
+
+</body>
+</html>

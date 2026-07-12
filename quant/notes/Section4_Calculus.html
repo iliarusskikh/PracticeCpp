@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculus — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #0e0c09;
+    --bg2:         #161310;
+    --bg3:         #1e1912;
+    --border:      #2e2618;
+    --copper:      #d97706;
+    --copper2:     #fbbf24;
+    --copper-dim:  #6b4a10;
+    --text:        #ede8df;
+    --text-dim:    #857a68;
+    --violet:      #a78bfa;
+    --green:       #4ade80;
+    --rose:        #fb7185;
+    --sky:         #38bdf8;
+    --teal:        #2dd4bf;
+    --orange:      #fb923c;
+    --pink:        #f472b6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #d9770620, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--copper-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.3rem;
+    font-weight: 600;
+    color: var(--copper2);
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--copper);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--copper);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--copper2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--copper-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--copper2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--copper); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--copper);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--copper2); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.pink   { border-left-color: var(--pink); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0e1e0e; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #200e0e; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #130e20; border-left: 3px solid var(--violet); }
+  .callout.example { background: #0a1520; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1c1608; border-left: 3px solid var(--copper); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--copper); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--copper); border-bottom: 1px solid var(--copper-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--copper-dim); color: var(--copper2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── RULE CARD ── */
+  .rule-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .rule-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1rem; color: var(--copper2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--copper2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 4 of 9</div>
+  <h1>Calculus</h1>
+  <div class="subtitle">Differential · Integral · Multivariable · Differential Equations</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Differential Calculus</a>
+      <ul class="sub">
+        <li><a href="#s1-rules">Product, Chain &amp; Quotient Rules</a></li>
+        <li><a href="#s1-minmax">Maxima &amp; Minima</a></li>
+        <li><a href="#s1-lhop">L'Hôpital's Rule</a></li>
+        <li><a href="#s1-taylor">Taylor &amp; Maclaurin Series</a></li>
+        <li><a href="#s1-implicit">Implicit Differentiation</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Integral Calculus</a>
+      <ul class="sub">
+        <li><a href="#s2-ftc">Fundamental Theorem of Calculus</a></li>
+        <li><a href="#s2-ibp">Integration by Parts</a></li>
+        <li><a href="#s2-sub">Substitution</a></li>
+        <li><a href="#s2-pf">Partial Fractions</a></li>
+        <li><a href="#s2-imp">Improper Integrals</a></li>
+        <li><a href="#s2-geo">Geometric Series</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Multivariable Calculus</a>
+      <ul class="sub">
+        <li><a href="#s3-partial">Partial Derivatives</a></li>
+        <li><a href="#s3-grad">Gradient &amp; Hessian</a></li>
+        <li><a href="#s3-jac">Jacobian</a></li>
+        <li><a href="#s3-lag">Lagrange Multipliers</a></li>
+        <li><a href="#s3-multi">Double &amp; Triple Integrals</a></li>
+        <li><a href="#s3-cov">Change of Variables</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Differential Equations</a>
+      <ul class="sub">
+        <li><a href="#s4-sep">Separation of Variables</a></li>
+        <li><a href="#s4-lin1">Linear First-Order ODEs</a></li>
+        <li><a href="#s4-2nd">Second-Order Linear ODEs</a></li>
+        <li><a href="#s4-pde">Heat / Diffusion PDE &amp; Black-Scholes</a></li>
+        <li><a href="#s4-fourier">Fourier Series Basics</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: DIFFERENTIAL CALCULUS                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Differential Calculus</div>
+  </div>
+
+  <p>The derivative $f'(x)$ measures the instantaneous rate of change of $f$ at $x$. Formally:</p>
+
+  <div class="fbox gold">
+    $$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h} \qquad \text{(limit of secant slopes)}$$
+  </div>
+
+  <p>Geometrically: the slope of the tangent line to $y = f(x)$ at the point $(x, f(x))$.</p>
+
+  <h3 id="s1-rules">1.1 Product, Chain &amp; Quotient Rules</h3>
+
+  <div class="rule-card">
+    <h4>Product Rule</h4>
+    <div class="fbox gold">
+      $$(fg)' = f'g + fg' \qquad \frac{d}{dx}[f(x)g(x)] = f'(x)g(x) + f(x)g'(x)$$
+    </div>
+    <div class="callout proof">
+      <strong>Proof:</strong> Add and subtract $f(x+h)g(x)$ in the numerator of the limit definition:<br>
+      $\frac{f(x+h)g(x+h)-f(x)g(x)}{h} = \frac{[f(x+h)-f(x)]g(x+h) + f(x)[g(x+h)-g(x)]}{h}$.<br>
+      As $h\to 0$: first term $\to f'(x)g(x)$ (since $g$ is continuous), second $\to f(x)g'(x)$.
+    </div>
+    <p><strong>Extended product rule</strong> for $n$ functions: $(f_1 f_2 \cdots f_n)' = \sum_{i=1}^n f_1 \cdots f_{i-1} \cdot f_i' \cdot f_{i+1} \cdots f_n$.</p>
+    <div class="callout example">
+      <div class="ctitle">📋 Example</div>
+      $\frac{d}{dx}[x^2 \sin x] = 2x\sin x + x^2\cos x$
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <h4>Chain Rule</h4>
+    <div class="fbox gold">
+      $$\frac{d}{dx}f(g(x)) = f'(g(x)) \cdot g'(x) \qquad \text{"derivative of outer × derivative of inner"}$$
+    </div>
+    <p>In Leibniz notation (most intuitive): if $y = f(u)$ and $u = g(x)$, then $\dfrac{dy}{dx} = \dfrac{dy}{du}\cdot\dfrac{du}{dx}$.</p>
+    <p><strong>Chain rule for multiple compositions:</strong> $\frac{d}{dx}f(g(h(x))) = f'(g(h(x))) \cdot g'(h(x)) \cdot h'(x)$.</p>
+    <div class="callout example">
+      <div class="ctitle">📋 Examples</div>
+      <ul>
+        <li>$\frac{d}{dx}e^{x^2} = e^{x^2} \cdot 2x$</li>
+        <li>$\frac{d}{dx}\ln(\sin x) = \frac{1}{\sin x} \cdot \cos x = \cot x$</li>
+        <li>$\frac{d}{dx}(1+x^2)^{10} = 10(1+x^2)^9 \cdot 2x$</li>
+        <li>$\frac{d}{dx}\sqrt{x^2+1} = \frac{x}{\sqrt{x^2+1}}$ — appears constantly in Black-Scholes Greeks</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rule-card">
+    <h4>Quotient Rule</h4>
+    <div class="fbox gold">
+      $$\left(\frac{f}{g}\right)' = \frac{f'g - fg'}{g^2} \qquad \text{"low d-high minus high d-low, over low squared"}$$
+    </div>
+    <div class="callout tip">
+      <div class="ctitle">✓ Derivation Shortcut</div>
+      The quotient rule follows from the product rule: write $f/g = f \cdot g^{-1}$, then $(f\cdot g^{-1})' = f'g^{-1} + f\cdot(-g^{-2}g') = \frac{f'g - fg'}{g^2}$. No need to memorise separately — derive it.
+    </div>
+    <div class="callout example">
+      <div class="ctitle">📋 Example</div>
+      $\frac{d}{dx}\tan x = \frac{d}{dx}\frac{\sin x}{\cos x} = \frac{\cos x \cdot \cos x - \sin x \cdot (-\sin x)}{\cos^2 x} = \frac{\cos^2 x + \sin^2 x}{\cos^2 x} = \frac{1}{\cos^2 x} = \sec^2 x$
+    </div>
+  </div>
+
+  <h4>Standard Derivatives to Know Cold</h4>
+  <table>
+    <tr><th>$f(x)$</th><th>$f'(x)$</th><th>$f(x)$</th><th>$f'(x)$</th></tr>
+    <tr><td>$x^n$</td><td>$nx^{n-1}$</td><td>$e^x$</td><td>$e^x$</td></tr>
+    <tr><td>$a^x$</td><td>$a^x \ln a$</td><td>$\ln x$</td><td>$1/x$</td></tr>
+    <tr><td>$\log_a x$</td><td>$\frac{1}{x\ln a}$</td><td>$x^x$</td><td>$x^x(1+\ln x)$</td></tr>
+    <tr><td>$\sin x$</td><td>$\cos x$</td><td>$\cos x$</td><td>$-\sin x$</td></tr>
+    <tr><td>$\tan x$</td><td>$\sec^2 x$</td><td>$\sec x$</td><td>$\sec x\tan x$</td></tr>
+    <tr><td>$\arcsin x$</td><td>$1/\sqrt{1-x^2}$</td><td>$\arctan x$</td><td>$1/(1+x^2)$</td></tr>
+    <tr><td>$\Phi(x)$ (normal CDF)</td><td>$\phi(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}$</td><td>$\sqrt{x}$</td><td>$\frac{1}{2\sqrt{x}}$</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Derivative of $\Phi(d_1)$</div>
+    The Black-Scholes delta is $\Delta = \Phi(d_1)$ where $d_1 = \frac{\ln(S/K) + (r+\frac{1}{2}\sigma^2)T}{\sigma\sqrt{T}}$. Computing $\frac{\partial \Delta}{\partial S} = \frac{\partial \Phi(d_1)}{\partial S}$ requires the chain rule: $\frac{\partial \Phi(d_1)}{\partial S} = \phi(d_1)\frac{\partial d_1}{\partial S} = \phi(d_1)\cdot\frac{1}{S\sigma\sqrt{T}} = \frac{\text{Gamma}}{1}$. This gives $\Gamma = \frac{\phi(d_1)}{S\sigma\sqrt{T}}$.
+  </div>
+
+  <h3 id="s1-minmax">1.2 Maxima &amp; Minima</h3>
+
+  <h4>Critical Points</h4>
+  <p>A critical point occurs where $f'(x) = 0$ or $f'(x)$ does not exist. All local extrema of a differentiable function are critical points, but not all critical points are extrema (e.g.\ inflection points).</p>
+
+  <h4>First Derivative Test</h4>
+  <div class="fbox gold">
+    At a critical point $x = c$:
+    <ul style="margin-top:0.4rem;">
+      <li>$f' > 0$ for $x < c$ and $f' < 0$ for $x > c$ $\Rightarrow$ <strong>local maximum</strong></li>
+      <li>$f' < 0$ for $x < c$ and $f' > 0$ for $x > c$ $\Rightarrow$ <strong>local minimum</strong></li>
+      <li>$f'$ does not change sign $\Rightarrow$ <strong>inflection point</strong> (neither max nor min)</li>
+    </ul>
+  </div>
+
+  <h4>Second Derivative Test</h4>
+  <div class="fbox gold">
+    At a critical point $f'(c) = 0$:
+    <ul style="margin-top:0.4rem;">
+      <li>$f''(c) > 0$ $\Rightarrow$ <strong>local minimum</strong> (concave up, like a bowl $\cup$)</li>
+      <li>$f''(c) < 0$ $\Rightarrow$ <strong>local maximum</strong> (concave down, like a cap $\cap$)</li>
+      <li>$f''(c) = 0$ $\Rightarrow$ <strong>inconclusive</strong> — use first derivative test</li>
+    </ul>
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example: Optimisation</div>
+    <strong>Minimise</strong> $f(x) = x + \frac{1}{x}$ for $x > 0$.<br><br>
+    $f'(x) = 1 - \frac{1}{x^2} = 0 \Rightarrow x^2 = 1 \Rightarrow x = 1$ (positive root).<br>
+    $f''(x) = \frac{2}{x^3} > 0$ at $x=1$ $\Rightarrow$ local minimum.<br>
+    $f(1) = 2$. By AM-GM: $x + \frac{1}{x} \geq 2\sqrt{x \cdot \frac{1}{x}} = 2$ for all $x > 0$ ✓.
+  </div>
+
+  <h4>Inflection Points and Concavity</h4>
+  <p>$f''(x) > 0$: $f$ is concave up (slope increasing). $f''(x) < 0$: concave down. An inflection point is where $f''$ changes sign — the curve switches concavity. Jensen's inequality (Section 2, Statistics notes) is essentially a statement about concavity.</p>
+
+  <h3 id="s1-lhop">1.3 L'Hôpital's Rule</h3>
+
+  <p>For indeterminate forms $0/0$ or $\infty/\infty$:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">L'Hôpital's Rule</div>
+    If $\lim_{x \to a} f(x) = \lim_{x \to a} g(x) = 0$ (or both $\pm\infty$), and $g'(x) \neq 0$ near $a$, then:
+    $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
+    provided the right-hand limit exists.
+  </div>
+
+  <p>Can be applied repeatedly if the result is still indeterminate.</p>
+
+  <h4>Other Indeterminate Forms — Reduce to $0/0$ or $\infty/\infty$</h4>
+  <table>
+    <tr><th>Form</th><th>Rewrite as</th><th>Example</th></tr>
+    <tr><td>$0 \cdot \infty$</td><td>$f/(1/g)$ giving $0/0$</td><td>$\lim_{x\to 0^+} x\ln x = \lim \frac{\ln x}{1/x} \to \frac{-\infty}{+\infty}$</td></tr>
+    <tr><td>$\infty - \infty$</td><td>Combine to single fraction</td><td>$\lim\left(\frac{1}{x} - \frac{1}{\sin x}\right) = \lim\frac{\sin x - x}{x\sin x}$</td></tr>
+    <tr><td>$1^\infty$, $0^0$, $\infty^0$</td><td>$e^{\lim f\ln g}$ (log trick)</td><td>$\lim(1+1/n)^n = e^{\lim n\ln(1+1/n)} = e^1$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Key Examples</div>
+    <strong>(a)</strong> $\lim_{x\to 0}\dfrac{\sin x}{x} = \lim_{x\to 0}\dfrac{\cos x}{1} = 1$ &emsp; (or use Taylor: $\sin x = x - x^3/6 + \ldots$)<br><br>
+    <strong>(b)</strong> $\lim_{x\to\infty}\dfrac{x^n}{e^x} = 0$ for any fixed $n$ — apply L'Hôpital $n$ times: exponential dominates all polynomials.<br><br>
+    <strong>(c)</strong> $\lim_{x\to 0^+}x\ln x$: write $\dfrac{\ln x}{1/x} \to \dfrac{1/x}{-1/x^2} = -x \to 0$.<br><br>
+    <strong>(d)</strong> $\lim_{x\to 0}\dfrac{e^x - 1 - x}{x^2} = \lim\dfrac{e^x - 1}{2x} = \lim\dfrac{e^x}{2} = \dfrac{1}{2}$ &emsp; (matches Taylor coefficient)
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ When Not to Use L'Hôpital</div>
+    L'Hôpital is often <em>slower</em> than Taylor series for $x \to 0$. For $\lim_{x\to 0}\frac{\sin x - x + x^3/6}{x^5}$, expand the Taylor series directly — differentiating 5 times is tedious. In interviews, Taylor expansion is usually the cleaner approach for polynomial-order limits.
+  </div>
+
+  <h3 id="s1-taylor">1.4 Taylor &amp; Maclaurin Series</h3>
+
+  <h4>Taylor's Theorem</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Taylor Series (expansion around $x = a$)</div>
+    $$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n = f(a) + f'(a)(x-a) + \frac{f''(a)}{2!}(x-a)^2 + \cdots$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Maclaurin Series (expansion around $x = 0$)</div>
+    $$f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(0)}{n!}x^n = f(0) + f'(0)x + \frac{f''(0)}{2!}x^2 + \frac{f'''(0)}{3!}x^3 + \cdots$$
+  </div>
+
+  <h4>Taylor Remainder</h4>
+  <div class="fbox teal">
+    <div class="flabel">Lagrange Remainder (truncation error)</div>
+    $$R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}$$
+    for some $\xi$ between $a$ and $x$. The error is bounded by $|R_n| \leq \frac{M}{(n+1)!}|x-a|^{n+1}$ where $M = \max|f^{(n+1)}|$.
+  </div>
+
+  <h4>Essential Maclaurin Series (memorise all of these)</h4>
+
+  <table>
+    <tr><th>Function</th><th>Series</th><th>Radius of convergence</th></tr>
+    <tr><td>$e^x$</td><td>$\displaystyle\sum_{n=0}^{\infty}\frac{x^n}{n!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$</td><td>$R = \infty$</td></tr>
+    <tr><td>$\sin x$</td><td>$\displaystyle\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+1}}{(2n+1)!} = x - \frac{x^3}{6} + \frac{x^5}{120} - \cdots$</td><td>$R = \infty$</td></tr>
+    <tr><td>$\cos x$</td><td>$\displaystyle\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n}}{(2n)!} = 1 - \frac{x^2}{2} + \frac{x^4}{24} - \cdots$</td><td>$R = \infty$</td></tr>
+    <tr><td>$\ln(1+x)$</td><td>$\displaystyle\sum_{n=1}^{\infty}\frac{(-1)^{n+1}x^n}{n} = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots$</td><td>$R = 1$ ($-1 < x \leq 1$)</td></tr>
+    <tr><td>$\frac{1}{1-x}$</td><td>$\displaystyle\sum_{n=0}^{\infty}x^n = 1 + x + x^2 + x^3 + \cdots$</td><td>$R = 1$ ($|x| < 1$)</td></tr>
+    <tr><td>$\frac{1}{1+x}$</td><td>$\displaystyle\sum_{n=0}^{\infty}(-1)^n x^n = 1 - x + x^2 - x^3 + \cdots$</td><td>$R = 1$ ($|x| < 1$)</td></tr>
+    <tr><td>$(1+x)^\alpha$</td><td>$\displaystyle\sum_{n=0}^{\infty}\binom{\alpha}{n}x^n = 1 + \alpha x + \frac{\alpha(\alpha-1)}{2!}x^2 + \cdots$</td><td>$R=1$; $R=\infty$ if $\alpha\in\mathbb{N}$</td></tr>
+    <tr><td>$\arctan x$</td><td>$\displaystyle\sum_{n=0}^{\infty}\frac{(-1)^n x^{2n+1}}{2n+1} = x - \frac{x^3}{3} + \frac{x^5}{5} - \cdots$</td><td>$R = 1$ ($|x| \leq 1$)</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 How to Derive New Series Fast</div>
+    Don't differentiate from scratch — use algebra on known series:<br><br>
+    <strong>$e^{-x^2}$:</strong> Replace $x$ with $-x^2$ in $e^x$: $1 - x^2 + \frac{x^4}{2!} - \frac{x^6}{3!} + \cdots$ (used for $\int e^{-x^2}dx$ in statistics)<br><br>
+    <strong>$\ln(1-x)$:</strong> Replace $x$ with $-x$ in $\ln(1+x)$: $-x - \frac{x^2}{2} - \frac{x^3}{3} - \cdots$<br><br>
+    <strong>$\frac{1}{(1-x)^2}$:</strong> Differentiate $\frac{1}{1-x} = \sum x^n$ to get $\frac{1}{(1-x)^2} = \sum_{n=1}^\infty nx^{n-1}$<br><br>
+    <strong>Small-$x$ approximations</strong> (keep only leading terms):
+    $e^x \approx 1+x$, $\ln(1+x)\approx x$, $\sin x \approx x$, $\cos x \approx 1 - x^2/2$, $(1+x)^\alpha \approx 1 + \alpha x$.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Taylor in the Black-Scholes World</div>
+    Option price changes are approximated via Taylor expansion:
+    $$dV \approx \Delta\,dS + \frac{1}{2}\Gamma\,(dS)^2 + \Theta\,dt + \mathcal{V}\,d\sigma$$
+    where $\Delta = \partial V/\partial S$, $\Gamma = \partial^2 V/\partial S^2$, $\Theta = \partial V/\partial t$, $\mathcal{V} = \partial V/\partial \sigma$ are the Greeks — literally the first and second Taylor coefficients of the option price surface.
+  </div>
+
+  <h3 id="s1-implicit">1.5 Implicit Differentiation</h3>
+
+  <p>When $y$ is defined implicitly by $F(x,y) = 0$, differentiate both sides with respect to $x$, treating $y$ as a function of $x$ and applying the chain rule wherever $y$ appears.</p>
+
+  <div class="fbox gold">
+    $$\frac{dy}{dx} = -\frac{\partial F/\partial x}{\partial F/\partial y} = -\frac{F_x}{F_y}$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Examples</div>
+    <strong>(a) Unit circle:</strong> $x^2 + y^2 = 1$. Differentiate: $2x + 2y\frac{dy}{dx} = 0 \Rightarrow \frac{dy}{dx} = -\frac{x}{y}$.<br><br>
+    <strong>(b) Ellipse:</strong> $\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1 \Rightarrow \frac{dy}{dx} = -\frac{b^2 x}{a^2 y}$.<br><br>
+    <strong>(c) $x^y = y^x$:</strong> Take logs: $y\ln x = x\ln y$. Differentiate both sides: $\frac{dy}{dx}\ln x + \frac{y}{x} = \ln y + \frac{x}{y}\frac{dy}{dx}$. Solve for $\frac{dy}{dx}$.
+  </div>
+
+  <p><strong>Logarithmic differentiation</strong> (special case of implicit): for $y = f(x)^{g(x)}$, take $\ln y = g(x)\ln f(x)$, differentiate implicitly.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Log Differentiation: $y = x^x$</div>
+    $\ln y = x\ln x$. Differentiate: $\frac{1}{y}\frac{dy}{dx} = \ln x + x \cdot \frac{1}{x} = \ln x + 1$.<br>
+    $\frac{dy}{dx} = y(\ln x + 1) = x^x(1 + \ln x)$.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: INTEGRAL CALCULUS                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Integral Calculus</div>
+  </div>
+
+  <h3 id="s2-ftc">2.1 Fundamental Theorem of Calculus</h3>
+
+  <p>The FTC bridges differentiation and integration — the two operations are inverses of each other.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">FTC Part I — Integral as Anti-Derivative</div>
+    If $f$ is continuous on $[a,b]$ and $F'(x) = f(x)$, then:
+    $$\int_a^b f(x)\,dx = F(b) - F(a)$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">FTC Part II — Differentiation of Integral Function</div>
+    If $f$ is continuous, then $G(x) = \int_a^x f(t)\,dt$ is differentiable and:
+    $$G'(x) = \frac{d}{dx}\int_a^x f(t)\,dt = f(x)$$
+    More generally (Leibniz rule): $\frac{d}{dx}\int_{u(x)}^{v(x)} f(t)\,dt = f(v(x))v'(x) - f(u(x))u'(x)$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Leibniz Rule Example</div>
+    $\frac{d}{dx}\int_x^{x^2} e^{-t^2}\,dt = e^{-(x^2)^2} \cdot 2x - e^{-x^2} \cdot 1 = 2x e^{-x^4} - e^{-x^2}$
+  </div>
+
+  <h4>Standard Integrals</h4>
+  <table>
+    <tr><th>$f(x)$</th><th>$\int f(x)\,dx$</th><th>$f(x)$</th><th>$\int f(x)\,dx$</th></tr>
+    <tr><td>$x^n$ ($n\neq-1$)</td><td>$\frac{x^{n+1}}{n+1}+C$</td><td>$1/x$</td><td>$\ln|x|+C$</td></tr>
+    <tr><td>$e^x$</td><td>$e^x+C$</td><td>$e^{ax}$</td><td>$\frac{1}{a}e^{ax}+C$</td></tr>
+    <tr><td>$\sin x$</td><td>$-\cos x+C$</td><td>$\cos x$</td><td>$\sin x+C$</td></tr>
+    <tr><td>$\sec^2 x$</td><td>$\tan x+C$</td><td>$\frac{1}{1+x^2}$</td><td>$\arctan x+C$</td></tr>
+    <tr><td>$\frac{1}{\sqrt{1-x^2}}$</td><td>$\arcsin x+C$</td><td>$\ln x$</td><td>$x\ln x - x+C$</td></tr>
+  </table>
+
+  <h3 id="s2-ibp">2.2 Integration by Parts</h3>
+
+  <div class="fbox gold">
+    $$\int u\,dv = uv - \int v\,du \qquad \Leftrightarrow \qquad \int f(x)g'(x)\,dx = f(x)g(x) - \int f'(x)g(x)\,dx$$
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ LIATE Rule — How to Choose $u$</div>
+    Pick $u$ in this priority order: <strong>L</strong>ogarithms, <strong>I</strong>nverse trig, <strong>A</strong>lgebraic (polynomials), <strong>T</strong>rig, <strong>E</strong>xponentials. The part higher on this list becomes $u$ (it gets differentiated); the rest is $dv$ (it gets integrated).
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Examples</div>
+    <strong>(a) $\int x e^x\,dx$:</strong> $u = x$ (algebraic), $dv = e^x dx$. So $du = dx$, $v = e^x$.<br>
+    $= xe^x - \int e^x\,dx = xe^x - e^x + C = e^x(x-1) + C$<br><br>
+    <strong>(b) $\int \ln x\,dx$:</strong> $u = \ln x$ (logarithm), $dv = dx$. $du = dx/x$, $v = x$.<br>
+    $= x\ln x - \int x \cdot \frac{1}{x}\,dx = x\ln x - x + C$<br><br>
+    <strong>(c) $\int e^x\sin x\,dx$:</strong> Apply IBP twice (or use: result $I = e^x\sin x - e^x\cos x - I$, so $2I = e^x(\sin x - \cos x)$).<br>
+    $\int e^x\sin x\,dx = \frac{e^x(\sin x - \cos x)}{2} + C$<br><br>
+    <strong>(d) Reduction formula — $\int x^n e^x dx = x^n e^x - n\int x^{n-1}e^x dx$:</strong> Apply $n$ times to get $e^x\sum_{k=0}^{n}(-1)^k\frac{n!}{(n-k)!}x^{n-k}$.
+  </div>
+
+  <h3 id="s2-sub">2.3 Substitution</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">$u$-Substitution (reverse chain rule)</div>
+    Let $u = g(x)$, so $du = g'(x)\,dx$:
+    $$\int f(g(x))\,g'(x)\,dx = \int f(u)\,du$$
+    For definite integrals, transform limits: $\int_a^b f(g(x))g'(x)\,dx = \int_{g(a)}^{g(b)} f(u)\,du$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Examples</div>
+    <strong>(a)</strong> $\int 2x e^{x^2}\,dx$: $u = x^2$, $du = 2x\,dx$. $= \int e^u\,du = e^{x^2}+C$<br><br>
+    <strong>(b)</strong> $\int \frac{\ln x}{x}\,dx$: $u = \ln x$, $du = dx/x$. $= \int u\,du = \frac{(\ln x)^2}{2} + C$<br><br>
+    <strong>(c)</strong> $\int_0^1 x\sqrt{1-x^2}\,dx$: $u = 1-x^2$, $du = -2x\,dx$, limits $u: 1\to 0$.<br>
+    $= -\frac{1}{2}\int_1^0 \sqrt{u}\,du = \frac{1}{2}\int_0^1 u^{1/2}\,du = \frac{1}{2}\cdot\frac{2}{3} = \frac{1}{3}$<br><br>
+    <strong>(d) Trig substitution:</strong> $\int\sqrt{1-x^2}\,dx$: $x = \sin\theta$, $dx = \cos\theta\,d\theta$, $\sqrt{1-x^2} = \cos\theta$.<br>
+    $= \int\cos^2\theta\,d\theta = \frac{\theta}{2} + \frac{\sin 2\theta}{4} + C = \frac{\arcsin x}{2} + \frac{x\sqrt{1-x^2}}{2} + C$
+  </div>
+
+  <h3 id="s2-pf">2.4 Partial Fractions</h3>
+
+  <p>Decompose a rational function $\frac{P(x)}{Q(x)}$ (with $\deg P < \deg Q$) before integrating.</p>
+
+  <table>
+    <tr><th>Factor in $Q(x)$</th><th>Partial fraction term(s)</th></tr>
+    <tr><td>$(x-a)$</td><td>$\dfrac{A}{x-a}$</td></tr>
+    <tr><td>$(x-a)^k$</td><td>$\dfrac{A_1}{x-a} + \dfrac{A_2}{(x-a)^2} + \cdots + \dfrac{A_k}{(x-a)^k}$</td></tr>
+    <tr><td>$(x^2+bx+c)$ irreducible</td><td>$\dfrac{Ax+B}{x^2+bx+c}$</td></tr>
+    <tr><td>$(x^2+bx+c)^k$ irreducible</td><td>$\dfrac{A_1 x+B_1}{x^2+bx+c}+\cdots+\dfrac{A_k x+B_k}{(x^2+bx+c)^k}$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example</div>
+    $\displaystyle\int \frac{1}{x^2-1}\,dx = \int\frac{1}{(x-1)(x+1)}\,dx$<br><br>
+    Write $\dfrac{1}{(x-1)(x+1)} = \dfrac{A}{x-1}+\dfrac{B}{x+1}$. Multiply through: $1 = A(x+1)+B(x-1)$.<br>
+    $x=1$: $1 = 2A \Rightarrow A=1/2$. $\quad x=-1$: $1 = -2B \Rightarrow B=-1/2$.<br><br>
+    $\displaystyle\int\frac{1}{x^2-1}\,dx = \frac{1}{2}\ln|x-1| - \frac{1}{2}\ln|x+1| + C = \frac{1}{2}\ln\left|\frac{x-1}{x+1}\right|+C$
+  </div>
+
+  <h3 id="s2-imp">2.5 Improper Integrals</h3>
+
+  <p>Integrals where the interval is unbounded or the integrand has a singularity. Defined as limits:</p>
+
+  <div class="fbox gold">
+    $$\int_a^{\infty} f(x)\,dx = \lim_{b\to\infty}\int_a^b f(x)\,dx \qquad \int_{-\infty}^{\infty} f(x)\,dx = \int_{-\infty}^{c} + \int_{c}^{\infty} \text{ (both must converge)}$$
+  </div>
+
+  <h4>The $p$-Integral Test — Know This Cold</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Tail Integral $\int_1^\infty x^{-p}\,dx$</div>
+    $$\int_1^{\infty} \frac{1}{x^p}\,dx = \begin{cases} \frac{1}{p-1} & \text{if } p > 1 \text{ (converges)} \\ +\infty & \text{if } p \leq 1 \text{ (diverges)} \end{cases}$$
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Singularity at 0: $\int_0^1 x^{-p}\,dx$</div>
+    $$\int_0^{1} \frac{1}{x^p}\,dx = \begin{cases} \frac{1}{1-p} & \text{if } p < 1 \text{ (converges)} \\ +\infty & \text{if } p \geq 1 \text{ (diverges)} \end{cases}$$
+  </div>
+
+  <p>Together: the harmonic integral $\int_1^\infty 1/x\,dx$ diverges (at $\infty$), and $\int_0^1 1/x\,dx$ diverges (at 0). The borderline case $p=1$ always diverges at both ends.</p>
+
+  <h4>Key Improper Integrals for Quant Interviews</h4>
+
+  <table>
+    <tr><th>Integral</th><th>Value</th><th>Method / Connection</th></tr>
+    <tr><td>$\displaystyle\int_{-\infty}^{\infty} e^{-x^2}\,dx$</td><td>$\sqrt{\pi}$</td><td>Gaussian; square and polar coords</td></tr>
+    <tr><td>$\displaystyle\int_{-\infty}^{\infty} e^{-x^2/2}\,dx$</td><td>$\sqrt{2\pi}$</td><td>Normal PDF normalisation</td></tr>
+    <tr><td>$\displaystyle\int_0^{\infty} x^{n-1}e^{-x}\,dx$</td><td>$\Gamma(n)$</td><td>$= (n-1)!$ for integers; $\Gamma(1/2)=\sqrt{\pi}$</td></tr>
+    <tr><td>$\displaystyle\int_0^{\infty} e^{-\lambda x}\,dx$</td><td>$1/\lambda$</td><td>Exponential distribution normalisation</td></tr>
+    <tr><td>$\displaystyle\int_0^{\infty} x e^{-\lambda x}\,dx$</td><td>$1/\lambda^2$</td><td>Exponential mean via IBP</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The Gaussian Integral Proof</div>
+    Let $I = \int_{-\infty}^\infty e^{-x^2}dx$. Then $I^2 = \int\!\!\int e^{-(x^2+y^2)}dx\,dy$. Switch to polar: $x=r\cos\theta$, $y=r\sin\theta$, $dx\,dy = r\,dr\,d\theta$.<br><br>
+    $I^2 = \int_0^{2\pi}\int_0^\infty e^{-r^2}r\,dr\,d\theta = 2\pi\cdot\left[-\frac{1}{2}e^{-r^2}\right]_0^\infty = 2\pi\cdot\frac{1}{2} = \pi$<br>
+    So $I = \sqrt{\pi}$. This is one of the most elegant proofs in mathematics.
+  </div>
+
+  <h3 id="s2-geo">2.6 Geometric Series</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Finite Geometric Series</div>
+    $$\sum_{k=0}^{n-1} ar^k = a\frac{1-r^n}{1-r}, \qquad r \neq 1$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Infinite Geometric Series (Tail Sum)</div>
+    $$\sum_{k=0}^{\infty} ar^k = \frac{a}{1-r}, \qquad |r| < 1$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Derivation:</strong> Let $S = a + ar + ar^2 + \cdots + ar^{n-1}$. Then $rS = ar + ar^2 + \cdots + ar^n$. Subtract: $S - rS = a - ar^n$, so $S = a(1-r^n)/(1-r)$. As $n\to\infty$ and $|r|<1$: $r^n \to 0$, giving $S = a/(1-r)$.
+  </div>
+
+  <h4>Useful Variants Derived from Differentiating</h4>
+  <div class="fbox teal">
+    Differentiate $\displaystyle\frac{1}{1-x} = \sum_{n=0}^\infty x^n$ to get:
+    $$\frac{1}{(1-x)^2} = \sum_{n=1}^\infty n x^{n-1} = 1 + 2x + 3x^2 + \cdots \qquad (|x|<1)$$
+    $$\frac{1}{(1-x)^3} = \sum_{n=2}^\infty \frac{n(n-1)}{2} x^{n-2} \qquad (|x|<1)$$
+    Multiply both sides of $\frac{1}{(1-x)^2}$ by $x$:
+    $$\frac{x}{(1-x)^2} = \sum_{n=1}^\infty n x^n = x + 2x^2 + 3x^3 + \cdots$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Finance: Present Value as Geometric Series</div>
+    A perpetuity pays $C$ per period at discount rate $r$. PV $= \sum_{t=1}^\infty \frac{C}{(1+r)^t} = C\sum_{t=1}^\infty \left(\frac{1}{1+r}\right)^t = \frac{C/(1+r)}{1 - 1/(1+r)} = \frac{C}{r}$.<br><br>
+    Growing perpetuity (cash flow grows at $g < r$): $\text{PV} = \frac{C}{r-g}$ — the Gordon Growth Model.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: MULTIVARIABLE CALCULUS                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Multivariable Calculus</div>
+  </div>
+
+  <h3 id="s3-partial">3.1 Partial Derivatives</h3>
+
+  <p>For $f(x_1, \ldots, x_n)$, the partial derivative $\frac{\partial f}{\partial x_i}$ is the derivative with respect to $x_i$ treating all other variables as constants.</p>
+
+  <div class="fbox gold">
+    $$\frac{\partial f}{\partial x}\bigg|_{(a,b)} = \lim_{h\to 0}\frac{f(a+h,b) - f(a,b)}{h}$$
+  </div>
+
+  <h4>Clairaut's Theorem (Mixed Partials)</h4>
+  <p>For functions with continuous second partial derivatives:</p>
+  <div class="fbox">
+    $$\frac{\partial^2 f}{\partial x \partial y} = \frac{\partial^2 f}{\partial y \partial x}$$
+  </div>
+  <p>Mixed partials commute. This fails only for pathological functions — in any finance/physics application you will encounter, assume it holds.</p>
+
+  <h4>Total Differential</h4>
+  <p>For a small change $(dx, dy)$ from $(x, y)$:</p>
+  <div class="fbox gold">
+    $$df = \frac{\partial f}{\partial x}\,dx + \frac{\partial f}{\partial y}\,dy$$
+  </div>
+  <p>This is the multivariate analogue of $dy = f'(x)dx$. In stochastic calculus, this becomes Itô's lemma — see Section 5 of the full series (Stochastic Calculus).</p>
+
+  <h3 id="s3-grad">3.2 Gradient &amp; Hessian</h3>
+
+  <h4>Gradient</h4>
+  <div class="fbox gold">
+    $$\nabla f = \left(\frac{\partial f}{\partial x_1},\, \frac{\partial f}{\partial x_2},\, \ldots,\, \frac{\partial f}{\partial x_n}\right)$$
+  </div>
+  <p>The gradient is a vector that:</p>
+  <ul>
+    <li>Points in the direction of <em>steepest ascent</em> of $f$</li>
+    <li>Is perpendicular to the level curves $\{f = c\}$</li>
+    <li>Has magnitude $\|\nabla f\|$ equal to the rate of increase in the steepest direction</li>
+  </ul>
+
+  <p>The directional derivative in direction $\hat{\mathbf{u}}$ (unit vector) is $D_{\hat{\mathbf{u}}}f = \nabla f \cdot \hat{\mathbf{u}}$. Maximum when $\hat{\mathbf{u}} = \nabla f / \|\nabla f\|$.</p>
+
+  <h4>Hessian Matrix</h4>
+  <div class="fbox gold">
+    $$H_f = \nabla^2 f = \begin{pmatrix} f_{xx} & f_{xy} \\ f_{yx} & f_{yy} \end{pmatrix} = \begin{pmatrix} \frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\ \frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2} \end{pmatrix}$$
+  </div>
+  <p>By Clairaut's theorem, $H$ is symmetric. It encodes the curvature of $f$. The second-order Taylor expansion of $f$ around $\mathbf{a}$:</p>
+  <div class="fbox teal">
+    $$f(\mathbf{a}+\mathbf{h}) \approx f(\mathbf{a}) + \nabla f(\mathbf{a})^\top\mathbf{h} + \frac{1}{2}\mathbf{h}^\top H_f(\mathbf{a})\mathbf{h}$$
+  </div>
+
+  <h4>Second-Order Test for Critical Points of $f(x,y)$</h4>
+  <p>At a critical point $\nabla f = \mathbf{0}$, compute $D = \det(H) = f_{xx}f_{yy} - f_{xy}^2$:</p>
+
+  <table>
+    <tr><th>Condition</th><th>Conclusion</th></tr>
+    <tr><td>$D > 0$ and $f_{xx} > 0$</td><td>Local minimum ($H$ positive definite)</td></tr>
+    <tr><td>$D > 0$ and $f_{xx} < 0$</td><td>Local maximum ($H$ negative definite)</td></tr>
+    <tr><td>$D < 0$</td><td>Saddle point ($H$ indefinite)</td></tr>
+    <tr><td>$D = 0$</td><td>Inconclusive (degenerate case)</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Hessian = Curvature = LA Positive Definiteness</div>
+    This is exactly the positive definiteness test from Linear Algebra (Section 3): $H \succ 0 \Leftrightarrow$ all eigenvalues positive $\Leftrightarrow$ all leading minors positive $\Leftrightarrow$ $f_{xx}>0$ and $\det(H)>0$. In $n$ dimensions: $f$ has a local minimum at $\mathbf{a}$ iff $\nabla f(\mathbf{a})=0$ and $H_f(\mathbf{a}) \succ 0$.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Gamma as Second Derivative (Hessian Entry)</div>
+    Portfolio value $V(S_1, S_2, \ldots, S_n, t)$ depends on multiple asset prices. The full Taylor expansion to second order gives the multi-asset P&amp;L:
+    $$dV \approx \sum_i \Delta_i dS_i + \frac{1}{2}\sum_{i,j}\Gamma_{ij}\,dS_i\,dS_j + \Theta\,dt$$
+    The matrix $\Gamma_{ij} = \partial^2 V/\partial S_i\partial S_j$ is the <em>Gamma matrix</em> — the Hessian of $V$ with respect to asset prices.
+  </div>
+
+  <h3 id="s3-jac">3.3 Jacobian</h3>
+
+  <p>For a vector-valued map $\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^m$, the Jacobian matrix captures all first-order partial derivatives:</p>
+
+  <div class="fbox gold">
+    $$J_\mathbf{F} = \frac{\partial(F_1, \ldots, F_m)}{\partial(x_1, \ldots, x_n)} = \begin{pmatrix} \frac{\partial F_1}{\partial x_1} & \cdots & \frac{\partial F_1}{\partial x_n} \\ \vdots & \ddots & \vdots \\ \frac{\partial F_m}{\partial x_1} & \cdots & \frac{\partial F_m}{\partial x_n} \end{pmatrix}$$
+  </div>
+
+  <p>When $m = n$ (square Jacobian), $|\det J_\mathbf{F}|$ is the <em>volume scaling factor</em> — how much the transformation stretches or compresses volume locally. This appears in change-of-variables integration (§3.6).</p>
+
+  <h4>Chain Rule in Vector Form</h4>
+  <div class="fbox">
+    $$\frac{d\mathbf{F}(\mathbf{g}(\mathbf{x}))}{d\mathbf{x}} = J_\mathbf{F}(\mathbf{g}(\mathbf{x}))\cdot J_\mathbf{g}(\mathbf{x}) \qquad \text{(Jacobian of composition = product of Jacobians)}$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Polar Coordinates Jacobian</div>
+    $x = r\cos\theta$, $y = r\sin\theta$. $J = \begin{pmatrix}\cos\theta & -r\sin\theta\\\sin\theta & r\cos\theta\end{pmatrix}$<br><br>
+    $\det J = r\cos^2\theta + r\sin^2\theta = r$.<br><br>
+    Area element: $dx\,dy = |\det J|\,dr\,d\theta = r\,dr\,d\theta$ ✓
+  </div>
+
+  <h3 id="s3-lag">3.4 Lagrange Multipliers</h3>
+
+  <p>To find the extreme values of $f(\mathbf{x})$ subject to equality constraint $g(\mathbf{x}) = c$:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Lagrange Condition</div>
+    At the constrained optimum: $\nabla f = \lambda\,\nabla g$ for some scalar $\lambda$ (the Lagrange multiplier).<br><br>
+    Equivalently: solve the system $\nabla\mathcal{L} = 0$ where the Lagrangian is $\mathcal{L}(\mathbf{x},\lambda) = f(\mathbf{x}) - \lambda(g(\mathbf{x}) - c)$
+  </div>
+
+  <p><strong>Geometric intuition:</strong> At the optimum, the level curves of $f$ and the constraint surface $g = c$ are tangent to each other — they share the same tangent plane, so their gradients are parallel: $\nabla f \parallel \nabla g$.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example: Maximise $xy$ subject to $x+y = 10$</div>
+    $\mathcal{L} = xy - \lambda(x+y-10)$.<br><br>
+    $\frac{\partial\mathcal{L}}{\partial x} = y - \lambda = 0 \Rightarrow y = \lambda$<br>
+    $\frac{\partial\mathcal{L}}{\partial y} = x - \lambda = 0 \Rightarrow x = \lambda$<br>
+    $\frac{\partial\mathcal{L}}{\partial\lambda} = -(x+y-10) = 0 \Rightarrow x+y = 10$<br><br>
+    So $x = y = \lambda = 5$. Maximum value $= xy = 25$.<br><br>
+    <em>Interpretation of $\lambda$:</em> $\lambda = 5$ means "relaxing the constraint by 1 unit (to $x+y=11$) increases the maximum by approximately 5." The multiplier is the shadow price of the constraint.
+  </div>
+
+  <h4>Multiple Constraints</h4>
+  <p>For $k$ constraints $g_1(\mathbf{x}) = c_1, \ldots, g_k(\mathbf{x}) = c_k$:</p>
+  <div class="fbox">
+    $$\nabla f = \lambda_1\nabla g_1 + \lambda_2\nabla g_2 + \cdots + \lambda_k\nabla g_k$$
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Mean-Variance Portfolio Optimisation</div>
+    Minimise $\mathbf{w}^\top\Sigma\mathbf{w}$ (portfolio variance) subject to $\mathbf{1}^\top\mathbf{w} = 1$ (budget) and $\boldsymbol{\mu}^\top\mathbf{w} = \mu^*$ (target return). The Lagrangian is:
+    $$\mathcal{L} = \mathbf{w}^\top\Sigma\mathbf{w} - \lambda_1(\mathbf{1}^\top\mathbf{w}-1) - \lambda_2(\boldsymbol{\mu}^\top\mathbf{w}-\mu^*)$$
+    Setting $\partial\mathcal{L}/\partial\mathbf{w} = 0$: $2\Sigma\mathbf{w} = \lambda_1\mathbf{1} + \lambda_2\boldsymbol{\mu}$, so $\mathbf{w}^* = \frac{1}{2}\Sigma^{-1}(\lambda_1\mathbf{1}+\lambda_2\boldsymbol{\mu})$. This is the Markowitz efficient frontier derivation.
+  </div>
+
+  <h3 id="s3-multi">3.5 Double &amp; Triple Integrals</h3>
+
+  <h4>Double Integral</h4>
+  <div class="fbox gold">
+    $$\iint_R f(x,y)\,dA = \int_a^b\int_{c(x)}^{d(x)} f(x,y)\,dy\,dx = \int_c^d\int_{a(y)}^{b(y)} f(x,y)\,dx\,dy$$
+  </div>
+  <p><strong>Fubini's Theorem:</strong> For continuous $f$ on a rectangle $[a,b]\times[c,d]$, you may integrate in either order. For non-rectangular regions, the limits of the inner integral become functions of the outer variable.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example: Region bounded by $y=x$ and $y=x^2$</div>
+    Intersection: $x=x^2 \Rightarrow x=0,1$. For $0\leq x\leq 1$: $x^2 \leq y \leq x$.<br><br>
+    $\displaystyle\iint_R (x+y)\,dA = \int_0^1\int_{x^2}^{x}(x+y)\,dy\,dx = \int_0^1\left[xy+\frac{y^2}{2}\right]_{x^2}^{x}dx$<br>
+    $= \int_0^1\left(x^2+\frac{x^2}{2} - x^3 - \frac{x^4}{2}\right)dx = \int_0^1\left(\frac{3x^2}{2}-x^3-\frac{x^4}{2}\right)dx = \frac{1}{2} - \frac{1}{4} - \frac{1}{10} = \frac{3}{20}$
+  </div>
+
+  <h4>Triple Integral</h4>
+  <div class="fbox">
+    $$\iiint_V f\,dV = \int\!\int\!\int f(x,y,z)\,dx\,dy\,dz$$
+  </div>
+  <p>Used to compute volumes, masses, moments, and expected values over three-dimensional regions.</p>
+
+  <h3 id="s3-cov">3.6 Change of Variables</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Change of Variables Formula</div>
+    If $(u,v) = \mathbf{T}(x,y)$ is a bijection with non-zero Jacobian, and $R$ maps to $S$ under $\mathbf{T}^{-1}$:
+    $$\iint_R f(x,y)\,dx\,dy = \iint_S f(x(u,v),\,y(u,v))\,\left|\frac{\partial(x,y)}{\partial(u,v)}\right|\,du\,dv$$
+  </div>
+
+  <table>
+    <tr><th>Coordinates</th><th>Transformation</th><th>Jacobian $|J|$</th><th>Use case</th></tr>
+    <tr><td>Polar</td><td>$x=r\cos\theta,\;y=r\sin\theta$</td><td>$r$</td><td>Circular regions, Gaussian integral</td></tr>
+    <tr><td>Cylindrical</td><td>$x=r\cos\theta,\;y=r\sin\theta,\;z=z$</td><td>$r$</td><td>Cylinders, rotationally symmetric</td></tr>
+    <tr><td>Spherical</td><td>$x=\rho\sin\phi\cos\theta$, etc.</td><td>$\rho^2\sin\phi$</td><td>Spheres, angular integrals</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example: Area of Disk using Polar Coordinates</div>
+    Area of disk radius $R$: $\displaystyle\iint_{x^2+y^2\leq R^2}dx\,dy = \int_0^{2\pi}\int_0^R r\,dr\,d\theta = 2\pi\cdot\frac{R^2}{2} = \pi R^2$ ✓
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: DIFFERENTIAL EQUATIONS                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Differential Equations</div>
+  </div>
+
+  <h3 id="s4-sep">4.1 Separation of Variables</h3>
+
+  <p>A first-order ODE $\frac{dy}{dx} = f(x)g(y)$ is <em>separable</em> if the right side factors into a product of a function of $x$ and a function of $y$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Method</div>
+    $$\frac{dy}{g(y)} = f(x)\,dx \quad\Rightarrow\quad \int\frac{dy}{g(y)} = \int f(x)\,dx + C$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Key Examples</div>
+    <strong>(a) Exponential growth/decay:</strong> $\dfrac{dy}{dt} = ky$<br>
+    Separate: $\dfrac{dy}{y} = k\,dt \Rightarrow \ln|y| = kt + C \Rightarrow \boxed{y(t) = y_0 e^{kt}}$<br><br>
+    <strong>(b) Logistic growth:</strong> $\dfrac{dP}{dt} = rP\!\left(1-\dfrac{P}{K}\right)$<br>
+    Partial fractions: $\dfrac{1}{P(1-P/K)} = \dfrac{1}{P}+\dfrac{1/K}{1-P/K}$. Solution: $P(t) = \dfrac{K}{1 + \left(\frac{K-P_0}{P_0}\right)e^{-rt}}$<br><br>
+    <strong>(c) Brownian-type SDE (simple case):</strong> $\dfrac{dS}{S} = \mu\,dt$ (deterministic) $\Rightarrow S(t) = S_0 e^{\mu t}$
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Geometric Brownian Motion (Deterministic Skeleton)</div>
+    The deterministic limit of GBM satisfies $dS/S = \mu\,dt$, giving $S(t) = S_0 e^{\mu t}$. Adding the stochastic term: $dS = \mu S\,dt + \sigma S\,dW$. The solution is $S(t) = S_0\exp\!\left((\mu-\frac{1}{2}\sigma^2)t + \sigma W_t\right)$ — the $-\sigma^2/2$ Itô correction comes from the second-order term $\frac{1}{2}S_{SS}(dS)^2$ in Itô's lemma.
+  </div>
+
+  <h3 id="s4-lin1">4.2 Linear First-Order ODEs</h3>
+
+  <p>Standard form: $\dfrac{dy}{dx} + P(x)\,y = Q(x)$</p>
+
+  <h4>Integrating Factor Method</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Integrating Factor $\mu(x) = e^{\int P(x)\,dx}$</div>
+    Multiply both sides by $\mu(x)$:
+    $$\frac{d}{dx}\bigl[\mu(x)\,y\bigr] = \mu(x)\,Q(x)$$
+    Integrate both sides to get the general solution:
+    $$y(x) = \frac{1}{\mu(x)}\left[\int \mu(x)\,Q(x)\,dx + C\right]$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Why it works:</strong> $\mu(x) = e^{\int P\,dx}$ satisfies $\mu' = P\mu$. Then $\frac{d}{dx}[\mu y] = \mu'y + \mu y' = P\mu y + \mu(Q - Py) = \mu Q$. So the equation becomes $(\mu y)' = \mu Q$, which integrates directly.
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example</div>
+    Solve $y' + y = e^x$ (i.e.\ $P = 1$, $Q = e^x$).<br><br>
+    Integrating factor: $\mu = e^{\int 1\,dx} = e^x$.<br>
+    Multiply: $\frac{d}{dx}[e^x y] = e^x \cdot e^x = e^{2x}$.<br>
+    Integrate: $e^x y = \frac{e^{2x}}{2} + C$.<br>
+    Divide: $y = \frac{e^x}{2} + Ce^{-x}$.<br><br>
+    With $y(0) = 1$: $1 = \frac{1}{2} + C \Rightarrow C = \frac{1}{2}$. Solution: $y = \frac{1}{2}(e^x + e^{-x}) = \cosh x$.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Vasicek Interest Rate Model</div>
+    The Vasicek model has short rate $r_t$ satisfying: $dr_t = \kappa(\theta - r_t)\,dt + \sigma\,dW_t$.<br>
+    The deterministic part is a linear first-order ODE: $\frac{dr}{dt} = \kappa(\theta - r) = -\kappa r + \kappa\theta$ ($P(t) = \kappa$, $Q(t) = \kappa\theta$).<br>
+    Integrating factor $e^{\kappa t}$: $r_t = \theta + (r_0 - \theta)e^{-\kappa t}$ (mean reversion to $\theta$ at rate $\kappa$).
+  </div>
+
+  <h3 id="s4-2nd">4.3 Second-Order Linear ODEs &amp; Characteristic Equation</h3>
+
+  <p>Standard form with constant coefficients: $ay'' + by' + cy = f(x)$.</p>
+
+  <h4>Homogeneous Case: $ay'' + by' + cy = 0$</h4>
+  <p>Try $y = e^{rx}$. Substituting: $ar^2 e^{rx} + bre^{rx} + ce^{rx} = 0 \Rightarrow ar^2 + br + c = 0$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Characteristic Equation</div>
+    $$ar^2 + br + c = 0 \qquad\text{with roots}\qquad r = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$$
+  </div>
+
+  <table>
+    <tr><th>Discriminant $\Delta = b^2-4ac$</th><th>Roots</th><th>General Solution</th></tr>
+    <tr><td>$\Delta > 0$</td><td>Two distinct real $r_1, r_2$</td><td>$y = C_1 e^{r_1 x} + C_2 e^{r_2 x}$</td></tr>
+    <tr><td>$\Delta = 0$</td><td>Repeated real root $r$</td><td>$y = (C_1 + C_2 x)e^{rx}$</td></tr>
+    <tr><td>$\Delta < 0$</td><td>Complex $r = \alpha \pm \beta i$</td><td>$y = e^{\alpha x}(C_1\cos\beta x + C_2\sin\beta x)$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Examples</div>
+    <strong>(a)</strong> $y'' - 5y' + 6y = 0$: $r^2 - 5r + 6 = (r-2)(r-3) = 0$, roots $r_1=2,r_2=3$.<br>
+    Solution: $y = C_1 e^{2x} + C_2 e^{3x}$<br><br>
+    <strong>(b)</strong> $y'' - 4y' + 4y = 0$: $r^2-4r+4 = (r-2)^2=0$, repeated root $r=2$.<br>
+    Solution: $y = (C_1+C_2 x)e^{2x}$<br><br>
+    <strong>(c)</strong> $y'' + 4y = 0$: $r^2+4=0$, roots $r = \pm 2i$ ($\alpha=0$, $\beta=2$).<br>
+    Solution: $y = C_1\cos 2x + C_2\sin 2x$ (pure oscillation)<br><br>
+    <strong>(d)</strong> $y'' + 2y' + 5y = 0$: $r = \frac{-2\pm\sqrt{4-20}}{2} = -1\pm 2i$.<br>
+    Solution: $y = e^{-x}(C_1\cos 2x + C_2\sin 2x)$ (decaying oscillation)
+  </div>
+
+  <h4>Non-Homogeneous Case: $ay'' + by' + cy = f(x)$</h4>
+  <p>General solution = homogeneous solution $y_h$ + particular solution $y_p$: $y = y_h + y_p$.</p>
+
+  <table>
+    <tr><th>$f(x)$ form</th><th>Trial $y_p$</th></tr>
+    <tr><td>$e^{kx}$ (if $k$ not a root)</td><td>$Ae^{kx}$</td></tr>
+    <tr><td>$e^{kx}$ (if $k$ is a simple root)</td><td>$Axe^{kx}$</td></tr>
+    <tr><td>$\sin kx$ or $\cos kx$</td><td>$A\cos kx + B\sin kx$</td></tr>
+    <tr><td>$x^n$</td><td>$A_n x^n + \cdots + A_1 x + A_0$</td></tr>
+    <tr><td>$x^n e^{kx}$</td><td>$(A_n x^n + \cdots + A_0)e^{kx}$</td></tr>
+  </table>
+
+  <h3 id="s4-pde">4.4 Heat / Diffusion PDE &amp; the Black-Scholes Equation</h3>
+
+  <h4>The Heat Equation</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Heat (Diffusion) Equation</div>
+    $$\frac{\partial u}{\partial t} = \kappa\,\frac{\partial^2 u}{\partial x^2}$$
+  </div>
+
+  <p>$u(x,t)$ = temperature at position $x$ and time $t$. $\kappa > 0$ is the thermal diffusivity. The equation says: the rate of temperature change equals the spatial curvature of temperature (heat flows from hot to cold).</p>
+
+  <h4>Fundamental Solution (Heat Kernel)</h4>
+
+  <div class="fbox teal">
+    $$u(x,t) = \frac{1}{\sqrt{4\pi\kappa t}}\,e^{-x^2/(4\kappa t)} \qquad \text{(Gaussian spreading)}$$
+  </div>
+
+  <p>Starting from a concentrated source at $x=0, t=0$ (a delta function), the temperature profile spreads as a Gaussian with standard deviation $\sigma = \sqrt{2\kappa t}$. <strong>The width grows as $\sqrt{t}$</strong> — the signature of diffusion.</p>
+
+  <h4>The Black-Scholes PDE</h4>
+
+  <p>Under the risk-neutral measure, the stock price $S$ follows $dS = rS\,dt + \sigma S\,dW$. By Itô's lemma, any derivative $V(S,t)$ with payoff $V(S,T)$ must satisfy:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Black-Scholes PDE</div>
+    $$\frac{\partial V}{\partial t} + \frac{1}{2}\sigma^2 S^2\frac{\partial^2 V}{\partial S^2} + rS\frac{\partial V}{\partial S} - rV = 0$$
+    with terminal condition $V(S,T) = $ payoff
+  </div>
+
+  <h4>Reduction of BS PDE to the Heat Equation</h4>
+  <p>The Black-Scholes PDE is the heat equation in disguise. Under the change of variables:</p>
+
+  <div class="fbox teal">
+    $$x = \ln(S/K) + (r - \tfrac{1}{2}\sigma^2)(T-t), \quad \tau = \tfrac{1}{2}\sigma^2(T-t), \quad u = e^{\alpha x+\beta\tau}V$$
+    (with appropriately chosen $\alpha, \beta$) the BS PDE becomes: $\frac{\partial u}{\partial\tau} = \frac{\partial^2 u}{\partial x^2}$
+  </div>
+
+  <p>This is the heat equation with $\kappa = 1$, $\tau$ as time. The solution propagates forward in $\tau$ (backward in calendar time $t$). The Black-Scholes formula is the convolution of the Gaussian heat kernel with the terminal payoff function.</p>
+
+  <h4>Greeks as PDE Terms</h4>
+  <table>
+    <tr><th>Greek</th><th>Definition</th><th>Role in PDE</th></tr>
+    <tr><td>$\Theta$ (Theta)</td><td>$\partial V/\partial t$</td><td>Time decay term</td></tr>
+    <tr><td>$\Delta$ (Delta)</td><td>$\partial V/\partial S$</td><td>First-order $S$ derivative</td></tr>
+    <tr><td>$\Gamma$ (Gamma)</td><td>$\partial^2 V/\partial S^2$</td><td>Second-order $S$ derivative (curvature)</td></tr>
+    <tr><td colspan="3" style="font-style:italic; color:var(--text-dim);">BS PDE rewritten: $\Theta + \frac{1}{2}\sigma^2 S^2\Gamma + rS\Delta - rV = 0$, so $\Theta = rV - rS\Delta - \frac{1}{2}\sigma^2 S^2\Gamma$</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why the BS PDE Has a $\frac{1}{2}\sigma^2 S^2$ Term</div>
+    In Itô's lemma, $(dS)^2 = \sigma^2 S^2\,dt$ (the quadratic variation). The second-order Taylor term $\frac{1}{2}V_{SS}(dS)^2$ gives $\frac{1}{2}\sigma^2 S^2 V_{SS}\,dt$ — the $\frac{1}{2}$ is from the Taylor expansion, the $\sigma^2 S^2$ is from the variance of the log-normal process. This is the core of Itô's correction. Without the $\frac{1}{2}$ term, you'd be doing ordinary calculus, not stochastic calculus.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 BS PDE Derivation Sketch (Delta Hedging)</div>
+    <ol style="margin:0.3rem 0 0 1.3rem;">
+      <li>Hold a portfolio $\Pi = V - \Delta\cdot S$ (long derivative, short $\Delta$ shares)</li>
+      <li>By Itô's lemma: $dV = V_t\,dt + V_S\,dS + \frac{1}{2}V_{SS}(dS)^2$</li>
+      <li>Choose $\Delta = V_S$ to eliminate stochastic $dS$ term: $d\Pi = (V_t + \frac{1}{2}\sigma^2 S^2 V_{SS})\,dt$</li>
+      <li>No-arbitrage: $d\Pi = r\Pi\,dt = r(V - V_S S)\,dt$</li>
+      <li>Equate: $V_t + \frac{1}{2}\sigma^2 S^2 V_{SS} + rSV_S - rV = 0$ ✓</li>
+    </ol>
+  </div>
+
+  <h3 id="s4-fourier">4.5 Fourier Series Basics</h3>
+
+  <p>Any "reasonable" periodic function $f(x)$ with period $2L$ can be written as a sum of sines and cosines:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Fourier Series</div>
+    $$f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty}\left(a_n\cos\frac{n\pi x}{L} + b_n\sin\frac{n\pi x}{L}\right)$$
+    with coefficients (using orthogonality of $\sin$ and $\cos$):
+    $$a_n = \frac{1}{L}\int_{-L}^{L}f(x)\cos\frac{n\pi x}{L}\,dx, \qquad b_n = \frac{1}{L}\int_{-L}^{L}f(x)\sin\frac{n\pi x}{L}\,dx$$
+  </div>
+
+  <h4>Symmetry Shortcuts</h4>
+  <table>
+    <tr><th>Function type</th><th>Non-zero coefficients</th><th>Reason</th></tr>
+    <tr><td>Even: $f(-x) = f(x)$</td><td>Only $a_n$ (cosines)</td><td>$\sin$ is odd, product of even×odd = odd, integral over $[-L,L]$ = 0</td></tr>
+    <tr><td>Odd: $f(-x) = -f(x)$</td><td>Only $b_n$ (sines)</td><td>$\cos$ is even, product of odd×even = odd, integral = 0</td></tr>
+    <tr><td>Neither</td><td>Both $a_n$ and $b_n$</td><td>No simplification</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Square Wave (Classic Interview Example)</div>
+    $f(x) = \text{sgn}(\sin x)$ — the square wave, period $2\pi$, $f = +1$ on $(0,\pi)$, $f = -1$ on $(\pi, 2\pi)$. It is odd, so $a_n = 0$.<br><br>
+    $b_n = \frac{1}{\pi}\int_{-\pi}^{\pi}f(x)\sin(nx)\,dx = \frac{2}{\pi}\int_0^{\pi}\sin(nx)\,dx = \frac{2}{n\pi}\bigl[1-(-1)^n\bigr]$<br><br>
+    For odd $n$: $b_n = \frac{4}{n\pi}$. For even $n$: $b_n = 0$.<br><br>
+    $$f(x) = \frac{4}{\pi}\left(\sin x + \frac{\sin 3x}{3} + \frac{\sin 5x}{5} + \cdots\right) = \frac{4}{\pi}\sum_{k=0}^{\infty}\frac{\sin(2k+1)x}{2k+1}$$
+  </div>
+
+  <h4>Parseval's Theorem</h4>
+  <div class="fbox teal">
+    $$\frac{1}{L}\int_{-L}^{L}[f(x)]^2\,dx = \frac{a_0^2}{2} + \sum_{n=1}^{\infty}(a_n^2 + b_n^2)$$
+  </div>
+  <p>"Energy" in the function equals "energy" in the Fourier coefficients. Applied to the square wave (with $f^2 = 1$ a.e.):
+  $1 = \frac{16}{\pi^2}\sum_{k=0}^\infty\frac{1}{(2k+1)^2} \Rightarrow \sum_{k=0}^\infty\frac{1}{(2k+1)^2} = \frac{\pi^2}{8}$.</p>
+
+  <h4>Connection to the Heat Equation</h4>
+  <p>Fourier series are the natural way to solve the heat equation with initial conditions. Writing $u(x,0) = f(x)$ as a Fourier series $\sum_n c_n\sin(n\pi x/L)$, each mode evolves independently:</p>
+  <div class="fbox">
+    $$u(x,t) = \sum_{n=1}^{\infty} c_n\,e^{-\kappa n^2\pi^2 t/L^2}\sin\!\left(\frac{n\pi x}{L}\right)$$
+  </div>
+  <p>Higher frequency modes decay faster (factor $e^{-\kappa n^2 \cdot}$) — the heat equation acts as a <em>low-pass filter</em>. This is the Fourier method for solving PDEs.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Fourier Transform in Finance</div>
+    The Fourier transform (continuous-frequency generalisation of Fourier series) is used in option pricing. The characteristic function $\phi(\omega) = E[e^{i\omega \ln S_T}]$ has a closed form for many models (Heston, VG, CGMY). Carr-Madan (1999) shows how to recover option prices via inverse Fourier transform — transforming a convolution integral into a pointwise product, dramatically speeding up calibration.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Differentiation Rules at a Glance</h3>
+  <table>
+    <tr><th>Rule</th><th>Formula</th><th>Key Note</th></tr>
+    <tr><td>Product</td><td>$(fg)' = f'g + fg'$</td><td>Proved from limit definition</td></tr>
+    <tr><td>Chain</td><td>$(f\circ g)' = f'(g)\cdot g'$</td><td>Leibniz: $dy/dx = (dy/du)(du/dx)$</td></tr>
+    <tr><td>Quotient</td><td>$(f/g)' = (f'g-fg')/g^2$</td><td>Derive from product rule; no need to memorise</td></tr>
+    <tr><td>Implicit</td><td>$dy/dx = -F_x/F_y$</td><td>For $F(x,y)=0$</td></tr>
+    <tr><td>Log diff</td><td>$(g\ln f)' \cdot y = y'$</td><td>For $y=f^g$: take $\ln y = g\ln f$</td></tr>
+    <tr><td>Gradient</td><td>$\nabla f = (f_{x_1},\ldots,f_{x_n})$</td><td>Points in direction of steepest ascent</td></tr>
+    <tr><td>Hessian test</td><td>$D = f_{xx}f_{yy}-f_{xy}^2$</td><td>$D>0, f_{xx}>0$: min; $D>0, f_{xx}<0$: max; $D<0$: saddle</td></tr>
+    <tr><td>Lagrange</td><td>$\nabla f = \lambda\nabla g$</td><td>Shadow price interpretation for $\lambda$</td></tr>
+  </table>
+
+  <h3>Integration Techniques Decision Tree</h3>
+  <table>
+    <tr><th>Integrand form</th><th>Technique</th><th>Example</th></tr>
+    <tr><td>$f(g(x))g'(x)$</td><td>Substitution $u=g(x)$</td><td>$\int 2xe^{x^2}dx$</td></tr>
+    <tr><td>$f(x)g(x)$ (product)</td><td>Integration by parts (LIATE)</td><td>$\int x\ln x\,dx$</td></tr>
+    <tr><td>$P(x)/Q(x)$ rational</td><td>Partial fractions</td><td>$\int\frac{1}{x^2-1}dx$</td></tr>
+    <tr><td>$\sqrt{a^2-x^2}$</td><td>Trig sub $x=a\sin\theta$</td><td>$\int\sqrt{1-x^2}dx$</td></tr>
+    <tr><td>$\sqrt{x^2+a^2}$</td><td>Trig sub $x=a\tan\theta$</td><td>$\int\frac{1}{\sqrt{x^2+1}}dx$</td></tr>
+    <tr><td>$e^{ax}\cdot\sin bx$ or $\cos bx$</td><td>IBP twice, solve for integral</td><td>$\int e^x\sin x\,dx$</td></tr>
+  </table>
+
+  <h3>Essential Series &amp; Limits</h3>
+  <table>
+    <tr><th>Result</th><th>Formula</th><th>Key Use</th></tr>
+    <tr><td>$e^x$ Maclaurin</td><td>$\sum_{n=0}^\infty x^n/n!$</td><td>Everywhere; $e^{-x^2}$ gives Gaussian</td></tr>
+    <tr><td>$\ln(1+x)$</td><td>$x - x^2/2 + x^3/3 - \cdots$, $|x|\leq 1$</td><td>Log approximations; LLN proof</td></tr>
+    <tr><td>$(1+x)^\alpha$</td><td>$1+\alpha x+\frac{\alpha(\alpha-1)}{2}x^2+\cdots$</td><td>Binomial expansion; $(1+x)^{-1}\approx 1-x$</td></tr>
+    <tr><td>Geometric</td><td>$\sum ar^n = a/(1-r)$, $|r|<1$</td><td>Perpetuity PV, probability sums</td></tr>
+    <tr><td>$\lim_{x\to0}\frac{\sin x}{x}$</td><td>$1$</td><td>L'Hôpital or Taylor</td></tr>
+    <tr><td>$\lim_{n\to\infty}(1+1/n)^n$</td><td>$e$</td><td>Continuous compounding</td></tr>
+    <tr><td>Gaussian integral</td><td>$\int_{-\infty}^\infty e^{-x^2}dx = \sqrt{\pi}$</td><td>Proved by polar coordinates</td></tr>
+    <tr><td>$p$-integral (tail)</td><td>$\int_1^\infty x^{-p}dx = \frac{1}{p-1}$ iff $p>1$</td><td>Convergence tests</td></tr>
+    <tr><td>Small-angle approx</td><td>$\sin x\approx x$, $\cos x\approx 1-x^2/2$</td><td>Physics, Fourier analysis</td></tr>
+  </table>
+
+  <h3>ODE Solution Methods</h3>
+  <table>
+    <tr><th>ODE type</th><th>Method</th><th>Solution form</th></tr>
+    <tr><td>$y' = f(x)g(y)$</td><td>Separation of variables</td><td>$\int dy/g(y) = \int f(x)dx$</td></tr>
+    <tr><td>$y' + P(x)y = Q(x)$</td><td>Integrating factor $\mu = e^{\int P\,dx}$</td><td>$y = \frac{1}{\mu}\int\mu Q\,dx$</td></tr>
+    <tr><td>$ay''+by'+cy=0$, $\Delta>0$</td><td>Characteristic equation</td><td>$C_1 e^{r_1 x}+C_2 e^{r_2 x}$</td></tr>
+    <tr><td>$ay''+by'+cy=0$, $\Delta=0$</td><td>Repeated root $r$</td><td>$(C_1+C_2 x)e^{rx}$</td></tr>
+    <tr><td>$ay''+by'+cy=0$, $\Delta<0$</td><td>Complex roots $\alpha\pm\beta i$</td><td>$e^{\alpha x}(C_1\cos\beta x+C_2\sin\beta x)$</td></tr>
+    <tr><td>$ay''+by'+cy=f(x)$</td><td>$y_h + y_p$ (undetermined coefficients)</td><td>Particular solution by guessing</td></tr>
+    <tr><td>Heat PDE $u_t = \kappa u_{xx}$</td><td>Fourier series / heat kernel</td><td>$u \sim$ Gaussian spreading</td></tr>
+    <tr><td>BS PDE</td><td>Change of variables to heat equation</td><td>BS formula = Gaussian convolution</td></tr>
+  </table>
+
+  <h3>The Calculus-Finance Map</h3>
+  <table>
+    <tr><th>Finance Concept</th><th>Calculus Tool</th><th>Key Formula</th></tr>
+    <tr><td>Option Greeks</td><td>Partial derivatives</td><td>$\Delta=V_S$, $\Gamma=V_{SS}$, $\Theta=V_t$</td></tr>
+    <tr><td>Taylor P&amp;L</td><td>Taylor series (2nd order)</td><td>$dV\approx\Delta\,dS+\frac{1}{2}\Gamma(dS)^2+\Theta\,dt$</td></tr>
+    <tr><td>Black-Scholes formula</td><td>Gaussian integral + change of vars</td><td>$C = S\Phi(d_1) - Ke^{-rT}\Phi(d_2)$</td></tr>
+    <tr><td>BS PDE derivation</td><td>Itô's lemma + total differential</td><td>$V_t+\frac{1}{2}\sigma^2S^2V_{SS}+rSV_S-rV=0$</td></tr>
+    <tr><td>Stock price model (SDE)</td><td>Separation of variables</td><td>$dS/S=\mu\,dt+\sigma\,dW$, $S=S_0e^{\mu t}$ (det.)</td></tr>
+    <tr><td>Vasicek mean reversion</td><td>Linear 1st-order ODE</td><td>$r_t=\theta+(r_0-\theta)e^{-\kappa t}$</td></tr>
+    <tr><td>Portfolio optimisation</td><td>Lagrange multipliers</td><td>$\min\mathbf{w}^\top\Sigma\mathbf{w}$ s.t.\ constraints</td></tr>
+    <tr><td>Present value (perpetuity)</td><td>Geometric series</td><td>PV $= C/r$</td></tr>
+    <tr><td>Volatility drag</td><td>Jensen + Taylor expansion</td><td>$E[\ln S_T] = \ln S_0+(\mu-\sigma^2/2)T$</td></tr>
+    <tr><td>Fourier option pricing</td><td>Fourier transform</td><td>Carr-Madan: $C = $ inverse FT of $\phi(\omega)$</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 4 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Product/Chain/Quotient Rules · Maxima &amp; Minima · L'Hôpital · Taylor &amp; Maclaurin Series · Implicit Differentiation · FTC · IBP · Substitution · Partial Fractions · Improper Integrals · Geometric Series · Partial Derivatives · Gradient &amp; Hessian · Jacobian · Lagrange Multipliers · Double &amp; Triple Integrals · Change of Variables · Separation of Variables · Linear 1st-Order ODEs · 2nd-Order ODEs · Heat/Diffusion PDE · Black-Scholes Connection · Fourier Series
+</footer>
+
+</body>
+</html>

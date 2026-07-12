@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programming &amp; Algorithms — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0c0a08;
+    --bg2:        #181410;
+    --bg3:        #221e18;
+    --border:     #3a3020;
+    --coral:      #f97316;
+    --coral2:     #fdba74;
+    --coral-dim:  #7c2d12;
+    --text:       #f0e8dc;
+    --text-dim:   #a08060;
+    --gold:       #c9a84c;
+    --gold2:      #e8c97a;
+    --gold-dim:   #7a6030;
+    --violet:     #a78bfa;
+    --green:      #4ade80;
+    --rose:       #fb7185;
+    --sky:        #38bdf8;
+    --teal:       #2dd4bf;
+    --amber:      #fbbf24;
+    --lime:       #a3e635;
+    --pink:       #f472b6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #f9731620, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--coral-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--coral2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--coral);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--coral);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--coral2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--coral-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--coral2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--coral); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--coral);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.amber  { border-left-color: var(--amber); }
+  .fbox.lime   { border-left-color: var(--lime); }
+  .fbox.pink   { border-left-color: var(--pink); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #0a0e14;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--lime);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c8d3e8;
+  }
+  .code-block .kw  { color: var(--coral2); }
+  .code-block .fn  { color: var(--amber); }
+  .code-block .cm  { color: #5a6a7a; font-style: italic; }
+  .code-block .st  { color: var(--lime); }
+  .code-block .nm  { color: var(--sky); }
+  .code-block .op  { color: var(--coral); }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1a1408; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+  .callout.algo    { background: #0a1a0a; border-left: 3px solid var(--lime); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+  .callout.algo    .ctitle { color: var(--lime); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--coral); border-bottom: 1px solid var(--coral-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--coral-dim); color: var(--coral2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── COMPLEXITY GRID ── */
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .cx-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.8rem;
+    text-align: center;
+  }
+  .cx-cell .cx-name  { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--coral2); display: block; margin-bottom: 0.25rem; letter-spacing: 0.04em; }
+  .cx-cell .cx-big   { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: var(--amber); }
+  .cx-cell .cx-label { font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 0.15rem; }
+
+  /* ── ALGO CARD ── */
+  .algo-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .algo-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.05rem; color: var(--coral2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── DS GRID ── */
+  .ds-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin: 1rem 0;
+  }
+  .ds-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+  }
+  .ds-cell h5 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    color: var(--coral2);
+  }
+  .ds-cell p { font-size: 0.88rem; color: var(--text-dim); margin: 0; }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--coral2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.55rem; }
+    .cx-grid { grid-template-columns: repeat(2, 1fr); }
+    .ds-grid  { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 8 of 9</div>
+  <h1>Programming &amp; Algorithms</h1>
+  <div class="subtitle">Data Structures · Complexity · Algorithmic Techniques · Quant Coding · Number Theory</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Data Structures &amp; Complexity</a>
+      <ul class="sub">
+        <li><a href="#s1-bigo">Big-O Notation &amp; Complexity Classes</a></li>
+        <li><a href="#s1-arrays">Arrays &amp; Hash Maps</a></li>
+        <li><a href="#s1-heaps">Heaps &amp; Priority Queues</a></li>
+        <li><a href="#s1-trees">Trees &amp; Graphs</a></li>
+        <li><a href="#s1-sort">Sorting Algorithms</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Algorithmic Techniques</a>
+      <ul class="sub">
+        <li><a href="#s2-dp">Dynamic Programming</a></li>
+        <li><a href="#s2-recur">Linear Recurrences &amp; Generating Functions</a></li>
+        <li><a href="#s2-divide">Divide &amp; Conquer</a></li>
+        <li><a href="#s2-two">Two-Pointer &amp; Sliding Window</a></li>
+        <li><a href="#s2-bfsdfs">BFS &amp; DFS</a></li>
+        <li><a href="#s2-memo">Memoisation vs Tabulation</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Quant Coding Problems</a>
+      <ul class="sub">
+        <li><a href="#s3-stoch">Simulating Stochastic Processes</a></li>
+        <li><a href="#s3-mc">Monte Carlo &amp; Binomial Distribution</a></li>
+        <li><a href="#s3-matrix">Cache-Efficient Matrix Operations</a></li>
+        <li><a href="#s3-option">Option Pricing via Binomial Tree</a></li>
+        <li><a href="#s3-markov">Implementing Markov Chains</a></li>
+        <li><a href="#s3-rng">Random Number Generation</a></li>
+        <li><a href="#s3-bit">Bit Manipulation &amp; Modular Arithmetic</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Number Theory &amp; Discrete Math</a>
+      <ul class="sub">
+        <li><a href="#s4-mod">Modular Arithmetic</a></li>
+        <li><a href="#s4-gcd">GCD &amp; Euclidean Algorithm</a></li>
+        <li><a href="#s4-binom">Binomial Theorem mod $n$</a></li>
+        <li><a href="#s4-rec">Linear Recurrences &amp; Characteristic Roots</a></li>
+        <li><a href="#s4-graph">Graph Theory Basics</a></li>
+        <li><a href="#s4-gen">Generating Functions</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: DATA STRUCTURES & COMPLEXITY                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Data Structures &amp; Complexity</div>
+  </div>
+
+  <p>Quant interviews routinely include algorithmic coding problems — the same core material tested at top tech firms, but with a finance lens. Understanding complexity lets you reason about whether your simulation, calibration loop, or matrix computation will finish in time on real data.</p>
+
+  <h3 id="s1-bigo">1.1 Big-O Notation &amp; Complexity Classes</h3>
+
+  <p>Big-O notation describes the asymptotic upper bound on resource usage (time or space) as input size $n \to \infty$, ignoring constants and lower-order terms.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Formal Definition</div>
+    $f(n) = O(g(n))$ iff $\exists\, c > 0, n_0$ such that $f(n) \leq c\,g(n)$ for all $n \geq n_0$.<br>
+    Tight bound: $f(n) = \Theta(g(n))$ iff $f = O(g)$ and $f = \Omega(g)$ simultaneously.
+  </div>
+
+  <h4>The Complexity Hierarchy — Memorise This Order</h4>
+  <div class="cx-grid">
+    <div class="cx-cell">
+      <span class="cx-name">Constant</span>
+      <span class="cx-big">O(1)</span>
+      <span class="cx-label">Hash lookup, array index</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Logarithmic</span>
+      <span class="cx-big">O(log n)</span>
+      <span class="cx-label">Binary search, balanced BST</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Linear</span>
+      <span class="cx-big">O(n)</span>
+      <span class="cx-label">Single scan, LLN estimator</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Linearithmic</span>
+      <span class="cx-big">O(n log n)</span>
+      <span class="cx-label">Merge sort, FFT</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Quadratic</span>
+      <span class="cx-big">O(n²)</span>
+      <span class="cx-label">Naive covariance, bubble sort</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Cubic</span>
+      <span class="cx-big">O(n³)</span>
+      <span class="cx-label">Matrix multiply, LU decomp</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Exponential</span>
+      <span class="cx-big">O(2ⁿ)</span>
+      <span class="cx-label">Combinatorial search, brute force</span>
+    </div>
+    <div class="cx-cell">
+      <span class="cx-name">Factorial</span>
+      <span class="cx-big">O(n!)</span>
+      <span class="cx-label">All permutations</span>
+    </div>
+  </div>
+
+  <h4>Complexity Rules of Thumb</h4>
+  <table>
+    <tr><th>Rule</th><th>Example</th></tr>
+    <tr><td>Nested loops multiply: two loops of $n$ each → $O(n^2)$</td><td>Naive covariance matrix computation</td></tr>
+    <tr><td>Sequential blocks add, biggest dominates: $O(n^2) + O(n) = O(n^2)$</td><td>Sort then scan</td></tr>
+    <tr><td>Halving at each level → $O(\log n)$; halving $n$ times → $O(n \log n)$</td><td>Merge sort recurrence $T(n) = 2T(n/2) + O(n)$</td></tr>
+    <tr><td>Space complexity counts peak memory, not total allocations</td><td>In-place sort $O(1)$ space vs merge sort $O(n)$</td></tr>
+    <tr><td>Amortised: some operations are occasionally expensive but cheap on average</td><td>Dynamic array append: $O(1)$ amortised despite occasional $O(n)$ resize</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Where Complexity Bites You</div>
+    A naive sample covariance matrix for $p$ assets over $n$ observations costs $O(np^2)$. With $p=500$ assets and $n=252$ days: $\approx 31M$ operations — fast. But calibrating a full Heston model on a 50-strike × 10-maturity grid, recomputing the full covariance at each iteration of a 1000-step optimisation: complexity compounds and runtime explodes. Knowing asymptotic behaviour is how you pre-empt production performance disasters.
+  </div>
+
+  <h3 id="s1-arrays">1.2 Arrays &amp; Hash Maps</h3>
+
+  <div class="ds-grid">
+    <div class="ds-cell">
+      <h5>Dynamic Array (List / Vec)</h5>
+      <p>Contiguous memory; random access $O(1)$; append amortised $O(1)$; insert/delete at middle $O(n)$. Cache-friendly — sequential access is very fast due to spatial locality.</p>
+    </div>
+    <div class="ds-cell">
+      <h5>Hash Map (Dict / unordered_map)</h5>
+      <p>Key-value store; average $O(1)$ insert, lookup, delete. Worst case $O(n)$ (all keys collide). Load factor $\leq 0.75$ keeps expected $O(1)$.</p>
+    </div>
+    <div class="ds-cell">
+      <h5>Sorted Array / Binary Search</h5>
+      <p>Search in $O(\log n)$; insert requires $O(n)$ shift. Use when data is static or writes are rare; optimal for ordered iteration and range queries.</p>
+    </div>
+    <div class="ds-cell">
+      <h5>Deque / Ring Buffer</h5>
+      <p>$O(1)$ push/pop at both ends. Used for sliding-window maximum, BFS queues, and real-time order books where front and back operations are frequent.</p>
+    </div>
+  </div>
+
+  <h4>Hash Map Pattern — Two-Sum and Frequency Counting</h4>
+  <p>The hash map is the single most versatile data structure for interview problems. Any problem asking "have I seen this value before?" or "what is the count of X?" reduces to a hash map:</p>
+
+  <div class="code-block"><span class="cm"># Two-sum: find indices i,j where arr[i] + arr[j] == target  O(n) time, O(n) space</span>
+<span class="kw">def</span> <span class="fn">two_sum</span>(arr, target):
+    seen = {}                         <span class="cm"># value → index</span>
+    <span class="kw">for</span> i, x <span class="kw">in</span> <span class="fn">enumerate</span>(arr):
+        complement = target - x
+        <span class="kw">if</span> complement <span class="kw">in</span> seen:
+            <span class="kw">return</span> (seen[complement], i)
+        seen[x] = i
+    <span class="kw">return</span> <span class="nm">None</span></div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Hash Map Interview Pattern</div>
+    Whenever you find yourself writing a nested loop to compare every pair of elements ($O(n^2)$), ask: "can I store something in a hash map on the first pass so I can look it up in $O(1)$ on the second pass?" This pattern reduces an enormous class of $O(n^2)$ problems to $O(n)$.
+  </div>
+
+  <h3 id="s1-heaps">1.3 Heaps &amp; Priority Queues</h3>
+
+  <p>A <strong>binary heap</strong> is a complete binary tree stored as an array, satisfying the heap property: every parent is smaller (min-heap) or larger (max-heap) than its children.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Heap Operations</div>
+    $$\text{Insert (push):} \quad O(\log n) \qquad \text{Extract min/max (pop):} \quad O(\log n)$$
+    $$\text{Peek min/max:} \quad O(1) \qquad \text{Build heap from array:} \quad O(n)$$
+  </div>
+
+  <p>In an array representation with 0-indexing: the left child of node $i$ is at $2i+1$, right child at $2i+2$, and parent at $\lfloor(i-1)/2\rfloor$.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Classic Heap Problems</div>
+    <strong>$k$-th largest element in a stream:</strong> maintain a min-heap of size $k$. If new element $>$ heap top, push and pop. Top of heap is the $k$-th largest. Cost: $O(n \log k)$.<br><br>
+    <strong>Merge $k$ sorted lists:</strong> use a min-heap of size $k$, each storing (value, list_index, position). Pop min, push next element from same list. Cost: $O(N \log k)$ where $N$ = total elements.<br><br>
+    <strong>Running median:</strong> maintain two heaps — a max-heap for the lower half and a min-heap for the upper half. Keep sizes balanced. Median is the top(s) of the heap(s). Cost: $O(\log n)$ per insertion, $O(1)$ for median.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Priority Queues in Order Books</div>
+    An electronic order book matches buy and sell orders. Bids (buys) are stored in a max-heap (highest price first); asks (sells) in a min-heap (lowest price first). Matching: if top of bid heap ≥ top of ask heap, execute the trade. Insert/cancel: $O(\log n)$. Best bid/ask: $O(1)$. Real exchange matching engines use more sophisticated structures (price-level maps + FIFO queues within each level), but the heap-based model captures the core logic.
+  </div>
+
+  <h3 id="s1-trees">1.4 Trees &amp; Graphs</h3>
+
+  <h4>Binary Search Tree (BST)</h4>
+  <p>Each node: left subtree contains smaller keys, right subtree contains larger keys. In-order traversal visits nodes in sorted order.</p>
+
+  <table>
+    <tr><th>Operation</th><th>Average</th><th>Worst (unbalanced)</th></tr>
+    <tr><td>Search / Insert / Delete</td><td>$O(\log n)$</td><td>$O(n)$ — degenerate tree (sorted input)</td></tr>
+    <tr><td>Min / Max</td><td>$O(\log n)$</td><td>$O(n)$</td></tr>
+    <tr><td>In-order traversal</td><td>$O(n)$</td><td>$O(n)$</td></tr>
+  </table>
+
+  <p><strong>Self-balancing BSTs</strong> (AVL, Red-Black trees) guarantee $O(\log n)$ worst case by rebalancing after insertions/deletions. Used in C++ <code>std::map</code> / Java <code>TreeMap</code>.</p>
+
+  <h4>Graph Representations</h4>
+  <table>
+    <tr><th>Representation</th><th>Space</th><th>Edge lookup</th><th>Iterate neighbours</th><th>Best for</th></tr>
+    <tr><td>Adjacency matrix</td><td>$O(V^2)$</td><td>$O(1)$</td><td>$O(V)$</td><td>Dense graphs; easy matrix algebra</td></tr>
+    <tr><td>Adjacency list</td><td>$O(V+E)$</td><td>$O(\deg(v))$</td><td>$O(\deg(v))$</td><td>Sparse graphs; most practical cases</td></tr>
+    <tr><td>Edge list</td><td>$O(E)$</td><td>$O(E)$</td><td>$O(E)$</td><td>Minimum spanning tree algorithms</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Graph Terminology in Quant Contexts</div>
+    <ul>
+      <li><strong>DAG (Directed Acyclic Graph):</strong> used to represent dependency chains in computational graphs for automatic differentiation and derivative payoff calculation</li>
+      <li><strong>Bipartite graph:</strong> arises in matching problems — e.g.\ matching traders to execution venues</li>
+      <li><strong>Weighted graph:</strong> correlation matrix defines edge weights in a correlation network; minimum spanning tree extracts the dominant factor structure</li>
+      <li><strong>Strongly connected components:</strong> in market microstructure, cycles of cross-holding between entities</li>
+    </ul>
+  </div>
+
+  <h3 id="s1-sort">1.5 Sorting Algorithms</h3>
+
+  <table>
+    <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th></tr>
+    <tr><td>Bubble sort</td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr>
+    <tr><td>Insertion sort</td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr>
+    <tr><td>Merge sort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n)$</td><td>Yes</td></tr>
+    <tr><td>Quick sort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n^2)$ (bad pivot)</td><td>$O(\log n)$</td><td>No</td></tr>
+    <tr><td>Heap sort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(1)$</td><td>No</td></tr>
+    <tr><td>Counting sort</td><td>$O(n+k)$</td><td>$O(n+k)$</td><td>$O(n+k)$</td><td>$O(k)$</td><td>Yes</td></tr>
+    <tr><td>Radix sort</td><td>$O(nk)$</td><td>$O(nk)$</td><td>$O(nk)$</td><td>$O(n+k)$</td><td>Yes</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Sorting Lower Bound — $O(n \log n)$ is Optimal</div>
+    For comparison-based sorting, any algorithm must make $\Omega(n \log n)$ comparisons in the worst case. Proof: sorting $n$ elements corresponds to identifying one of $n!$ permutations. A binary decision tree needs $\lceil\log_2 n!\rceil \approx n\log_2 n - n\log_2 e$ leaves, giving a height of $\Omega(n\log n)$. Counting sort and radix sort bypass this by using non-comparison operations (direct indexing), but require bounded integer keys.
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Merge Sort — Know the Recurrence Cold</div>
+    Merge sort splits into two halves, sorts each, merges: $T(n) = 2T(n/2) + O(n)$. By the Master Theorem: $a=2$, $b=2$, $f(n)=O(n)$, and since $n^{\log_b a} = n^1 = f(n)$, we land in case 2 → $T(n) = O(n\log n)$. The merge step is the $O(n)$ term; it requires $O(n)$ additional space, which is the main practical disadvantage vs quicksort.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: ALGORITHMIC TECHNIQUES                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Algorithmic Techniques</div>
+  </div>
+
+  <h3 id="s2-dp">2.1 Dynamic Programming</h3>
+
+  <p>Dynamic programming (DP) solves problems by breaking them into overlapping subproblems, solving each once, and storing the results. Two criteria for applicability:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">DP Prerequisites</div>
+    <ol style="margin: 0.4rem 0 0 1.2rem;">
+      <li><strong>Optimal substructure:</strong> the optimal solution to the whole problem can be built from optimal solutions to subproblems</li>
+      <li><strong>Overlapping subproblems:</strong> the same subproblems recur — unlike divide and conquer where subproblems are disjoint</li>
+    </ol>
+  </div>
+
+  <h4>The DP Recipe</h4>
+  <ol class="steps">
+    <li><strong>Define the state:</strong> what information do I need to capture the subproblem? (e.g.\ <code>dp[i]</code> = max profit using the first $i$ items)</li>
+    <li><strong>Write the recurrence:</strong> express <code>dp[i]</code> in terms of smaller states</li>
+    <li><strong>Identify base cases:</strong> states small enough to solve directly</li>
+    <li><strong>Choose order:</strong> bottom-up (tabulation) or top-down (memoisation)</li>
+    <li><strong>Extract answer:</strong> identify which state(s) hold the final answer</li>
+  </ol>
+
+  <div class="algo-card">
+    <h4>Knapsack — The Canonical DP Problem</h4>
+    <p>$n$ items, each with weight $w_i$ and value $v_i$; capacity $W$. Maximise total value without exceeding capacity.</p>
+    <div class="fbox gold">
+      $$\text{dp}[i][c] = \max\!\left(\text{dp}[i-1][c],\; v_i + \text{dp}[i-1][c - w_i]\right)$$
+      <em>either skip item $i$ or take it (if it fits)</em>
+    </div>
+    <p>State space: $O(nW)$. Time: $O(nW)$. Space can be reduced to $O(W)$ using a rolling array (process in reverse).</p>
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Knapsack Structure in Portfolio Problems</div>
+      Integer programming portfolio selection — choose at most $k$ assets from $n$ candidates to maximise expected return subject to a budget — has the same structure as 0-1 knapsack. With cardinality constraints, portfolio optimisation becomes NP-hard (as noted in Section 7, §1.1), and DP is one approach for small $n$.
+    </div>
+  </div>
+
+  <div class="algo-card">
+    <h4>Longest Common Subsequence (LCS)</h4>
+    <p>Classic string DP: find the longest subsequence common to strings $s$ and $t$.</p>
+    <div class="fbox gold">
+      $$\text{dp}[i][j] = \begin{cases} \text{dp}[i-1][j-1] + 1 & \text{if } s[i] = t[j] \\ \max(\text{dp}[i-1][j],\; \text{dp}[i][j-1]) & \text{otherwise} \end{cases}$$
+    </div>
+    <p>Time: $O(mn)$. Space: $O(mn)$ or $O(\min(m,n))$ with rolling array. Template for sequence alignment, diff algorithms, and options path comparisons.</p>
+  </div>
+
+  <div class="algo-card">
+    <h4>Maximum Subarray — Kadane's Algorithm</h4>
+    <p>Find the contiguous subarray of an array $A$ with the maximum sum.</p>
+    <div class="fbox gold">
+      $$\text{dp}[i] = \max(A[i],\; \text{dp}[i-1] + A[i]) = A[i] + \max(0,\; \text{dp}[i-1])$$
+    </div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">max_subarray</span>(A):
+    best = cur = A[<span class="nm">0</span>]
+    <span class="kw">for</span> x <span class="kw">in</span> A[<span class="nm">1</span>:]:
+        cur = x + <span class="fn">max</span>(<span class="nm">0</span>, cur)   <span class="cm"># extend or restart</span>
+        best = <span class="fn">max</span>(best, cur)
+    <span class="kw">return</span> best                  <span class="cm"># O(n) time, O(1) space</span></div>
+    <p>The core insight: at each position, either start a new subarray (take just $A[i]$) or extend the previous one ($\text{dp}[i-1] + A[i]$). Discard history when it becomes negative.</p>
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Maximum Drawdown</div>
+      Maximum subarray (of negative returns) directly solves the maximum drawdown problem: the worst peak-to-trough loss over a time series. For maximum profit (buy low, sell high), a variant tracks the running minimum seen so far: best profit = $\max_i(A[i] - \min_{j \leq i} A[j])$ — $O(n)$ time, $O(1)$ space.
+    </div>
+  </div>
+
+  <h3 id="s2-recur">2.2 Linear Recurrences — Fibonacci &amp; Generalisation</h3>
+
+  <p>A linear recurrence of order $k$ has the form:</p>
+
+  <div class="fbox gold">
+    $$a_n = c_1 a_{n-1} + c_2 a_{n-2} + \cdots + c_k a_{n-k}$$
+  </div>
+
+  <p>The <strong>Fibonacci sequence</strong> ($a_n = a_{n-1} + a_{n-2}$, $a_0=0$, $a_1=1$) is the canonical example. Four ways to compute $F_n$, in increasing order of sophistication:</p>
+
+  <table>
+    <tr><th>Method</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+    <tr><td>Naive recursion</td><td>$O(2^n)$</td><td>$O(n)$ stack</td><td>Never use — exponential due to recomputation</td></tr>
+    <tr><td>Memoisation / tabulation (DP)</td><td>$O(n)$</td><td>$O(n)$ or $O(1)$</td><td>Standard approach; reduce to $O(1)$ space with two variables</td></tr>
+    <tr><td>Matrix exponentiation</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Compute $\begin{pmatrix}1&1\\1&0\end{pmatrix}^n$ via fast exponentiation</td></tr>
+    <tr><td>Closed form (Binet)</td><td>$O(1)$</td><td>$O(1)$</td><td>$F_n = (\phi^n - \hat\phi^n)/\sqrt5$; floating-point issues for large $n$</td></tr>
+  </table>
+
+  <div class="fbox teal">
+    <div class="flabel">Matrix Exponentiation — Fast Power Method</div>
+    $$\begin{pmatrix}F_{n+1}\\F_n\end{pmatrix} = \begin{pmatrix}1&1\\1&0\end{pmatrix}\begin{pmatrix}F_n\\F_{n-1}\end{pmatrix} \quad\Rightarrow\quad \begin{pmatrix}F_{n+1}&F_n\\F_n&F_{n-1}\end{pmatrix} = \begin{pmatrix}1&1\\1&0\end{pmatrix}^n$$
+    Fast exponentiation computes $M^n$ in $O(\log n)$ matrix multiplications: square repeatedly and multiply when the bit is set.
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why Matrix Exponentiation Matters for Quants</div>
+    Any linear recurrence system $\mathbf{a}_n = A\mathbf{a}_{n-1}$ (including Markov chains, multi-step autoregressive processes, and lattice option pricing) can be solved in $O(\log n)$ steps via matrix fast power. For a Markov chain: $\pi_n = P^n \pi_0$ — computing $P^{1000}$ takes 10 matrix multiplications, not 1000.
+  </div>
+
+  <h3 id="s2-divide">2.3 Divide &amp; Conquer</h3>
+
+  <p>Divide and conquer breaks a problem into independent subproblems, solves them recursively, and combines the results. Unlike DP, subproblems do <em>not</em> overlap — no memoisation needed.</p>
+
+  <h4>The Master Theorem — Solving Recurrences</h4>
+  <p>For $T(n) = aT(n/b) + f(n)$ where $a \geq 1$, $b > 1$:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Master Theorem — Three Cases</div>
+    Let $c^* = \log_b a$. Then:<br><br>
+    <strong>Case 1:</strong> $f(n) = O(n^{c^* - \varepsilon})$ for some $\varepsilon > 0$ $\Rightarrow$ $T(n) = \Theta(n^{c^*})$ <em>(subproblems dominate)</em><br>
+    <strong>Case 2:</strong> $f(n) = \Theta(n^{c^*})$ $\Rightarrow$ $T(n) = \Theta(n^{c^*}\log n)$ <em>(balanced)</em><br>
+    <strong>Case 3:</strong> $f(n) = \Omega(n^{c^* + \varepsilon})$ for some $\varepsilon > 0$ (and regularity condition) $\Rightarrow$ $T(n) = \Theta(f(n))$ <em>(combination step dominates)</em>
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Master Theorem Applications</div>
+    <strong>Merge sort:</strong> $T(n) = 2T(n/2) + O(n)$. $a=2, b=2, c^*=1, f(n)=O(n)=\Theta(n^1)$ → Case 2 → $T(n) = O(n\log n)$.<br><br>
+    <strong>Binary search:</strong> $T(n) = T(n/2) + O(1)$. $a=1, b=2, c^*=0, f(n)=O(1)=\Theta(n^0)$ → Case 2 → $T(n) = O(\log n)$.<br><br>
+    <strong>Karatsuba fast multiplication:</strong> $T(n) = 3T(n/2) + O(n)$. $a=3, b=2, c^*=\log_2 3 \approx 1.585, f(n)=O(n)=O(n^{1.585-\varepsilon})$ → Case 1 → $T(n) = O(n^{\log_2 3}) \approx O(n^{1.585})$.
+  </div>
+
+  <h3 id="s2-two">2.4 Two-Pointer &amp; Sliding Window</h3>
+
+  <p>These linear-time techniques are the go-to approach for subarray and substring problems, replacing $O(n^2)$ nested loops.</p>
+
+  <h4>Two-Pointer</h4>
+  <p>Use two indices moving toward each other (or in the same direction) to avoid redundant comparisons. Works when the problem has a monotone structure:</p>
+
+  <div class="code-block"><span class="cm"># Two-sum in SORTED array — O(n) time, O(1) space</span>
+<span class="kw">def</span> <span class="fn">two_sum_sorted</span>(arr, target):
+    lo, hi = <span class="nm">0</span>, <span class="fn">len</span>(arr) - <span class="nm">1</span>
+    <span class="kw">while</span> lo &lt; hi:
+        s = arr[lo] + arr[hi]
+        <span class="kw">if</span>   s == target: <span class="kw">return</span> (lo, hi)
+        <span class="kw">elif</span> s &lt; target:  lo += <span class="nm">1</span>   <span class="cm"># need larger sum</span>
+        <span class="kw">else</span>:             hi -= <span class="nm">1</span>   <span class="cm"># need smaller sum</span>
+    <span class="kw">return</span> <span class="nm">None</span></div>
+
+  <h4>Sliding Window</h4>
+  <p>Maintain a window <code>[l, r]</code> over the array. Expand <code>r</code> to include new elements; contract <code>l</code> when a constraint is violated. Each element enters and leaves the window at most once → $O(n)$:</p>
+
+  <div class="code-block"><span class="cm"># Longest subarray with sum ≤ k  — O(n) time, O(1) space</span>
+<span class="kw">def</span> <span class="fn">longest_subarray</span>(arr, k):
+    l = curr_sum = best = <span class="nm">0</span>
+    <span class="kw">for</span> r, x <span class="kw">in</span> <span class="fn">enumerate</span>(arr):
+        curr_sum += x
+        <span class="kw">while</span> curr_sum &gt; k:        <span class="cm"># shrink window from left</span>
+            curr_sum -= arr[l]; l += <span class="nm">1</span>
+        best = <span class="fn">max</span>(best, r - l + <span class="nm">1</span>)
+    <span class="kw">return</span> best</div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Rolling Statistics with Sliding Window</div>
+    Rolling mean, rolling variance (Welford's online algorithm), and rolling Sharpe ratio are all sliding window problems. A window of size $k$ over a returns series of length $n$ runs in $O(n)$ time (not $O(nk)$) by maintaining a running sum and sum of squares. The <strong>Deque-based sliding window maximum</strong> (maintaining a monotone deque) computes rolling max/min in $O(n)$ — used for computing rolling drawdowns.
+  </div>
+
+  <h3 id="s2-bfsdfs">2.5 BFS &amp; DFS</h3>
+
+  <p>The two canonical graph traversal algorithms. Both visit all reachable nodes in $O(V + E)$ time, but their order of exploration and data structures differ fundamentally.</p>
+
+  <table>
+    <tr><th></th><th>BFS (Breadth-First)</th><th>DFS (Depth-First)</th></tr>
+    <tr><td>Data structure</td><td>Queue (FIFO)</td><td>Stack (LIFO) or recursion</td></tr>
+    <tr><td>Exploration order</td><td>Level by level — nearest nodes first</td><td>As deep as possible before backtracking</td></tr>
+    <tr><td>Shortest path</td><td>✓ — finds shortest path in unweighted graph</td><td>✗ — not guaranteed</td></tr>
+    <tr><td>Cycle detection</td><td>✓</td><td>✓ — use visited / in-stack flags</td></tr>
+    <tr><td>Topological sort</td><td>✓ (Kahn's algorithm)</td><td>✓ — reverse of DFS finish times</td></tr>
+    <tr><td>Connected components</td><td>✓</td><td>✓</td></tr>
+    <tr><td>Space</td><td>$O(V)$ — queue can hold an entire level</td><td>$O(V)$ — stack depth; $O(\text{depth})$ in practice</td></tr>
+  </table>
+
+  <div class="code-block"><span class="cm"># BFS — shortest path in unweighted graph</span>
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+<span class="kw">def</span> <span class="fn">bfs</span>(graph, src, dst):
+    queue = deque([(src, [src])])
+    visited = {src}
+    <span class="kw">while</span> queue:
+        node, path = queue.popleft()
+        <span class="kw">if</span> node == dst: <span class="kw">return</span> path
+        <span class="kw">for</span> nbr <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> nbr <span class="kw">not in</span> visited:
+                visited.add(nbr)
+                queue.append((nbr, path + [nbr]))</div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Dijkstra = BFS with a Priority Queue</div>
+    For weighted graphs, replace the BFS queue with a min-heap (priority queue) keyed by distance. This gives Dijkstra's shortest path algorithm: $O((V + E)\log V)$ with a binary heap. For dense graphs, use a Fibonacci heap for $O(V \log V + E)$. In finance: minimum cost transaction routing, shortest path arbitrage detection in FX graphs.
+  </div>
+
+  <h3 id="s2-memo">2.6 Memoisation vs Tabulation</h3>
+
+  <p>Both are implementations of dynamic programming. The choice affects code clarity, stack overhead, and which subproblems get computed.</p>
+
+  <table>
+    <tr><th></th><th>Memoisation (Top-Down)</th><th>Tabulation (Bottom-Up)</th></tr>
+    <tr><td>Approach</td><td>Recurse naturally; cache results in a dict/array</td><td>Fill a table iteratively from base cases up</td></tr>
+    <tr><td>Subproblems computed</td><td>Only what is needed (lazy)</td><td>All subproblems (eager)</td></tr>
+    <tr><td>Code style</td><td>Mirrors the recursive structure — intuitive</td><td>Requires explicit ordering — sometimes less obvious</td></tr>
+    <tr><td>Stack overflow risk</td><td>Yes, for deep recursions ($n \gtrsim 10^4$ in Python)</td><td>No — iterative</td></tr>
+    <tr><td>Space optimisation</td><td>Harder — cache holds all seen states</td><td>Easy — rolling array when only last $k$ rows needed</td></tr>
+    <tr><td>Interview default</td><td>Faster to code; safe for most problems</td><td>Better for production; no recursion depth issues</td></tr>
+  </table>
+
+  <div class="code-block"><span class="cm"># Memoisation — coin change problem</span>
+<span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+<span class="kw">def</span> <span class="fn">coin_change_memo</span>(coins, amount):
+    <span class="op">@</span><span class="fn">lru_cache</span>(maxsize=<span class="nm">None</span>)
+    <span class="kw">def</span> <span class="fn">dp</span>(rem):
+        <span class="kw">if</span> rem == <span class="nm">0</span>: <span class="kw">return</span> <span class="nm">0</span>
+        <span class="kw">if</span> rem &lt; <span class="nm">0</span>:  <span class="kw">return</span> <span class="fn">float</span>(<span class="st">'inf'</span>)
+        <span class="kw">return</span> <span class="nm">1</span> + <span class="fn">min</span>(<span class="fn">dp</span>(rem - c) <span class="kw">for</span> c <span class="kw">in</span> coins)
+    res = <span class="fn">dp</span>(amount)
+    <span class="kw">return</span> res <span class="kw">if</span> res != <span class="fn">float</span>(<span class="st">'inf'</span>) <span class="kw">else</span> -<span class="nm">1</span>
+
+<span class="cm"># Tabulation — same problem, O(amount × |coins|)</span>
+<span class="kw">def</span> <span class="fn">coin_change_tab</span>(coins, amount):
+    dp = [<span class="fn">float</span>(<span class="st">'inf'</span>)] * (amount + <span class="nm">1</span>)
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>
+    <span class="kw">for</span> a <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, amount + <span class="nm">1</span>):
+        <span class="kw">for</span> c <span class="kw">in</span> coins:
+            <span class="kw">if</span> c &lt;= a: dp[a] = <span class="fn">min</span>(dp[a], <span class="nm">1</span> + dp[a - c])
+    <span class="kw">return</span> dp[amount] <span class="kw">if</span> dp[amount] != <span class="fn">float</span>(<span class="st">'inf'</span>) <span class="kw">else</span> -<span class="nm">1</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: QUANT CODING PROBLEMS                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Quant Coding Problems</div>
+  </div>
+
+  <p>Quant coding interviews combine standard algorithmic problems with domain-specific numerical tasks. The following are high-frequency problem types you should be able to code from scratch.</p>
+
+  <h3 id="s3-stoch">3.1 Simulating Stochastic Processes</h3>
+
+  <p>Given the mathematical SDE, translate it into an efficient simulation. The canonical building block is the Euler-Maruyama scheme (Section 7, §3.1).</p>
+
+  <div class="code-block"><span class="cm"># GBM exact simulation — O(n_steps × n_paths)</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">simulate_gbm</span>(S0, mu, sigma, T, n_steps, n_paths, seed=<span class="nm">42</span>):
+    rng   = np.random.<span class="fn">default_rng</span>(seed)
+    dt    = T / n_steps
+    Z     = rng.<span class="fn">standard_normal</span>((n_steps, n_paths))    <span class="cm"># pre-allocate</span>
+    log_r = (mu - <span class="nm">0.5</span> * sigma**<span class="nm">2</span>) * dt + sigma * np.<span class="fn">sqrt</span>(dt) * Z
+    log_S = np.<span class="fn">cumsum</span>(log_r, axis=<span class="nm">0</span>)                  <span class="cm"># cumulative log-return</span>
+    S     = S0 * np.<span class="fn">exp</span>(np.<span class="fn">vstack</span>([np.<span class="fn">zeros</span>(n_paths), log_S]))
+    <span class="kw">return</span> S   <span class="cm"># shape (n_steps+1, n_paths)</span>
+
+<span class="cm"># Ornstein-Uhlenbeck (mean-reverting) process</span>
+<span class="kw">def</span> <span class="fn">simulate_ou</span>(X0, kappa, mu, sigma, T, n_steps, n_paths, seed=<span class="nm">42</span>):
+    rng = np.random.<span class="fn">default_rng</span>(seed)
+    dt  = T / n_steps
+    X   = np.<span class="fn">zeros</span>((n_steps + <span class="nm">1</span>, n_paths))
+    X[<span class="nm">0</span>] = X0
+    Z   = rng.<span class="fn">standard_normal</span>((n_steps, n_paths))
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n_steps):                           <span class="cm"># Euler-Maruyama</span>
+        X[i+<span class="nm">1</span>] = X[i] + kappa * (mu - X[i]) * dt + sigma * np.<span class="fn">sqrt</span>(dt) * Z[i]
+    <span class="kw">return</span> X</div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Vectorise Over Paths, Not Over Time Steps</div>
+    NumPy vectorisation is fastest when the loop is over time steps (outer loop) and each step operates on all paths simultaneously as a vector. Pre-allocating random numbers with <code>rng.standard_normal((n_steps, n_paths))</code> avoids repeated generator overhead. Never loop over individual paths — that is $n_\text{paths}\times$ slower than the vectorised form.
+  </div>
+
+  <h3 id="s3-mc">3.2 Monte Carlo &amp; Binomial Distribution</h3>
+
+  <div class="code-block"><span class="cm"># European call price via Monte Carlo  — verify against Black-Scholes</span>
+<span class="kw">def</span> <span class="fn">mc_european_call</span>(S, K, r, sigma, T, N=<span class="nm">100_000</span>, seed=<span class="nm">0</span>):
+    rng = np.random.<span class="fn">default_rng</span>(seed)
+    Z   = rng.<span class="fn">standard_normal</span>(N)
+    ST  = S * np.<span class="fn">exp</span>((r - <span class="nm">0.5</span>*sigma**<span class="nm">2</span>)*T + sigma*np.<span class="fn">sqrt</span>(T)*Z)
+    payoffs = np.<span class="fn">maximum</span>(ST - K, <span class="nm">0</span>)
+    price = np.<span class="fn">exp</span>(-r * T) * payoffs.<span class="fn">mean</span>()
+    se    = np.<span class="fn">exp</span>(-r * T) * payoffs.<span class="fn">std</span>() / np.<span class="fn">sqrt</span>(N)
+    <span class="kw">return</span> price, se
+
+<span class="cm"># Binomial distribution simulation — coin flip experiment</span>
+<span class="kw">def</span> <span class="fn">binomial_mc</span>(n, p, n_trials=<span class="nm">100_000</span>):
+    <span class="st">"""Estimate P(X = k) for X ~ Binom(n, p) by simulation."""</span>
+    rng    = np.random.<span class="fn">default_rng</span>()
+    flips  = rng.<span class="fn">random</span>((n_trials, n)) &lt; p   <span class="cm"># True = success</span>
+    counts = flips.<span class="fn">sum</span>(axis=<span class="nm">1</span>)               <span class="cm"># successes per trial</span>
+    pmf    = np.<span class="fn">bincount</span>(counts, minlength=n+<span class="nm">1</span>) / n_trials
+    <span class="kw">return</span> pmf</div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Interview: Estimate π via Monte Carlo</div>
+    Classic Monte Carlo estimation: generate $(x,y) \sim U(-1,1)^2$. The fraction of points satisfying $x^2 + y^2 \leq 1$ converges to $\pi/4$.<br><br>
+    <code>rng = np.random.default_rng(); N = 10_000_000</code><br>
+    <code>pts = rng.uniform(-1, 1, (N, 2))</code><br>
+    <code>π_est = 4 * (pts[:,0]**2 + pts[:,1]**2 ≤ 1).mean()</code><br><br>
+    Standard error: $2/\sqrt{N}$ (since $\text{Var}(\mathbf{1}_{x^2+y^2\leq1}) = (\pi/4)(1-\pi/4)$). With $N=10^7$: SE $\approx 0.0006$. The interviewer expects you to derive this SE formula.
+  </div>
+
+  <h3 id="s3-matrix">3.3 Cache-Efficient Matrix Operations</h3>
+
+  <p>Naive nested-loop matrix multiplication ignores memory layout. NumPy's built-in routines (backed by BLAS/LAPACK) are cache-optimised, but understanding why matters for hand-coded implementations.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Cache Efficiency — Row-Major vs Column-Major</div>
+    C/NumPy store arrays in <strong>row-major</strong> (C-order): element $(i,j)$ is at offset $i \times \text{ncols} + j$. Accessing elements sequentially along a row is cache-friendly (stride-1 access). Accessing along a column requires jumping by <code>ncols</code> — potentially a cache miss at every step.
+  </div>
+
+  <div class="code-block"><span class="cm"># Naive matrix multiply: A (m×k) @ B (k×n) → C (m×n)</span>
+<span class="cm"># Inner loop iterates over k — B is accessed column-wise (bad!)</span>
+<span class="kw">def</span> <span class="fn">matmul_naive</span>(A, B):
+    m, k = A.shape; _, n = B.shape
+    C = np.<span class="fn">zeros</span>((m, n))
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(m):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n):
+            <span class="kw">for</span> l <span class="kw">in</span> <span class="fn">range</span>(k):
+                C[i,j] += A[i,l] * B[l,j]   <span class="cm"># B[l,j]: stride = n</span>
+    <span class="kw">return</span> C
+
+<span class="cm"># Cache-friendly: transpose B so inner loop is row-major on both</span>
+<span class="kw">def</span> <span class="fn">matmul_cache_friendly</span>(A, B):
+    BT = B.T.<span class="fn">copy</span>()                       <span class="cm"># force contiguous transpose</span>
+    m, k = A.shape; n = BT.shape[<span class="nm">0</span>]
+    C = np.<span class="fn">zeros</span>((m, n))
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(m):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(n):
+            C[i,j] = A[i] @ BT[j]           <span class="cm"># dot product: both row-major</span>
+    <span class="kw">return</span> C
+
+<span class="cm"># In practice: always use np.dot(A, B) or A @ B — calls optimised BLAS</span></div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Memory Hierarchy Intuition</div>
+    L1 cache (~32KB): ~1 ns latency. L2 (~256KB): ~5 ns. L3 (~8MB): ~20 ns. RAM: ~100 ns. A cache miss to RAM costs ~100× a cache hit. Blocked (tiled) matrix multiplication reuses blocks that fit in cache, reducing RAM accesses from $O(n^3)$ to $O(n^3/b)$ where $b$ is the block size — the mathematical explanation for why BLAS is orders of magnitude faster than naive code.
+  </div>
+
+  <h3 id="s3-option">3.4 Option Pricing via Binomial Tree</h3>
+
+  <div class="code-block"><span class="cm"># CRR Binomial Tree — European and American options  O(N²) time, O(N) space</span>
+<span class="kw">def</span> <span class="fn">binomial_option</span>(S, K, r, sigma, T, N, option_type=<span class="st">'call'</span>, american=<span class="nm">False</span>):
+    dt  = T / N
+    u   = np.<span class="fn">exp</span>(sigma * np.<span class="fn">sqrt</span>(dt))
+    d   = <span class="nm">1</span> / u
+    p   = (np.<span class="fn">exp</span>(r * dt) - d) / (u - d)   <span class="cm"># risk-neutral probability</span>
+    disc = np.<span class="fn">exp</span>(-r * dt)
+
+    <span class="cm"># Terminal stock prices at step N</span>
+    j    = np.<span class="fn">arange</span>(N + <span class="nm">1</span>)
+    ST   = S * u**(N - j) * d**j
+
+    <span class="cm"># Terminal payoffs</span>
+    <span class="kw">if</span> option_type == <span class="st">'call'</span>:
+        V = np.<span class="fn">maximum</span>(ST - K, <span class="nm">0</span>)
+    <span class="kw">else</span>:
+        V = np.<span class="fn">maximum</span>(K - ST, <span class="nm">0</span>)
+
+    <span class="cm"># Backward induction</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(N - <span class="nm">1</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):
+        V = disc * (p * V[:<span class="nm">-1</span>] + (<span class="nm">1</span> - p) * V[<span class="nm">1</span>:])  <span class="cm"># continuation value</span>
+        <span class="kw">if</span> american:
+            S_now = S * u**(i - np.<span class="fn">arange</span>(i + <span class="nm">1</span>)) * d**np.<span class="fn">arange</span>(i + <span class="nm">1</span>)
+            intrinsic = (<span class="fn">np.maximum</span>(S_now - K, <span class="nm">0</span>) <span class="kw">if</span> option_type == <span class="st">'call'</span>
+                         <span class="kw">else</span> np.<span class="fn">maximum</span>(K - S_now, <span class="nm">0</span>))
+            V = np.<span class="fn">maximum</span>(V, intrinsic)             <span class="cm"># early-exercise check</span>
+    <span class="kw">return</span> V[<span class="nm">0</span>]</div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Space Optimisation: O(N) Not O(N²)</div>
+    A common mistake is storing the full price tree ($O(N^2)$ space). Since backward induction at step $i$ only needs step $i+1$, maintain a single array of length $N+1$ and overwrite in place. The vectorised slice <code>V = disc*(p*V[:-1] + (1-p)*V[1:])</code> does this naturally — each backward step shortens <code>V</code> by one element.
+  </div>
+
+  <h3 id="s3-markov">3.5 Implementing Markov Chains</h3>
+
+  <div class="code-block"><span class="cm"># Markov Chain — stationary distribution and n-step simulation</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">class</span> <span class="fn">MarkovChain</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, P):
+        self.P = np.<span class="fn">array</span>(P, dtype=<span class="fn">float</span>)
+        assert np.<span class.<fn>allclose</fn>](self.P.<span class="fn">sum</span>(axis=<span class="nm">1</span>), <span class="nm">1</span>), <span class="st">"Rows must sum to 1"</span>
+
+    <span class="kw">def</span> <span class="fn">stationary</span>(self):
+        <span class="st">"""Left eigenvector of P for eigenvalue 1."""</span>
+        n  = self.P.shape[<span class="nm">0</span>]
+        A  = (self.P.T - np.<span class="fn">eye</span>(n))       <span class="cm"># (P^T - I) π = 0</span>
+        A[-<span class="nm">1</span>] = <span class="nm">1</span>                           <span class="cm"># normalisation constraint</span>
+        b  = np.<span class="fn">zeros</span>(n); b[-<span class="nm">1</span>] = <span class="nm">1</span>
+        <span class="kw">return</span> np.linalg.<span class="fn">solve</span>(A, b)
+
+    <span class="kw">def</span> <span class="fn">simulate</span>(self, state, n_steps, seed=<span class="nm">None</span>):
+        <span class="st">"""Simulate a single path of length n_steps."""</span>
+        rng  = np.random.<span class="fn">default_rng</span>(seed)
+        path = [state]
+        <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n_steps):
+            state = rng.<span class="fn">choice</span>(<span class="fn">len</span>(self.P), p=self.P[state])
+            path.<span class="fn">append</span>(state)
+        <span class="kw">return</span> path
+
+    <span class="kw">def</span> <span class="fn">n_step_dist</span>(self, init_dist, n):
+        <span class="st">"""Distribution after n steps: π₀ @ P^n via fast matrix power."""</span>
+        Pn = np.linalg.<span class="fn">matrix_power</span>(self.P, n)
+        <span class="kw">return</span> np.<span class="fn">array</span>(init_dist) @ Pn</div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Interview: Gambler's Ruin as a Markov Chain</div>
+    States $\{0,1,\ldots,N\}$; absorbing at 0 and $N$; $P_{i,i+1}=p$, $P_{i,i-1}=q=1-p$. The fundamental matrix $N=(I-Q)^{-1}$ (Section 5, §1.4) gives expected absorption times without simulation. Code the matrix solution and verify against the closed form $E[T\mid X_0=k]=k(N-k)$ for $p=q=1/2$.
+  </div>
+
+  <h3 id="s3-rng">3.6 Random Number Generation</h3>
+
+  <p>Understanding how pseudo-random numbers are generated — and their limitations — is essential for reliable simulation.</p>
+
+  <h4>Linear Congruential Generator (LCG)</h4>
+  <div class="fbox gold">
+    <div class="flabel">LCG Recurrence</div>
+    $$X_{n+1} = (a X_n + c) \bmod m$$
+    Parameters: $a$ (multiplier), $c$ (increment), $m$ (modulus). Output: $U_n = X_n / m \in [0,1)$.
+  </div>
+
+  <p>The Hull-Dobell theorem gives conditions for a <em>full-period</em> LCG (period $= m$): (1) $\gcd(c,m)=1$; (2) $a-1$ divisible by all prime factors of $m$; (3) if $4 \mid m$ then $4 \mid (a-1)$.</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ LCG Pitfalls — Why You Must Use Better Generators</div>
+    LCGs have <strong>short periods</strong> ($\leq m$, often $2^{32}$), <strong>sequential correlation</strong> between consecutive values (points in $d$-dimensional space lie on $\leq m^{1/d}$ hyperplanes — Marsaglia's theorem), and <strong>poor statistical properties</strong> in high dimensions. For serious Monte Carlo work, use the Mersenne Twister (period $2^{19937}-1$, passes most tests) or, for cryptographic quality, ChaCha20. In Python/NumPy: <code>np.random.default_rng()</code> uses the PCG64 generator — far superior to the old <code>np.random.rand()</code>.
+  </div>
+
+  <h4>Testing RNG Quality — Key Statistical Tests</h4>
+  <table>
+    <tr><th>Test</th><th>What it checks</th></tr>
+    <tr><td>Chi-squared uniformity</td><td>Frequency of values in each bin matches Uniform$[0,1]$</td></tr>
+    <tr><td>Serial correlation</td><td>$\text{Corr}(U_n, U_{n+k}) \approx 0$ for all lags $k$</td></tr>
+    <tr><td>Runs test</td><td>Counts of consecutive ascending/descending runs</td></tr>
+    <tr><td>Spectral test</td><td>Hyperplane structure in $d$ dimensions (Marsaglia)</td></tr>
+    <tr><td>TestU01 / NIST suite</td><td>Comprehensive battery — industry standard</td></tr>
+  </table>
+
+  <h3 id="s3-bit">3.7 Bit Manipulation &amp; Modular Arithmetic</h3>
+
+  <p>Bit manipulation problems appear frequently in quant coding screens. They require knowing the fundamental bitwise operations and their applications.</p>
+
+  <h4>Essential Bit Operations</h4>
+  <div class="fbox gold">
+    <div class="flabel">Bitwise Identities — Memorise These</div>
+    $$x \,\&\, (x-1) \text{ clears the lowest set bit of } x \qquad\qquad x \,\&\, (-x) \text{ isolates the lowest set bit}$$
+    $$x \oplus x = 0 \qquad x \oplus 0 = x \qquad x \oplus y \oplus x = y$$
+    $$x \gg k = \lfloor x / 2^k \rfloor \qquad x \ll k = x \times 2^k \qquad \text{popcount}(x) = \sum_i b_i \text{ (number of 1s)}$$
+  </div>
+
+  <div class="code-block"><span class="cm"># Count set bits (Brian Kernighan's algorithm) — O(set bits)</span>
+<span class="kw">def</span> <span class="fn">popcount</span>(x):
+    count = <span class="nm">0</span>
+    <span class="kw">while</span> x:
+        x &amp;= x - <span class="nm">1</span>   <span class="cm"># clear lowest set bit</span>
+        count += <span class="nm">1</span>
+    <span class="kw">return</span> count
+
+<span class="cm"># Find the single non-duplicate in an array (all others appear twice)</span>
+<span class="kw">def</span> <span class="fn">single_number</span>(nums):
+    <span class="kw">return</span> <span class="fn">functools.reduce</span>(<span class="kw">lambda</span> a, b: a ^ b, nums)  <span class="cm"># XOR cancels pairs
+
+# Fast power mod — a^b mod m in O(log b)  — core of RSA and combinatorics</span>
+<span class="kw">def</span> <span class="fn">pow_mod</span>(a, b, m):
+    result = <span class="nm">1</span>; a %= m
+    <span class="kw">while</span> b:
+        <span class="kw">if</span> b &amp; <span class="nm">1</span>: result = result * a % m   <span class="cm"># if lowest bit set</span>
+        a = a * a % m                        <span class="cm"># square the base</span>
+        b >>= <span class="nm">1</span>                              <span class="cm"># shift right (divide by 2)</span>
+    <span class="kw">return</span> result</div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Modular Arithmetic in Quant Problems</div>
+    Many counting problems in quant interviews (number of paths in a lattice, number of ways to arrange trades, combinatorial probabilities mod a large prime) require computing $\binom{n}{k} \bmod p$. The standard approach: precompute factorials and inverse factorials modulo $p$ using Fermat's little theorem ($a^{-1} \equiv a^{p-2} \pmod{p}$ for prime $p$), then answer any query in $O(1)$.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: NUMBER THEORY & DISCRETE MATH                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Number Theory &amp; Discrete Math</div>
+  </div>
+
+  <h3 id="s4-mod">4.1 Modular Arithmetic</h3>
+
+  <p>Modular arithmetic works in the integers $\{0, 1, \ldots, m-1\}$ under the relation $a \equiv b \pmod{m}$ iff $m \mid (a-b)$. All standard operations are compatible:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Modular Arithmetic Rules</div>
+    $$(a + b) \bmod m = ((a \bmod m) + (b \bmod m)) \bmod m$$
+    $$(a \cdot b) \bmod m = ((a \bmod m) \cdot (b \bmod m)) \bmod m$$
+    $$(a - b) \bmod m = ((a \bmod m) - (b \bmod m) + m) \bmod m \quad\text{(add }m\text{ to stay positive)}$$
+  </div>
+
+  <h4>Modular Inverse</h4>
+  <p>The modular inverse of $a$ modulo $m$ is the value $a^{-1}$ such that $a \cdot a^{-1} \equiv 1 \pmod{m}$. It exists iff $\gcd(a,m)=1$.</p>
+
+  <div class="fbox teal">
+    <div class="flabel">Two Methods for Modular Inverse</div>
+    <strong>Method 1 — Fermat's Little Theorem</strong> (when $m$ is prime):<br>
+    $a^{-1} \equiv a^{m-2} \pmod{m}$. Compute in $O(\log m)$ via fast power.<br><br>
+    <strong>Method 2 — Extended Euclidean Algorithm</strong> (works for any coprime $a, m$):<br>
+    Find $x, y$ such that $ax + my = \gcd(a,m) = 1$. Then $x \equiv a^{-1} \pmod{m}$.
+  </div>
+
+  <h4>Chinese Remainder Theorem (CRT)</h4>
+  <div class="fbox gold">
+    <div class="flabel">Chinese Remainder Theorem</div>
+    Given pairwise coprime moduli $m_1,\ldots,m_k$ and residues $r_1,\ldots,r_k$, there exists a unique $x \in [0, m_1\cdots m_k)$ satisfying $x \equiv r_i \pmod{m_i}$ for all $i$. This unique solution is:
+    $$x = \sum_{i=1}^k r_i M_i (M_i^{-1} \bmod m_i), \quad M_i = \frac{m_1\cdots m_k}{m_i}$$
+  </div>
+
+  <p>The CRT enables computing with large integers by working modulo several small primes independently — used in arbitrary-precision arithmetic and number-theoretic transforms (NTT), which underpin fast polynomial multiplication for pricing exotic derivatives.</p>
+
+  <h3 id="s4-gcd">4.2 GCD &amp; Euclidean Algorithm</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Euclidean Algorithm</div>
+    $$\gcd(a, b) = \gcd(b, a \bmod b), \qquad \gcd(a, 0) = a$$
+    Terminates in $O(\log \min(a,b))$ steps.
+  </div>
+
+  <div class="callout proof">
+    <strong>Key insight:</strong> If $d \mid a$ and $d \mid b$, then $d \mid (a \bmod b) = a - \lfloor a/b \rfloor b$. So every common divisor of $(a,b)$ is also a common divisor of $(b, a \bmod b)$, and vice versa — the GCD is preserved at each step.
+  </div>
+
+  <div class="code-block"><span class="cm"># Euclidean GCD — O(log min(a,b))</span>
+<span class="kw">def</span> <span class="fn">gcd</span>(a, b):
+    <span class="kw">while</span> b: a, b = b, a % b
+    <span class="kw">return</span> a
+
+<span class="cm"># Extended Euclidean — returns (g, x, y) s.t. a*x + b*y = g</span>
+<span class="kw">def</span> <span class="fn">extended_gcd</span>(a, b):
+    <span class="kw">if</span> b == <span class="nm">0</span>: <span class="kw">return</span> a, <span class="nm">1</span>, <span class="nm">0</span>
+    g, x, y = <span class="fn">extended_gcd</span>(b, a % b)
+    <span class="kw">return</span> g, y, x - (a // b) * y
+
+<span class="cm"># LCM via GCD:  lcm(a,b) = a*b // gcd(a,b)  — avoid overflow: divide first</span>
+<span class="kw">def</span> <span class="fn">lcm</span>(a, b): <span class="kw">return</span> a // <span class="fn">gcd</span>(a, b) * b</div>
+
+  <h4>Fundamental Theorem of Arithmetic</h4>
+  <p>Every integer $n > 1$ has a unique prime factorisation $n = p_1^{e_1}\cdots p_k^{e_k}$. From this:</p>
+  <ul>
+    <li>$\gcd(a,b) = \prod p_i^{\min(e_i,f_i)}$ where $a = \prod p_i^{e_i}$, $b = \prod p_i^{f_i}$</li>
+    <li>$\text{lcm}(a,b) = \prod p_i^{\max(e_i,f_i)}$</li>
+    <li>$\gcd(a,b) \cdot \text{lcm}(a,b) = a \cdot b$</li>
+  </ul>
+
+  <h3 id="s4-binom">4.3 Binomial Theorem mod $n$</h3>
+
+  <p>Computing $\binom{n}{k} \bmod p$ efficiently is a core combinatorics skill.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Lucas' Theorem (prime modulus)</div>
+    For prime $p$, write $n = n_s p^s + \cdots + n_1 p + n_0$ and $k = k_s p^s + \cdots + k_1 p + k_0$ in base $p$. Then:
+    $$\binom{n}{k} \equiv \prod_{i=0}^{s} \binom{n_i}{k_i} \pmod{p}$$
+    Each factor $\binom{n_i}{k_i}$ is a small binomial with $n_i, k_i < p$ — computable directly.
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Precomputed Factorial Table (large n, prime p)</div>
+    Precompute $\text{fact}[i] = i! \bmod p$ and $\text{inv\_fact}[i] = (i!)^{-1} \bmod p$ for $i = 0, \ldots, n$. Then:
+    $$\binom{n}{k} \bmod p = \text{fact}[n] \cdot \text{inv\_fact}[k] \cdot \text{inv\_fact}[n-k] \bmod p$$
+    Preprocessing: $O(n)$ time. Query: $O(1)$ time.
+  </div>
+
+  <div class="code-block"><span class="cm"># Precompute factorials and inverse factorials mod prime p</span>
+<span class="kw">def</span> <span class="fn">precompute_factorials</span>(n, p):
+    fact     = [<span class="nm">1</span>] * (n + <span class="nm">1</span>)
+    inv_fact = [<span class="nm">1</span>] * (n + <span class="nm">1</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, n + <span class="nm">1</span>):
+        fact[i] = fact[i - <span class="nm">1</span>] * i % p
+    inv_fact[n] = <span class="fn">pow_mod</span>(fact[n], p - <span class="nm">2</span>, p)   <span class="cm"># Fermat's little theorem</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n - <span class="nm">1</span>, -<span class="nm">1</span>, -<span class="nm">1</span>):
+        inv_fact[i] = inv_fact[i + <span class="nm">1</span>] * (i + <span class="nm">1</span>) % p
+    <span class="kw">return</span> fact, inv_fact
+
+<span class="kw">def</span> <span class="fn">comb_mod</span>(n, k, p, fact, inv_fact):
+    <span class="kw">if</span> k &lt; <span class="nm">0</span> <span class="kw">or</span> k &gt; n: <span class="kw">return</span> <span class="nm">0</span>
+    <span class="kw">return</span> fact[n] * inv_fact[k] % p * inv_fact[n - k] % p</div>
+
+  <h3 id="s4-rec">4.4 Linear Recurrences &amp; Characteristic Roots</h3>
+
+  <p>For a linear recurrence $a_n = c_1 a_{n-1} + \cdots + c_k a_{n-k}$, the <strong>characteristic polynomial</strong> is:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Characteristic Equation</div>
+    $$r^k - c_1 r^{k-1} - c_2 r^{k-2} - \cdots - c_k = 0$$
+    If roots $r_1, r_2, \ldots, r_k$ are distinct: $a_n = A_1 r_1^n + A_2 r_2^n + \cdots + A_k r_k^n$<br>
+    If root $r$ has multiplicity $m$: replace $A r^n$ with $(A_0 + A_1 n + \cdots + A_{m-1}n^{m-1})r^n$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Fibonacci Closed Form via Characteristic Roots</div>
+    $F_n = F_{n-1} + F_{n-2}$: characteristic equation $r^2 - r - 1 = 0$, roots $r = \frac{1 \pm \sqrt{5}}{2}$, i.e.\ $\phi = (1+\sqrt5)/2$ and $\hat\phi = (1-\sqrt5)/2$.<br><br>
+    General solution: $F_n = A\phi^n + B\hat\phi^n$. Apply initial conditions $F_0=0$, $F_1=1$:<br>
+    $A + B = 0 \Rightarrow B = -A$; $A\phi - A\hat\phi = 1 \Rightarrow A = 1/\sqrt5$.<br><br>
+    $$\boxed{F_n = \frac{\phi^n - \hat\phi^n}{\sqrt5}} \qquad |\hat\phi| < 1 \text{ so } F_n \approx \phi^n/\sqrt5 \text{ for large }n$$
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: AR(1) as a Linear Recurrence</div>
+    The AR(1) process $X_t = \phi X_{t-1} + \varepsilon_t$ has the same structure. Its homogeneous solution is $X_t^{(h)} = C\phi^t$ — the characteristic root is $\phi$. Stationarity ($|\phi|<1$) forces the homogeneous part to zero as $t\to\infty$, leaving the stationary particular solution. The characteristic root language unifies time series analysis and combinatorics.
+  </div>
+
+  <h3 id="s4-graph">4.5 Graph Theory Basics</h3>
+
+  <h4>Key Theorems and Facts</h4>
+  <table>
+    <tr><th>Result</th><th>Statement</th><th>Finance connection</th></tr>
+    <tr><td>Handshaking lemma</td><td>$\sum_{v}\deg(v) = 2|E|$</td><td>Total market "connections" must be even — each trade has a buyer and a seller</td></tr>
+    <tr><td>Euler path</td><td>Exists iff exactly 0 or 2 vertices have odd degree</td><td>Circuit design; sequential execution of paired trades</td></tr>
+    <tr><td>Hamiltonian path</td><td>NP-complete to decide in general</td><td>Optimal asset visitation / routing problems</td></tr>
+    <tr><td>Bipartite criterion</td><td>A graph is bipartite iff it contains no odd-length cycle</td><td>2-colouring: long/short sides of a book</td></tr>
+    <tr><td>Minimum spanning tree</td><td>Kruskal's ($O(E\log E)$) or Prim's ($O(E\log V)$)</td><td>Correlation network: MST extracts dominant factor structure (Mantegna 1999)</td></tr>
+    <tr><td>Max flow = Min cut</td><td>Ford-Fulkerson theorem</td><td>Optimal portfolio rebalancing with capacity constraints</td></tr>
+  </table>
+
+  <h4>Topological Sort</h4>
+  <p>On a DAG, topological order is a linear ordering of vertices such that every directed edge $u \to v$ has $u$ before $v$. Used for dependency resolution and scheduling:</p>
+
+  <div class="code-block"><span class="cm"># Kahn's algorithm — BFS-based topological sort  O(V + E)</span>
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">topo_sort</span>(n, edges):
+    indegree = [<span class="nm">0</span>] * n
+    adj      = [[] <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n)]
+    <span class="kw">for</span> u, v <span class="kw">in</span> edges:
+        adj[u].<span class="fn">append</span>(v); indegree[v] += <span class="nm">1</span>
+    queue = deque(i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n) <span class="kw">if</span> indegree[i] == <span class="nm">0</span>)
+    order = []
+    <span class="kw">while</span> queue:
+        u = queue.<span class="fn">popleft</span>(); order.<span class="fn">append</span>(u)
+        <span class="kw">for</span> v <span class="kw">in</span> adj[u]:
+            indegree[v] -= <span class="nm">1</span>
+            <span class="kw">if</span> indegree[v] == <span class="nm">0</span>: queue.<span class="fn">append</span>(v)
+    <span class="kw">return</span> order <span class="kw">if</span> <span class="fn">len</span>(order) == n <span class="kw">else</span> []  <span class="cm"># empty = cycle detected</span></div>
+
+  <h3 id="s4-gen">4.6 Generating Functions</h3>
+
+  <p>The <strong>ordinary generating function (OGF)</strong> of a sequence $\{a_n\}$ is the formal power series $A(x) = \sum_{n=0}^\infty a_n x^n$. Generating functions convert recurrences into algebra, enabling closed-form solutions and asymptotic analysis.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Key Generating Functions</div>
+    $$\frac{1}{1-x} = \sum_{n=0}^\infty x^n \quad\text{(geometric)} \qquad \frac{1}{(1-x)^k} = \sum_{n=0}^\infty \binom{n+k-1}{k-1} x^n \quad\text{(stars-and-bars counts)}$$
+    $$(1+x)^n = \sum_{k=0}^n \binom{n}{k}x^k \quad\text{(binomial)} \qquad e^x = \sum_{n=0}^\infty \frac{x^n}{n!} \quad\text{(exponential GF for permutations)}$$
+  </div>
+
+  <h4>Solving Fibonacci via GF</h4>
+  <div class="callout proof">
+    <strong>GF derivation of $F_n$:</strong> Let $F(x) = \sum F_n x^n$. From $F_n = F_{n-1}+F_{n-2}$:
+    $$F(x) - xF(x) - x^2F(x) = F_0 + (F_1 - F_0)x = x$$
+    $$F(x) = \frac{x}{1-x-x^2} = \frac{x}{(1-\phi x)(1-\hat\phi x)} = \frac{1}{\sqrt5}\left(\frac{1}{1-\phi x} - \frac{1}{1-\hat\phi x}\right)$$
+    Expanding each geometric series: $F_n = (\phi^n - \hat\phi^n)/\sqrt5$ — the Binet formula recovered algebraically.
+  </div>
+
+  <h4>Probability Generating Functions (PGF)</h4>
+  <p>For a non-negative integer-valued random variable $X$:</p>
+  <div class="fbox teal">
+    $$G_X(z) = E[z^X] = \sum_{k=0}^\infty P(X=k)\,z^k$$
+    $$E[X] = G_X'(1) \qquad E[X(X-1)] = G_X''(1) \qquad \text{Var}(X) = G_X''(1) + G_X'(1) - [G_X'(1)]^2$$
+  </div>
+
+  <p>Independence: if $X \perp Y$, then $G_{X+Y}(z) = G_X(z)\cdot G_Y(z)$ — the PGF of a sum of independent variables is the product of their PGFs. This is the PGF analogue of the MGF multiplication rule, and directly gives the PGF of the Binomial ($G(z) = (q+pz)^n$) and Poisson ($G(z) = e^{\lambda(z-1)}$).</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Probability Generating Functions for Compound Distributions</div>
+    A compound Poisson variable $S = \sum_{i=1}^N X_i$ (where $N\sim\text{Pois}(\lambda)$ and $X_i$ i.i.d.) has PGF:
+    $$G_S(z) = G_N(G_X(z)) = e^{\lambda(G_X(z)-1)}$$
+    This gives moments instantly: $E[S] = \lambda E[X]$, $\text{Var}(S) = \lambda E[X^2]$ — the results from Section 2 (Statistics, §1.4, Eve's Law) recovered algebraically in one line.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Complexity at a Glance</h3>
+  <table>
+    <tr><th>Algorithm / Operation</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+    <tr><td>Array access / Hash lookup</td><td>$O(1)$ avg</td><td>—</td><td>Hash worst case $O(n)$</td></tr>
+    <tr><td>Binary search (sorted array)</td><td>$O(\log n)$</td><td>$O(1)$</td><td>Requires sorted input</td></tr>
+    <tr><td>Merge sort</td><td>$O(n\log n)$</td><td>$O(n)$</td><td>Stable; optimal comparison sort</td></tr>
+    <tr><td>Heap push/pop</td><td>$O(\log n)$</td><td>$O(n)$</td><td>Build heap: $O(n)$</td></tr>
+    <tr><td>BFS / DFS</td><td>$O(V+E)$</td><td>$O(V)$</td><td>On adjacency list</td></tr>
+    <tr><td>Dijkstra (binary heap)</td><td>$O((V+E)\log V)$</td><td>$O(V)$</td><td>Non-negative weights only</td></tr>
+    <tr><td>Matrix multiply (naive)</td><td>$O(n^3)$</td><td>$O(n^2)$</td><td>Strassen: $O(n^{2.807})$</td></tr>
+    <tr><td>Matrix power (fast exp)</td><td>$O(k^3 \log n)$</td><td>$O(k^2)$</td><td>For $k\times k$ matrix</td></tr>
+    <tr><td>GCD (Euclidean)</td><td>$O(\log\min(a,b))$</td><td>$O(1)$</td><td>Extended gives inverse too</td></tr>
+    <tr><td>Modular fast power</td><td>$O(\log b)$</td><td>$O(1)$</td><td>$a^b \bmod m$</td></tr>
+    <tr><td>Knapsack DP</td><td>$O(nW)$</td><td>$O(W)$</td><td>Rolling array reduces space</td></tr>
+    <tr><td>Longest common subsequence</td><td>$O(mn)$</td><td>$O(\min(m,n))$</td><td>Rolling row trick</td></tr>
+    <tr><td>Precompute factorials mod $p$</td><td>$O(n)$</td><td>$O(n)$</td><td>Then $\binom{n}{k}\bmod p$ in $O(1)$</td></tr>
+    <tr><td>Topological sort (Kahn)</td><td>$O(V+E)$</td><td>$O(V)$</td><td>Also detects cycles</td></tr>
+  </table>
+
+  <h3>Data Structure Decision Tree</h3>
+  <table>
+    <tr><th>Need</th><th>Use</th><th>Why</th></tr>
+    <tr><td>Fast lookup by key</td><td>Hash map</td><td>$O(1)$ average; $O(n)$ worst — use when keys are non-integers</td></tr>
+    <tr><td>Ordered iteration + lookup</td><td>Sorted array / BST</td><td>$O(\log n)$ search; range queries; in-order access</td></tr>
+    <tr><td>Repeated min/max extraction</td><td>Heap / priority queue</td><td>$O(\log n)$ push/pop; $O(1)$ peek</td></tr>
+    <tr><td>Running median</td><td>Two heaps (max + min)</td><td>$O(\log n)$ update, $O(1)$ median</td></tr>
+    <tr><td>Sliding window max/min</td><td>Monotone deque</td><td>$O(n)$ amortised for full scan</td></tr>
+    <tr><td>Counting distinct values</td><td>Hash set</td><td>$O(1)$ insert and membership test</td></tr>
+    <tr><td>Graph (sparse)</td><td>Adjacency list</td><td>$O(V+E)$ space; $O(\deg)$ neighbour iteration</td></tr>
+    <tr><td>Graph (dense / matrix ops)</td><td>Adjacency matrix</td><td>$O(1)$ edge lookup; $O(V^2)$ space</td></tr>
+    <tr><td>Union-Find (connected components)</td><td>Disjoint Set Union (DSU)</td><td>Near $O(1)$ amortised with path compression + rank</td></tr>
+  </table>
+
+  <h3>Algorithmic Technique Selector</h3>
+  <table>
+    <tr><th>Problem Shape</th><th>Technique</th><th>Signature</th></tr>
+    <tr><td>Optimal value over all subsets/sequences</td><td>Dynamic Programming</td><td>Overlapping subproblems; define state + recurrence</td></tr>
+    <tr><td>Optimal substructure, disjoint subproblems</td><td>Divide &amp; Conquer</td><td>$T(n) = aT(n/b) + f(n)$ — solve with Master Theorem</td></tr>
+    <tr><td>Pair/subarray finding in sorted or linear data</td><td>Two-Pointer</td><td>Move pointers monotonically; $O(n)$ total movement</td></tr>
+    <tr><td>Contiguous subarray/window with constraint</td><td>Sliding Window</td><td>Expand right, contract left; $O(n)$</td></tr>
+    <tr><td>Reachability / shortest path (unweighted)</td><td>BFS</td><td>Queue; level-by-level exploration</td></tr>
+    <tr><td>Cycle detection / topological order</td><td>DFS</td><td>Recursion + visited stack; finish-time ordering</td></tr>
+    <tr><td>Shortest path (weighted, non-negative)</td><td>Dijkstra</td><td>BFS + priority queue (min-heap)</td></tr>
+    <tr><td>Counting arrangements / combinations</td><td>Generating Functions / GF</td><td>$[x^n] A(x)B(x)$ extracts combined counts</td></tr>
+    <tr><td>"Have I seen this before?"</td><td>Hash Map / Set</td><td>Store and look up in $O(1)$</td></tr>
+    <tr><td>Heavy-tailed search / optimisation</td><td>Branch &amp; Bound / SA / GA</td><td>Non-convex; no polynomial guarantee</td></tr>
+  </table>
+
+  <h3>Number Theory Identities to Know Cold</h3>
+  <table>
+    <tr><th>Result</th><th>Formula</th><th>Use case</th></tr>
+    <tr><td>Fermat's Little Theorem</td><td>$a^{p-1} \equiv 1 \pmod{p}$ for prime $p$, $p\nmid a$</td><td>Modular inverse: $a^{-1} \equiv a^{p-2}$</td></tr>
+    <tr><td>Euler's Theorem</td><td>$a^{\phi(m)} \equiv 1 \pmod{m}$ when $\gcd(a,m)=1$</td><td>Generalisaton of Fermat; $\phi$ = Euler's totient</td></tr>
+    <tr><td>Bézout's Identity</td><td>$\exists x,y: ax + by = \gcd(a,b)$</td><td>Extended GCD gives modular inverse</td></tr>
+    <tr><td>Lucas' Theorem</td><td>$\binom{n}{k} \equiv \prod\binom{n_i}{k_i} \pmod{p}$</td><td>Binomial coefficient mod prime in $O(\log_p n)$</td></tr>
+    <tr><td>Stars &amp; Bars GF</td><td>$\frac{1}{(1-x)^k} = \sum \binom{n+k-1}{k-1} x^n$</td><td>Distributing $n$ items into $k$ bins</td></tr>
+    <tr><td>Fibonacci Binet</td><td>$F_n = (\phi^n - \hat\phi^n)/\sqrt5$</td><td>Closed form; relates to golden ratio</td></tr>
+    <tr><td>PGF of sum</td><td>$G_{X+Y}(z) = G_X(z)\cdot G_Y(z)$ if $X\perp Y$</td><td>Compound distributions; claim counting</td></tr>
+    <tr><td>Characteristic root method</td><td>$a_n = c_1 a_{n-1}+\cdots$ → roots $r_i$ → $a_n=\sum A_i r_i^n$</td><td>Linear recurrences; AR models</td></tr>
+  </table>
+
+  <h3>Quant Coding Cheat Sheet</h3>
+  <table>
+    <tr><th>Task</th><th>Key Idea</th><th>Complexity</th></tr>
+    <tr><td>GBM path simulation</td><td>Pre-generate all $Z$ at once; cumsum log-returns; <code>exp</code></td><td>$O(n_\text{steps} \cdot n_\text{paths})$</td></tr>
+    <tr><td>Binomial option tree</td><td>Backward induction; rolling array; American: add intrinsic check</td><td>$O(N^2)$ time, $O(N)$ space</td></tr>
+    <tr><td>Markov chain stationary dist.</td><td>Solve $(P^\top - I)\pi = 0$ with $\sum\pi_i=1$; or power iteration</td><td>$O(S^3)$ for $S$ states</td></tr>
+    <tr><td>Monte Carlo pricing</td><td>Vectorise over paths; antithetic + moment matching for free</td><td>$O(N)$ per Greek</td></tr>
+    <tr><td>Rolling statistics</td><td>Maintain running sum / deque; never recompute from scratch</td><td>$O(n)$ amortised</td></tr>
+    <tr><td>$\binom{n}{k} \bmod p$</td><td>Precompute factorials + Fermat inverse; Lucas for $n \geq p$</td><td>$O(n)$ setup; $O(1)$ query</td></tr>
+    <tr><td>Matrix power mod</td><td>Fast exponentiation; $P^{1000}$ in 10 matrix multiplications</td><td>$O(S^3 \log n)$</td></tr>
+    <tr><td>Max drawdown</td><td>Track running max; drawdown = current price − running max</td><td>$O(n)$ time, $O(1)$ space</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 8 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Big-O · Arrays · Hash Maps · Heaps · Trees · Graphs · Sorting · Dynamic Programming · Divide &amp; Conquer · Two-Pointer · Sliding Window · BFS &amp; DFS · Memoisation vs Tabulation · Stochastic Simulation · Monte Carlo · Matrix Operations · Binomial Tree · Markov Chains · RNG · Bit Manipulation · Modular Arithmetic · GCD &amp; Euclidean Algorithm · Binomial Theorem mod n · Linear Recurrences · Graph Theory · Generating Functions
+</footer>
+
+</body>
+</html>

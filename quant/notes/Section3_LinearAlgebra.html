@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Algebra — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0b0c18;
+    --bg2:       #10111f;
+    --bg3:       #161828;
+    --border:    #1f2240;
+    --violet:    #818cf8;
+    --violet2:   #a5b4fc;
+    --violet-dim:#3b3f7a;
+    --text:      #dde1ec;
+    --text-dim:  #7880a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --gold-dim:  #7a6030;
+    --rose:      #fb7185;
+    --green:     #4ade80;
+    --orange:    #fb923c;
+    --sky:       #38bdf8;
+    --sky-dim:   #1e4a6a;
+    --amber:     #fbbf24;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #818cf820, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--violet-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.3rem;
+    font-weight: 600;
+    color: var(--violet2);
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--violet);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--violet);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--violet2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--violet-dim);
+    min-width: 2.5rem;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--violet2);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.02rem;
+    color: var(--text);
+    margin: 2.4rem 0 0.9rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  h4 {
+    font-size: 1rem;
+    color: var(--violet);
+    margin: 1.5rem 0 0.5rem;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--violet);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #122212; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #241214; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #141228; border-left: 3px solid var(--violet); }
+  .callout.example { background: #101c28; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1e1a10; border-left: 3px solid var(--gold); }
+  .callout.algo    { background: #1a1710; border-left: 3px solid var(--amber); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+  .callout.algo    .ctitle { color: var(--amber); }
+
+  /* ── MATRIX DISPLAY ── */
+  .mat-wrap {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin: 1rem 0;
+  }
+  .mat-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.8rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--violet2);
+    white-space: pre;
+  }
+  .mat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th {
+    font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--violet); border-bottom: 1px solid var(--violet-dim); padding: 0.6rem 0.8rem;
+    text-align: left; background: var(--bg2);
+  }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── FOUR SUBSPACES DIAGRAM ── */
+  .subspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.2rem 0;
+  }
+  .subspace-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+  }
+  .subspace-cell h5 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .subspace-cell.col  h5 { color: var(--violet2); }
+  .subspace-cell.null h5 { color: var(--rose); }
+  .subspace-cell.row  h5 { color: var(--sky); }
+  .subspace-cell.lnul h5 { color: var(--amber); }
+  .subspace-cell p { font-size: 0.88rem; color: var(--text-dim); margin: 0; }
+
+  /* ── DECOMP CARD ── */
+  .decomp-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem 1.8rem;
+    margin: 1.8rem 0;
+  }
+  .decomp-card h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    color: var(--violet2);
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    font-style: normal;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── PROOF ── */
+  .proof {
+    background: var(--bg2); border: 1px dashed var(--border); border-radius: 4px;
+    padding: 0.9rem 1.3rem; margin: 0.8rem 0; font-size: 0.93rem;
+    font-style: italic; color: var(--text-dim);
+  }
+  .proof strong { color: var(--text); font-style: normal; }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--violet-dim); color: var(--violet2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--violet2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer {
+    text-align: center; color: var(--text-dim); font-size: 0.82rem;
+    padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic;
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.65rem; }
+    .subspace-grid { grid-template-columns: 1fr; }
+    .mat-wrap { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 3 of 9</div>
+  <h1>Linear Algebra</h1>
+  <div class="subtitle">Core Operations · Decompositions · Spaces &amp; Geometry · Applied Methods</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Core Operations</a>
+      <ul class="sub">
+        <li><a href="#s1-matmul">Matrix Multiplication &amp; Dot Product</a></li>
+        <li><a href="#s1-transpose">Transpose &amp; Inverse</a></li>
+        <li><a href="#s1-det">Determinant</a></li>
+        <li><a href="#s1-rank">Rank, Nullity &amp; Rank-Nullity Theorem</a></li>
+        <li><a href="#s1-trace">Trace</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Decompositions</a>
+      <ul class="sub">
+        <li><a href="#s2-eig">Eigenvalues &amp; Eigenvectors</a></li>
+        <li><a href="#s2-diag">Diagonalisation</a></li>
+        <li><a href="#s2-svd">Singular Value Decomposition (SVD)</a></li>
+        <li><a href="#s2-lu">LU Decomposition</a></li>
+        <li><a href="#s2-chol">Cholesky Decomposition</a></li>
+        <li><a href="#s2-qr">QR Decomposition</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Spaces &amp; Geometry</a>
+      <ul class="sub">
+        <li><a href="#s3-four">The Four Fundamental Subspaces</a></li>
+        <li><a href="#s3-orth">Orthogonality &amp; Projections</a></li>
+        <li><a href="#s3-gs">Gram-Schmidt Process</a></li>
+        <li><a href="#s3-basis">Change of Basis</a></li>
+        <li><a href="#s3-pd">Positive Definite Matrices</a></li>
+        <li><a href="#s3-qf">Quadratic Forms</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Applied Linear Algebra</a>
+      <ul class="sub">
+        <li><a href="#s4-axb">Systems of Equations Ax = b</a></li>
+        <li><a href="#s4-ls">Least Squares Regression</a></li>
+        <li><a href="#s4-pca">Principal Component Analysis (PCA)</a></li>
+        <li><a href="#s4-cov">Covariance Matrices</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: CORE OPERATIONS                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Core Operations</div>
+  </div>
+
+  <h3 id="s1-matmul">1.1 Matrix Multiplication &amp; Dot Product</h3>
+
+  <h4>Dot Product</h4>
+  <p>For vectors $\mathbf{a}, \mathbf{b} \in \mathbb{R}^n$:</p>
+  <div class="fbox gold">
+    $$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^n a_i b_i = \|\mathbf{a}\|\|\mathbf{b}\|\cos\theta$$
+  </div>
+  <p>where $\theta$ is the angle between the vectors. The geometric interpretation is fundamental: $\mathbf{a} \cdot \mathbf{b} = 0 \Leftrightarrow$ the vectors are <em>orthogonal</em>.</p>
+
+  <h4>Matrix Multiplication</h4>
+  <p>For $A \in \mathbb{R}^{m \times k}$ and $B \in \mathbb{R}^{k \times n}$, the product $C = AB \in \mathbb{R}^{m \times n}$ has entries:</p>
+  <div class="fbox gold">
+    $$C_{ij} = \sum_{r=1}^k A_{ir} B_{rj} = \text{(row }i\text{ of }A) \cdot \text{(col }j\text{ of }B)$$
+  </div>
+
+  <p><strong>Four ways to see matrix multiplication</strong> — each gives different geometric insight:</p>
+  <table>
+    <tr><th>Perspective</th><th>Formula</th><th>Insight</th></tr>
+    <tr><td>Row × Column (standard)</td><td>$C_{ij} = \mathbf{a}_i^\top \mathbf{b}_j$</td><td>Each entry is a dot product</td></tr>
+    <tr><td>Column picture</td><td>$AB = A[\mathbf{b}_1 \cdots \mathbf{b}_n]$; col $j$ of $C$ = $A$ times col $j$ of $B$</td><td>$C$'s columns are in col$(A)$</td></tr>
+    <tr><td>Row picture</td><td>Row $i$ of $C$ = row $i$ of $A$ times $B$</td><td>$C$'s rows are in row$(B)$</td></tr>
+    <tr><td>Outer product sum</td><td>$AB = \sum_{r=1}^k \mathbf{a}_{:,r}\,\mathbf{b}_{r,:}$</td><td>Rank-1 update; used in SVD</td></tr>
+  </table>
+
+  <h4>Key Properties</h4>
+  <table>
+    <tr><th>Property</th><th>Rule</th><th>Note</th></tr>
+    <tr><td>Associativity</td><td>$(AB)C = A(BC)$</td><td>Always holds</td></tr>
+    <tr><td>Distributivity</td><td>$A(B+C) = AB + AC$</td><td>Always holds</td></tr>
+    <tr><td>Non-commutativity</td><td>$AB \neq BA$ in general</td><td>Critical — order matters</td></tr>
+    <tr><td>Transpose of product</td><td>$(AB)^\top = B^\top A^\top$</td><td>Reverses order</td></tr>
+    <tr><td>Inverse of product</td><td>$(AB)^{-1} = B^{-1}A^{-1}$</td><td>Reverses order (both must be invertible)</td></tr>
+    <tr><td>Dimension check</td><td>$A_{m\times k} \cdot B_{k\times n} = C_{m\times n}$</td><td>Inner dims must match</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Non-Commutativity is the #1 Matrix Trap</div>
+    In scalar algebra $ab = ba$. In matrix algebra: $AB \neq BA$ in general. Even when both products exist and are the same size, they may differ. However, some pairs do commute: $A$ and $A^{-1}$, $A$ and $I$, $A$ and $f(A)$ for any polynomial $f$.
+  </div>
+
+  <h3 id="s1-transpose">1.2 Transpose &amp; Inverse</h3>
+
+  <h4>Transpose</h4>
+  <p>$(A^\top)_{ij} = A_{ji}$: reflect across the main diagonal.</p>
+  <div class="fbox">
+    <table style="margin:0; font-size:0.9rem;">
+      <tr><th>Identity</th><th>Formula</th></tr>
+      <tr><td>Double transpose</td><td>$(A^\top)^\top = A$</td></tr>
+      <tr><td>Sum</td><td>$(A+B)^\top = A^\top + B^\top$</td></tr>
+      <tr><td>Product</td><td>$(AB)^\top = B^\top A^\top$</td></tr>
+      <tr><td>Scalar</td><td>$(cA)^\top = cA^\top$</td></tr>
+    </table>
+  </div>
+  <p><strong>Symmetric matrix:</strong> $A = A^\top$. A symmetric matrix $A \in \mathbb{R}^{n \times n}$ always has real eigenvalues and orthogonal eigenvectors — the spectral theorem. Covariance matrices are always symmetric.</p>
+  <p><strong>Skew-symmetric:</strong> $A = -A^\top$ (all diagonal entries are zero).</p>
+  <p><strong>Orthogonal matrix:</strong> $Q^\top = Q^{-1}$, i.e.\ $Q^\top Q = QQ^\top = I$. The columns (and rows) form an orthonormal basis. Orthogonal matrices preserve lengths and angles: $\|Q\mathbf{x}\| = \|\mathbf{x}\|$.</p>
+
+  <h4>Matrix Inverse</h4>
+  <p>$A^{-1}$ exists iff $A$ is <em>square</em> and <em>non-singular</em> ($\det A \neq 0$, equivalently $\text{rank}(A) = n$). Then $AA^{-1} = A^{-1}A = I$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">2×2 Inverse Formula (must memorise)</div>
+    $$A = \begin{pmatrix}a & b \\ c & d\end{pmatrix} \implies A^{-1} = \frac{1}{ad-bc}\begin{pmatrix}d & -b \\ -c & a\end{pmatrix}$$
+  </div>
+
+  <p>For larger matrices: use Gaussian elimination (row reduction), cofactor expansion, or the formula $A^{-1} = \text{adj}(A)/\det(A)$.</p>
+
+  <table>
+    <tr><th>Identity</th><th>Formula</th></tr>
+    <tr><td>Product inverse</td><td>$(AB)^{-1} = B^{-1}A^{-1}$</td></tr>
+    <tr><td>Transpose inverse</td><td>$(A^\top)^{-1} = (A^{-1})^\top$</td></tr>
+    <tr><td>Scalar inverse</td><td>$(cA)^{-1} = \frac{1}{c}A^{-1}$</td></tr>
+    <tr><td>Inverse of inverse</td><td>$(A^{-1})^{-1} = A$</td></tr>
+    <tr><td>Determinant</td><td>$\det(A^{-1}) = 1/\det(A)$</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Sherman-Morrison-Woodbury (Finance Essential)</div>
+    Updating the inverse of a matrix after a low-rank change is expensive if done naively. The Woodbury identity gives:
+    $$\bigl(A + UCV\bigr)^{-1} = A^{-1} - A^{-1}U\bigl(C^{-1}+VA^{-1}U\bigr)^{-1}VA^{-1}$$
+    For $U, V \in \mathbb{R}^{n \times k}$, $k \ll n$: reduces cost from $O(n^3)$ to $O(k^2 n)$. Used constantly in portfolio optimisation when adding/removing assets.
+  </div>
+
+  <h3 id="s1-det">1.3 Determinant</h3>
+
+  <p>The determinant $\det(A)$ is a scalar that encodes the <em>signed volume scaling factor</em> of the linear transformation $A$. If $|\det(A)| > 1$, $A$ expands volume; if $< 1$, it shrinks it; if $= 0$, the transformation collapses space to a lower dimension.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">2×2 and 3×3</div>
+    $$\det\begin{pmatrix}a&b\\c&d\end{pmatrix} = ad - bc$$
+    $$\det\begin{pmatrix}a&b&c\\d&e&f\\g&h&i\end{pmatrix} = a(ei-fh) - b(di-fg) + c(dh-eg)$$
+  </div>
+
+  <h4>Key Determinant Properties</h4>
+  <table>
+    <tr><th>Property</th><th>Rule</th><th>Proof idea</th></tr>
+    <tr><td>Product</td><td>$\det(AB) = \det(A)\det(B)$</td><td>Volume composition</td></tr>
+    <tr><td>Transpose</td><td>$\det(A^\top) = \det(A)$</td><td>Same volume scaling</td></tr>
+    <tr><td>Scalar</td><td>$\det(cA) = c^n \det(A)$ for $A \in \mathbb{R}^{n\times n}$</td><td>Each row scaled by $c$</td></tr>
+    <tr><td>Inverse</td><td>$\det(A^{-1}) = 1/\det(A)$</td><td>From $\det(AA^{-1})=\det(I)=1$</td></tr>
+    <tr><td>Triangular</td><td>$\det(A) = \prod_i A_{ii}$ (product of diagonal)</td><td>No off-diagonal contribution</td></tr>
+    <tr><td>Row swap</td><td>Swapping two rows negates $\det$</td><td>Sign of permutation</td></tr>
+    <tr><td>Row scale</td><td>Multiplying one row by $c$ scales $\det$ by $c$</td><td>Multilinearity</td></tr>
+    <tr><td>Identical rows</td><td>$\det = 0$ if two rows are identical</td><td>Linearly dependent</td></tr>
+    <tr><td>Eigenvalues</td><td>$\det(A) = \prod_i \lambda_i$</td><td>Characteristic polynomial</td></tr>
+    <tr><td>Invertibility</td><td>$A$ invertible $\Leftrightarrow \det(A) \neq 0$</td><td>Core test</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Interview: Computing Determinants</div>
+    <strong>Triangular matrices are easy:</strong> $\det\begin{pmatrix}3&1&2\\0&4&5\\0&0&2\end{pmatrix} = 3 \times 4 \times 2 = 24$.<br><br>
+    <strong>The scalar trap:</strong> What is $\det(2A)$ for $A \in \mathbb{R}^{3\times 3}$ with $\det(A) = 5$?<br>
+    Answer: $2^3 \times 5 = 40$, not $2 \times 5 = 10$. Each of 3 rows is scaled by 2.
+  </div>
+
+  <h3 id="s1-rank">1.4 Rank, Nullity &amp; the Rank-Nullity Theorem</h3>
+
+  <h4>Definitions</h4>
+  <p><strong>Rank:</strong> $\text{rank}(A) = \dim(\text{col}(A)) = \dim(\text{row}(A))$. The number of linearly independent rows equals the number of linearly independent columns (a non-trivial fact).</p>
+  <p><strong>Nullity:</strong> $\text{nullity}(A) = \dim(\text{null}(A)) = $ number of free variables in $A\mathbf{x} = \mathbf{0}$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Rank-Nullity Theorem (Dimension Theorem)</div>
+    For $A \in \mathbb{R}^{m \times n}$:
+    $$\text{rank}(A) + \text{nullity}(A) = n \quad\text{(number of columns)}$$
+  </div>
+
+  <div class="proof">
+    <strong>Intuition:</strong> Every column either contributes a pivot (rank) or is a linear combination of previous columns (nullity). Together they exhaust all $n$ columns. Formally: the domain $\mathbb{R}^n$ is partitioned into the row space (dimension = rank, which maps injectively) and the null space (dimension = nullity, which maps to zero).
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example</div>
+    $A = \begin{pmatrix}1&2&3\\4&5&6\\7&8&9\end{pmatrix}$: rows are linearly dependent (row 3 = 2×row 2 − row 1). $\text{rank}(A) = 2$, $\text{nullity}(A) = 3 - 2 = 1$. This means $A\mathbf{x} = \mathbf{0}$ has a one-dimensional solution space — verified: $\mathbf{x} = (1,-2,1)^\top$ is in the null space.
+  </div>
+
+  <table>
+    <tr><th>Scenario</th><th>Meaning</th><th>Consequence</th></tr>
+    <tr><td>$\text{rank}(A) = n$ (full column rank)</td><td>Columns linearly independent</td><td>Null space = $\{0\}$; $A^\top A$ invertible; unique least-squares solution</td></tr>
+    <tr><td>$\text{rank}(A) = m$ (full row rank)</td><td>Rows linearly independent</td><td>$A\mathbf{x} = \mathbf{b}$ always has a solution</td></tr>
+    <tr><td>$\text{rank}(A) = n = m$</td><td>Full rank, square</td><td>$A$ invertible; unique solution to $A\mathbf{x} = \mathbf{b}$</td></tr>
+    <tr><td>$\text{rank}(A) < \min(m,n)$</td><td>Rank deficient</td><td>Not invertible; $\det = 0$; infinitely many or no solutions</td></tr>
+  </table>
+
+  <h3 id="s1-trace">1.5 Trace</h3>
+
+  <div class="fbox gold">
+    $$\text{tr}(A) = \sum_{i=1}^n A_{ii} = \sum_{i=1}^n \lambda_i$$
+  </div>
+
+  <p>Trace equals the <strong>sum of eigenvalues</strong>. Combined with $\det(A) = \prod_i \lambda_i$, these two facts let you read off the eigenvalues of a 2×2 matrix directly.</p>
+
+  <h4>Key Trace Properties</h4>
+  <table>
+    <tr><th>Property</th><th>Formula</th></tr>
+    <tr><td>Linearity</td><td>$\text{tr}(A+B) = \text{tr}(A)+\text{tr}(B)$, $\text{tr}(cA) = c\,\text{tr}(A)$</td></tr>
+    <tr><td>Cyclic permutation</td><td>$\text{tr}(ABC) = \text{tr}(BCA) = \text{tr}(CAB)$ (but not $\text{tr}(ACB)$ in general)</td></tr>
+    <tr><td>Transpose</td><td>$\text{tr}(A) = \text{tr}(A^\top)$</td></tr>
+    <tr><td>Inner product</td><td>$\text{tr}(A^\top B) = \sum_{i,j} A_{ij}B_{ij}$ — the Frobenius inner product</td></tr>
+    <tr><td>Frobenius norm</td><td>$\|A\|_F^2 = \text{tr}(A^\top A) = \sum_{i,j}A_{ij}^2 = \sum_i \sigma_i^2$</td></tr>
+    <tr><td>Rank of projector</td><td>$\text{tr}(P) = \text{rank}(P)$ for idempotent $P$</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 2×2 Eigenvalue Trick via Trace &amp; Determinant</div>
+    For $A = \begin{pmatrix}4&2\\1&3\end{pmatrix}$: $\text{tr}(A) = 7 = \lambda_1 + \lambda_2$, $\det(A) = 10 = \lambda_1\lambda_2$.<br><br>
+    Eigenvalues satisfy $\lambda^2 - 7\lambda + 10 = 0 \Rightarrow (\lambda-5)(\lambda-2) = 0 \Rightarrow \lambda = 5, 2$.<br><br>
+    <em>No need to set up $\det(A - \lambda I)$ from scratch — trace and determinant give you the characteristic polynomial immediately for 2×2 matrices.</em>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: DECOMPOSITIONS                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Decompositions</div>
+  </div>
+
+  <h3 id="s2-eig">2.1 Eigenvalues &amp; Eigenvectors</h3>
+
+  <p>A non-zero vector $\mathbf{v}$ is an <strong>eigenvector</strong> of $A$ with <strong>eigenvalue</strong> $\lambda$ if:</p>
+
+  <div class="fbox gold">
+    $$A\mathbf{v} = \lambda\mathbf{v} \qquad (\mathbf{v} \neq \mathbf{0})$$
+  </div>
+
+  <p><strong>Geometric interpretation:</strong> $\mathbf{v}$ is a direction that $A$ only <em>stretches</em> (by factor $\lambda$), not rotates. $\lambda < 0$ means it flips direction; $|\lambda| > 1$ means it stretches; $|\lambda| < 1$ means it compresses.</p>
+
+  <h4>Finding Eigenvalues: Characteristic Equation</h4>
+
+  <p>$A\mathbf{v} = \lambda\mathbf{v} \Rightarrow (A - \lambda I)\mathbf{v} = \mathbf{0}$. For non-trivial $\mathbf{v}$, the matrix $A - \lambda I$ must be singular:</p>
+
+  <div class="fbox gold">
+    $$\det(A - \lambda I) = 0 \qquad \text{(characteristic equation)}$$
+  </div>
+
+  <p>This gives a degree-$n$ polynomial in $\lambda$ (the <strong>characteristic polynomial</strong>), whose $n$ roots (counting multiplicity, possibly complex) are the eigenvalues.</p>
+
+  <h4>Finding Eigenvectors</h4>
+  <p>For each eigenvalue $\lambda_i$, solve $(A - \lambda_i I)\mathbf{v} = \mathbf{0}$ by row-reducing $A - \lambda_i I$. The solution space is the <strong>eigenspace</strong> corresponding to $\lambda_i$.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Full Worked Example</div>
+    $A = \begin{pmatrix}4&2\\1&3\end{pmatrix}$.<br><br>
+    <strong>Step 1 — Characteristic equation:</strong> $\det\begin{pmatrix}4-\lambda & 2 \\ 1 & 3-\lambda\end{pmatrix} = (4-\lambda)(3-\lambda) - 2 = \lambda^2 - 7\lambda + 10 = 0$<br><br>
+    $\Rightarrow \lambda_1 = 5,\;\lambda_2 = 2$<br><br>
+    <strong>Step 2 — Eigenvector for $\lambda_1 = 5$:</strong> $(A - 5I)\mathbf{v} = \begin{pmatrix}-1&2\\1&-2\end{pmatrix}\mathbf{v} = \mathbf{0}$. Row reduce: $-v_1 + 2v_2 = 0 \Rightarrow v_1 = 2v_2$. Eigenvector: $\mathbf{v}_1 = \begin{pmatrix}2\\1\end{pmatrix}$<br><br>
+    <strong>Step 3 — Eigenvector for $\lambda_2 = 2$:</strong> $(A - 2I)\mathbf{v} = \begin{pmatrix}2&2\\1&1\end{pmatrix}\mathbf{v} = \mathbf{0} \Rightarrow v_1 = -v_2$. Eigenvector: $\mathbf{v}_2 = \begin{pmatrix}1\\-1\end{pmatrix}$<br><br>
+    <strong>Verification:</strong> $A\mathbf{v}_1 = \begin{pmatrix}4&2\\1&3\end{pmatrix}\begin{pmatrix}2\\1\end{pmatrix} = \begin{pmatrix}10\\5\end{pmatrix} = 5\begin{pmatrix}2\\1\end{pmatrix}$ ✓
+  </div>
+
+  <h4>Key Spectral Facts</h4>
+  <table>
+    <tr><th>Property</th><th>Statement</th></tr>
+    <tr><td>Trace</td><td>$\sum \lambda_i = \text{tr}(A)$</td></tr>
+    <tr><td>Determinant</td><td>$\prod \lambda_i = \det(A)$</td></tr>
+    <tr><td>Invertibility</td><td>$A$ invertible $\Leftrightarrow$ no zero eigenvalue</td></tr>
+    <tr><td>$A^k$</td><td>Eigenvalues of $A^k$ are $\lambda_i^k$; same eigenvectors</td></tr>
+    <tr><td>$A^{-1}$</td><td>Eigenvalues are $1/\lambda_i$; same eigenvectors</td></tr>
+    <tr><td>$f(A)$</td><td>Eigenvalues of $f(A)$ are $f(\lambda_i)$; same eigenvectors</td></tr>
+    <tr><td>Symmetric $A$</td><td>All $\lambda_i \in \mathbb{R}$; eigenvectors for distinct eigenvalues are orthogonal</td></tr>
+    <tr><td>Linear independence</td><td>Eigenvectors for <em>distinct</em> eigenvalues are linearly independent</td></tr>
+  </table>
+
+  <h3 id="s2-diag">2.2 Diagonalisation</h3>
+
+  <p>An $n \times n$ matrix $A$ is <strong>diagonalisable</strong> if it has $n$ linearly independent eigenvectors. Then:</p>
+
+  <div class="fbox gold">
+    $$A = P D P^{-1}$$
+    where columns of $P$ are eigenvectors, and $D = \text{diag}(\lambda_1, \ldots, \lambda_n)$
+  </div>
+
+  <p><strong>When is $A$ diagonalisable?</strong></p>
+  <ul>
+    <li>$A$ has $n$ distinct eigenvalues $\Rightarrow$ always diagonalisable</li>
+    <li>$A$ is symmetric (real) $\Rightarrow$ always diagonalisable (<em>and</em> $P$ is orthogonal, giving $A = Q D Q^\top$, the spectral decomposition)</li>
+    <li>Repeated eigenvalues: need to check if algebraic multiplicity = geometric multiplicity</li>
+  </ul>
+
+  <h4>Power of Diagonalisation</h4>
+  <div class="fbox">
+    $$A^k = P D^k P^{-1}, \qquad D^k = \text{diag}(\lambda_1^k, \ldots, \lambda_n^k)$$
+  </div>
+  <p>Computing $A^{100}$ directly requires $O(n^3 \times 100)$ multiplications. With diagonalisation: compute $P$, $D^{100}$ (trivial), $P^{-1}$ — just one $O(n^3)$ factorisation.</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Markov Chain Powers</div>
+    A transition matrix $P$ for a Markov chain has $P^n$ giving the $n$-step distribution. Diagonalisation makes $P^n = Q D^n Q^{-1}$ tractable. The dominant eigenvalue is always 1 (stationary distribution); if $|\lambda_i| < 1$ for $i > 1$, all non-stationary components decay geometrically.
+  </div>
+
+  <h3 id="s2-svd">2.3 Singular Value Decomposition (SVD)</h3>
+
+  <p>SVD is the most important matrix decomposition in applied mathematics. Unlike eigendecomposition, SVD works for <em>any</em> matrix, not just square ones.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Singular Value Decomposition</div>
+    For any $A \in \mathbb{R}^{m \times n}$ with $\text{rank}(A) = r$:
+    $$A = U \Sigma V^\top$$
+    <ul style="margin-top:0.5rem;">
+      <li>$U \in \mathbb{R}^{m \times m}$: orthogonal matrix, columns = <strong>left singular vectors</strong></li>
+      <li>$\Sigma \in \mathbb{R}^{m \times n}$: diagonal, entries $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_r > 0$ are the <strong>singular values</strong></li>
+      <li>$V \in \mathbb{R}^{n \times n}$: orthogonal matrix, columns = <strong>right singular vectors</strong></li>
+    </ul>
+  </div>
+
+  <h4>Geometric Interpretation</h4>
+  <p>Any linear map $A$ can be decomposed into three steps: (1) $V^\top$ — rotate/reflect the input, (2) $\Sigma$ — stretch along axes by $\sigma_i$, (3) $U$ — rotate/reflect the output. The singular values $\sigma_i$ are the "stretching factors" in orthogonal directions.</p>
+
+  <h4>Connection to Eigenvalues</h4>
+  <div class="fbox sky">
+    $$A^\top A = V \Sigma^\top \Sigma V^\top = V \,\text{diag}(\sigma_1^2, \ldots, \sigma_r^2, 0, \ldots)\, V^\top$$
+    $$AA^\top = U \Sigma \Sigma^\top U^\top = U \,\text{diag}(\sigma_1^2, \ldots, \sigma_r^2, 0, \ldots)\, U^\top$$
+  </div>
+  <p>Therefore: singular values of $A$ = $\sqrt{\text{eigenvalues of }A^\top A}$ (= $\sqrt{\text{eigenvalues of }AA^\top}$). The right singular vectors $V$ are eigenvectors of $A^\top A$; the left singular vectors $U$ are eigenvectors of $AA^\top$.</p>
+
+  <h4>Low-Rank Approximation (Eckart-Young Theorem)</h4>
+  <div class="fbox gold">
+    The best rank-$k$ approximation to $A$ in both Frobenius and spectral norm is:
+    $$A_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^\top$$
+    with approximation error $\|A - A_k\|_F^2 = \sum_{i=k+1}^r \sigma_i^2$
+  </div>
+
+  <h4>Applications of SVD</h4>
+  <table>
+    <tr><th>Application</th><th>How SVD is used</th></tr>
+    <tr><td>PCA</td><td>SVD of the centred data matrix $X$ gives principal components directly</td></tr>
+    <tr><td>Rank determination</td><td>$\text{rank}(A) = $ number of non-zero singular values</td></tr>
+    <tr><td>Condition number</td><td>$\kappa(A) = \sigma_1/\sigma_r$ — measures numerical stability; large $\kappa$ = ill-conditioned</td></tr>
+    <tr><td>Pseudoinverse</td><td>$A^+ = V\Sigma^+ U^\top$ where $\Sigma^+$ replaces each non-zero $\sigma_i$ with $1/\sigma_i$</td></tr>
+    <tr><td>Image compression</td><td>Keep only top-$k$ singular values/vectors — captures most variance</td></tr>
+    <tr><td>Factor models</td><td>Low-rank approximation of return covariance; systematic vs idiosyncratic risk</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 SVD in Quantitative Finance</div>
+    In a factor model, the return covariance matrix $\Sigma$ is decomposed via SVD/eigen-decomposition: $\Sigma \approx \sum_{k=1}^K \sigma_k^2 \mathbf{f}_k\mathbf{f}_k^\top + D$ where $\mathbf{f}_k$ are factor loadings and $D$ is idiosyncratic risk. The first few singular values capture most of the variance — justifying dimension reduction.
+  </div>
+
+  <h3 id="s2-lu">2.4 LU Decomposition</h3>
+
+  <div class="decomp-card">
+    <h4>LU Decomposition</h4>
+    <p><strong>What:</strong> Factor $A = LU$ where $L$ is lower triangular (1s on diagonal) and $U$ is upper triangular.</p>
+
+    <div class="fbox">
+      $$A = LU \qquad \text{or with pivoting: } PA = LU$$
+    </div>
+
+    <p><strong>When:</strong> $A$ is square. Pivoting ($PA = LU$, $P$ = permutation matrix) is needed for numerical stability when a pivot would be zero or very small.</p>
+
+    <h4>Why It's Useful</h4>
+    <p>Solving $A\mathbf{x} = \mathbf{b}$ with LU requires $O(n^3)$ for the factorisation (done once), then two $O(n^2)$ triangular solves:</p>
+    <ol class="steps">
+      <li>Factor: $A = LU$ (cost $O(n^3)$)</li>
+      <li>Forward substitution: solve $L\mathbf{y} = \mathbf{b}$ for $\mathbf{y}$ (cost $O(n^2)$)</li>
+      <li>Back substitution: solve $U\mathbf{x} = \mathbf{y}$ for $\mathbf{x}$ (cost $O(n^2)$)</li>
+    </ol>
+    <p>For multiple right-hand sides $\mathbf{b}_1, \mathbf{b}_2, \ldots$, factor once and solve cheaply each time.</p>
+
+    <div class="callout algo">
+      <div class="ctitle">⚙ Algorithm (Gaussian Elimination = LU)</div>
+      LU decomposition is Gaussian elimination in disguise: the elimination multipliers become the entries of $L$, and the row echelon form is $U$. Partial pivoting = swap rows before each elimination step to ensure the largest element is the pivot.
+    </div>
+  </div>
+
+  <h3 id="s2-chol">2.5 Cholesky Decomposition</h3>
+
+  <div class="decomp-card">
+    <h4>Cholesky Decomposition</h4>
+    <p><strong>Requirement:</strong> $A$ must be <em>symmetric positive definite</em> (SPD).</p>
+
+    <div class="fbox gold">
+      $$A = LL^\top$$
+      where $L$ is a lower triangular matrix with <em>positive</em> diagonal entries
+    </div>
+
+    <p><strong>Why it matters:</strong></p>
+    <ul>
+      <li>Twice as efficient as LU for SPD matrices: $O(n^3/3)$ vs $O(2n^3/3)$</li>
+      <li>Numerically stable without pivoting (no cancellation because all diagonal entries are $\sqrt{A_{ii} - \sum \ldots} > 0$ for SPD matrices)</li>
+      <li>Simulating correlated normals: if $\mathbf{Z} \sim N(\mathbf{0}, I)$, then $L\mathbf{Z} \sim N(\mathbf{0}, LL^\top) = N(\mathbf{0}, A)$</li>
+    </ul>
+
+    <div class="callout example">
+      <div class="ctitle">📋 Worked Example</div>
+      $\Sigma = \begin{pmatrix}4&2\\2&3\end{pmatrix}$ (PD: both eigenvalues $> 0$).<br><br>
+      $L = \begin{pmatrix}l_{11}&0\\l_{21}&l_{22}\end{pmatrix}$. From $\Sigma = LL^\top$:<br><br>
+      $l_{11}^2 = 4 \Rightarrow l_{11} = 2$<br>
+      $l_{21}l_{11} = 2 \Rightarrow l_{21} = 1$<br>
+      $l_{21}^2 + l_{22}^2 = 3 \Rightarrow l_{22}^2 = 2 \Rightarrow l_{22} = \sqrt{2}$<br><br>
+      $L = \begin{pmatrix}2&0\\1&\sqrt{2}\end{pmatrix}$, verify: $LL^\top = \begin{pmatrix}4&2\\2&3\end{pmatrix}$ ✓
+    </div>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Simulating Correlated Returns</div>
+      To simulate $n$ correlated asset returns with covariance $\Sigma$: (1) Cholesky factor $\Sigma = LL^\top$; (2) Generate $\mathbf{Z} \sim N(\mathbf{0}, I_n)$; (3) Transform $\mathbf{R} = \boldsymbol{\mu} + L\mathbf{Z}$. Then $\mathbf{R} \sim N(\boldsymbol{\mu}, \Sigma)$. This is the standard Monte Carlo approach for multi-asset derivatives.
+    </div>
+  </div>
+
+  <h3 id="s2-qr">2.6 QR Decomposition</h3>
+
+  <div class="decomp-card">
+    <h4>QR Decomposition</h4>
+    <p>For $A \in \mathbb{R}^{m \times n}$ with $m \geq n$ and full column rank:</p>
+
+    <div class="fbox gold">
+      $$A = QR$$
+      <ul style="margin-top:0.5rem;">
+        <li>$Q \in \mathbb{R}^{m \times n}$: orthonormal columns ($Q^\top Q = I_n$)</li>
+        <li>$R \in \mathbb{R}^{n \times n}$: upper triangular with positive diagonal (unique if required)</li>
+      </ul>
+    </div>
+
+    <p><strong>Applications:</strong></p>
+    <ul>
+      <li><strong>Least squares:</strong> $A\mathbf{x} = \mathbf{b}$ solved as $R\mathbf{x} = Q^\top\mathbf{b}$ — numerically superior to normal equations $A^\top A\mathbf{x} = A^\top\mathbf{b}$ (avoids squaring the condition number)</li>
+      <li><strong>Gram-Schmidt:</strong> QR decomposition is the matrix formulation of Gram-Schmidt orthogonalisation</li>
+      <li><strong>Eigenvalue algorithms:</strong> The QR algorithm iteratively computes eigenvalues of a matrix</li>
+    </ul>
+
+    <table>
+      <tr><th>Decomposition</th><th>Matrix type</th><th>Key use</th><th>Cost</th></tr>
+      <tr><td>LU</td><td>Square</td><td>Solving $A\mathbf{x}=\mathbf{b}$, computing $\det$</td><td>$O(n^3/3)$</td></tr>
+      <tr><td>Cholesky</td><td>SPD</td><td>Fast solve + simulation</td><td>$O(n^3/6)$</td></tr>
+      <tr><td>QR</td><td>Any $m\geq n$, full col rank</td><td>Stable least squares, eigenvalues</td><td>$O(mn^2)$</td></tr>
+      <tr><td>SVD</td><td>Any</td><td>Low-rank approx, pseudoinverse, PCA</td><td>$O(\min(mn^2,m^2n))$</td></tr>
+      <tr><td>Eigen</td><td>Square (diagonalisable)</td><td>Powers, matrix functions, spectral theory</td><td>$O(n^3)$</td></tr>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: SPACES & GEOMETRY                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Spaces &amp; Geometry</div>
+  </div>
+
+  <h3 id="s3-four">3.1 The Four Fundamental Subspaces</h3>
+
+  <p>Every matrix $A \in \mathbb{R}^{m \times n}$ gives rise to four fundamental subspaces:</p>
+
+  <div class="subspace-grid">
+    <div class="subspace-cell col">
+      <h5>Column Space — $\text{col}(A)$</h5>
+      <p>Span of columns of $A$. Subset of $\mathbb{R}^m$. Dimension = $\text{rank}(A) = r$.</p>
+      <p>All possible outputs $A\mathbf{x}$. $A\mathbf{x}=\mathbf{b}$ solvable iff $\mathbf{b} \in \text{col}(A)$.</p>
+    </div>
+    <div class="subspace-cell null">
+      <h5>Null Space — $\text{null}(A)$</h5>
+      <p>All $\mathbf{x}$ with $A\mathbf{x} = \mathbf{0}$. Subset of $\mathbb{R}^n$. Dimension = nullity = $n - r$.</p>
+      <p>Orthogonal complement of the row space.</p>
+    </div>
+    <div class="subspace-cell row">
+      <h5>Row Space — $\text{row}(A)$</h5>
+      <p>Span of rows of $A$ = $\text{col}(A^\top)$. Subset of $\mathbb{R}^n$. Dimension = $r$.</p>
+      <p>Orthogonal complement of the null space.</p>
+    </div>
+    <div class="subspace-cell lnul">
+      <h5>Left Null Space — $\text{null}(A^\top)$</h5>
+      <p>All $\mathbf{y}$ with $A^\top\mathbf{y} = \mathbf{0}$. Subset of $\mathbb{R}^m$. Dimension = $m - r$.</p>
+      <p>Orthogonal complement of the column space.</p>
+    </div>
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Fundamental Theorem of Linear Algebra (Gilbert Strang)</div>
+    $$\text{row}(A) \perp \text{null}(A) \quad \text{in } \mathbb{R}^n$$
+    $$\text{col}(A) \perp \text{null}(A^\top) \quad \text{in } \mathbb{R}^m$$
+    Every $\mathbf{x} \in \mathbb{R}^n$ decomposes uniquely as $\mathbf{x} = \mathbf{x}_r + \mathbf{x}_n$ where $\mathbf{x}_r \in \text{row}(A)$ and $\mathbf{x}_n \in \text{null}(A)$.
+  </div>
+
+  <h3 id="s3-orth">3.2 Orthogonality &amp; Projections</h3>
+
+  <h4>Orthogonality</h4>
+  <p>$\mathbf{u} \perp \mathbf{v}$ iff $\mathbf{u}^\top\mathbf{v} = 0$. A set $\{\mathbf{u}_1, \ldots, \mathbf{u}_k\}$ is:</p>
+  <ul>
+    <li><strong>Orthogonal:</strong> $\mathbf{u}_i^\top\mathbf{u}_j = 0$ for $i \neq j$</li>
+    <li><strong>Orthonormal:</strong> additionally $\|\mathbf{u}_i\| = 1$, so $\mathbf{u}_i^\top\mathbf{u}_j = \delta_{ij}$</li>
+  </ul>
+  <p>An orthogonal set is automatically linearly independent (can verify: assume $\sum c_i \mathbf{u}_i = 0$, dot both sides with $\mathbf{u}_j$).</p>
+
+  <h4>Projection onto a Vector</h4>
+  <div class="fbox gold">
+    Projection of $\mathbf{b}$ onto $\mathbf{a}$:
+    $$\text{proj}_{\mathbf{a}}\mathbf{b} = \frac{\mathbf{a}^\top\mathbf{b}}{\mathbf{a}^\top\mathbf{a}}\,\mathbf{a} = \frac{\mathbf{a}\mathbf{a}^\top}{\mathbf{a}^\top\mathbf{a}}\,\mathbf{b}$$
+    The scalar $\hat{x} = \mathbf{a}^\top\mathbf{b}/\mathbf{a}^\top\mathbf{a}$ is the component of $\mathbf{b}$ along $\mathbf{a}$.
+  </div>
+
+  <h4>Projection onto a Subspace</h4>
+  <p>Given a subspace spanned by the columns of $A \in \mathbb{R}^{m \times n}$ (full column rank), the projection of $\mathbf{b}$ onto $\text{col}(A)$ is:</p>
+
+  <div class="fbox gold">
+    $$\hat{\mathbf{b}} = A(A^\top A)^{-1}A^\top\,\mathbf{b} = P\mathbf{b}$$
+    where $P = A(A^\top A)^{-1}A^\top$ is the <strong>projection matrix</strong> (also called hat matrix in regression)
+  </div>
+
+  <h4>Properties of Projection Matrices</h4>
+  <div class="fbox">
+    $$P^2 = P \quad\text{(idempotent)} \qquad P^\top = P \quad\text{(symmetric)} \qquad (I-P)^2 = (I-P) \quad\text{(complementary projector)}$$
+  </div>
+  <p>Eigenvalues of $P$ are only 0 and 1: $\text{rank}(P) = \text{tr}(P) = $ dimension of subspace projected onto.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Least Squares as Projection</div>
+    When $A\mathbf{x} = \mathbf{b}$ has no solution (overdetermined system), the least-squares solution $\hat{\mathbf{x}}$ gives the point in $\text{col}(A)$ closest to $\mathbf{b}$ — it is exactly $\hat{\mathbf{b}} = P\mathbf{b}$. The residual $\mathbf{e} = \mathbf{b} - A\hat{\mathbf{x}} = (I-P)\mathbf{b}$ is orthogonal to all columns of $A$.
+  </div>
+
+  <h3 id="s3-gs">3.3 Gram-Schmidt Process</h3>
+
+  <p>Given $n$ linearly independent vectors $\{\mathbf{v}_1, \ldots, \mathbf{v}_n\}$, Gram-Schmidt constructs an orthonormal basis $\{\mathbf{e}_1, \ldots, \mathbf{e}_n\}$ for the same subspace:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Gram-Schmidt Algorithm</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li>$\mathbf{u}_1 = \mathbf{v}_1$, $\;\mathbf{e}_1 = \mathbf{u}_1/\|\mathbf{u}_1\|$</li>
+      <li>$\mathbf{u}_2 = \mathbf{v}_2 - (\mathbf{v}_2\cdot\mathbf{e}_1)\mathbf{e}_1$, $\;\mathbf{e}_2 = \mathbf{u}_2/\|\mathbf{u}_2\|$</li>
+      <li>$\mathbf{u}_3 = \mathbf{v}_3 - (\mathbf{v}_3\cdot\mathbf{e}_1)\mathbf{e}_1 - (\mathbf{v}_3\cdot\mathbf{e}_2)\mathbf{e}_2$, $\;\mathbf{e}_3 = \mathbf{u}_3/\|\mathbf{u}_3\|$</li>
+      <li style="margin-top:0.3rem;">In general: $\mathbf{u}_k = \mathbf{v}_k - \sum_{j=1}^{k-1}(\mathbf{v}_k \cdot \mathbf{e}_j)\,\mathbf{e}_j$, $\;\mathbf{e}_k = \mathbf{u}_k/\|\mathbf{u}_k\|$</li>
+    </ol>
+  </div>
+
+  <p>At each step, we subtract the component of $\mathbf{v}_k$ along all previously computed directions — the remainder $\mathbf{u}_k$ is orthogonal to all of them.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Example</div>
+    Orthogonalise $\mathbf{v}_1 = (1,1,0)^\top$ and $\mathbf{v}_2 = (1,0,1)^\top$:<br><br>
+    $\mathbf{e}_1 = \mathbf{v}_1/\|\mathbf{v}_1\| = (1/\sqrt{2},\;1/\sqrt{2},\;0)^\top$<br><br>
+    $\mathbf{v}_2 \cdot \mathbf{e}_1 = 1/\sqrt{2}$<br>
+    $\mathbf{u}_2 = \mathbf{v}_2 - \frac{1}{\sqrt{2}}\mathbf{e}_1 = (1,0,1)^\top - \frac{1}{2}(1,1,0)^\top = (1/2,\;-1/2,\;1)^\top$<br>
+    $\|\mathbf{u}_2\| = \sqrt{1/4+1/4+1} = \sqrt{3/2}$<br>
+    $\mathbf{e}_2 = (1/\sqrt{6},\;-1/\sqrt{6},\;2/\sqrt{6})^\top$<br><br>
+    Verify: $\mathbf{e}_1 \cdot \mathbf{e}_2 = 1/\sqrt{12} - 1/\sqrt{12} + 0 = 0$ ✓
+  </div>
+
+  <p><strong>Gram-Schmidt = QR:</strong> The matrix with columns $\mathbf{v}_1, \ldots, \mathbf{v}_n$ equals $QR$ where $Q$ has columns $\mathbf{e}_1, \ldots, \mathbf{e}_n$ and $R_{jk} = \mathbf{v}_k \cdot \mathbf{e}_j$ (the projection coefficients).</p>
+
+  <h3 id="s3-basis">3.4 Change of Basis</h3>
+
+  <p>A basis $\mathcal{B} = \{\mathbf{b}_1, \ldots, \mathbf{b}_n\}$ for $\mathbb{R}^n$ gives an alternative coordinate system. The <strong>change-of-basis matrix</strong> $P = [\mathbf{b}_1 \cdots \mathbf{b}_n]$ converts $\mathcal{B}$-coordinates to standard coordinates.</p>
+
+  <div class="fbox gold">
+    $$[\mathbf{x}]_\text{std} = P\,[\mathbf{x}]_\mathcal{B} \qquad \Leftrightarrow \qquad [\mathbf{x}]_\mathcal{B} = P^{-1}[\mathbf{x}]_\text{std}$$
+  </div>
+
+  <p>If $A$ is a linear map expressed in standard basis, its representation in basis $\mathcal{B}$ is:</p>
+
+  <div class="fbox gold">
+    $$[A]_\mathcal{B} = P^{-1}A\,P$$
+  </div>
+
+  <p>This is exactly the diagonalisation formula: if $\mathcal{B}$ is the eigenbasis, $P^{-1}AP = D$ (diagonal).</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why Diagonalisation is Change of Basis</div>
+    Diagonalisation says: in the eigenvector coordinate system, the linear map $A$ is simply scaling each axis by its eigenvalue. Complicated behaviour in standard coordinates becomes trivial in the right basis. PCA does exactly this: finds the coordinate system (principal components) in which the data's covariance is diagonal.
+  </div>
+
+  <h3 id="s3-pd">3.5 Positive Definite Matrices</h3>
+
+  <p>A symmetric matrix $A \in \mathbb{R}^{n\times n}$ is <strong>positive definite (PD)</strong> if any of these equivalent conditions holds:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Five Equivalent Definitions of Positive Definiteness</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li>$\mathbf{x}^\top A\mathbf{x} > 0$ for all $\mathbf{x} \neq \mathbf{0}$ (definition via quadratic form)</li>
+      <li>All eigenvalues $\lambda_i > 0$</li>
+      <li>All leading principal minors are positive ($A_{11} > 0$, $\det\begin{pmatrix}A_{11}&A_{12}\\A_{21}&A_{22}\end{pmatrix} > 0$, ...)</li>
+      <li>Cholesky decomposition $A = LL^\top$ exists with $L$ having positive diagonal</li>
+      <li>$A = B^\top B$ for some matrix $B$ with full column rank</li>
+    </ol>
+  </div>
+
+  <h4>The PD Hierarchy</h4>
+  <table>
+    <tr><th>Type</th><th>Symbol</th><th>Condition</th><th>Eigenvalues</th></tr>
+    <tr><td>Positive definite</td><td>$A \succ 0$</td><td>$\mathbf{x}^\top A\mathbf{x} > 0$ for $\mathbf{x} \neq 0$</td><td>All $> 0$</td></tr>
+    <tr><td>Positive semi-definite</td><td>$A \succeq 0$</td><td>$\mathbf{x}^\top A\mathbf{x} \geq 0$ for all $\mathbf{x}$</td><td>All $\geq 0$</td></tr>
+    <tr><td>Negative definite</td><td>$A \prec 0$</td><td>$\mathbf{x}^\top A\mathbf{x} < 0$ for $\mathbf{x} \neq 0$</td><td>All $< 0$</td></tr>
+    <tr><td>Indefinite</td><td>—</td><td>Both positive and negative values</td><td>Mixed signs</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 PD in Finance</div>
+    Covariance matrices must be positive semi-definite — they encode variances (non-negative) and correlations. A covariance matrix estimated from data may fail to be PSD if there are more assets than observations ($n > T$). This causes portfolio optimisation to fail. Remedies: shrinkage estimators (Ledoit-Wolf), factor models, or nearest PSD projection.
+  </div>
+
+  <h3 id="s3-qf">3.6 Quadratic Forms</h3>
+
+  <p>A <strong>quadratic form</strong> in $\mathbf{x} \in \mathbb{R}^n$ is $Q(\mathbf{x}) = \mathbf{x}^\top A\mathbf{x}$ for a symmetric matrix $A$.</p>
+
+  <div class="fbox gold">
+    $$Q(\mathbf{x}) = \mathbf{x}^\top A\mathbf{x} = \sum_{i=1}^n \sum_{j=1}^n A_{ij}x_i x_j = \sum_i A_{ii}x_i^2 + 2\sum_{i < j}A_{ij}x_i x_j$$
+  </div>
+
+  <p><strong>Canonical form via diagonalisation:</strong> With $A = Q\Lambda Q^\top$ (spectral theorem), and $\mathbf{y} = Q^\top\mathbf{x}$:</p>
+
+  <div class="fbox sky">
+    $$\mathbf{x}^\top A\mathbf{x} = \mathbf{y}^\top \Lambda\mathbf{y} = \sum_{i=1}^n \lambda_i y_i^2$$
+  </div>
+
+  <p>The quadratic form is a sum of squared terms weighted by eigenvalues. Positive definiteness means all $\lambda_i > 0$, so $Q(\mathbf{x}) > 0$ for $\mathbf{x} \neq 0$.</p>
+
+  <h4>Quadratic Form Optimisation</h4>
+  <p>On the unit sphere $\|\mathbf{x}\|=1$, the maximum of $\mathbf{x}^\top A\mathbf{x}$ is $\lambda_{\max}$ (achieved at the corresponding eigenvector) and the minimum is $\lambda_{\min}$. The <em>Rayleigh quotient</em>:</p>
+
+  <div class="fbox">
+    $$R(\mathbf{x}) = \frac{\mathbf{x}^\top A\mathbf{x}}{\mathbf{x}^\top\mathbf{x}}, \quad \lambda_{\min} \leq R(\mathbf{x}) \leq \lambda_{\max}$$
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Portfolio Variance as Quadratic Form</div>
+    Portfolio variance is $\sigma_p^2 = \mathbf{w}^\top \Sigma\mathbf{w}$ where $\mathbf{w}$ is the weight vector and $\Sigma$ the covariance matrix. This is a quadratic form in $\mathbf{w}$. Minimising portfolio variance subject to constraints is a quadratic programming (QP) problem. The minimum variance portfolio corresponds to the smallest eigenvalue direction of $\Sigma$ subject to the budget constraint.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: APPLIED LINEAR ALGEBRA                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Applied Linear Algebra</div>
+  </div>
+
+  <h3 id="s4-axb">4.1 Systems of Equations $A\mathbf{x} = \mathbf{b}$</h3>
+
+  <p>For $A \in \mathbb{R}^{m \times n}$ and $\mathbf{b} \in \mathbb{R}^m$, three fundamental cases:</p>
+
+  <table>
+    <tr><th>System</th><th>Size</th><th>Solutions</th><th>Condition</th></tr>
+    <tr><td>Square, non-singular</td><td>$m = n$, full rank</td><td>Unique: $\mathbf{x} = A^{-1}\mathbf{b}$</td><td>$\det(A) \neq 0$</td></tr>
+    <tr><td>Overdetermined</td><td>$m > n$</td><td>Generally no exact solution — use least squares</td><td>$\mathbf{b} \notin \text{col}(A)$</td></tr>
+    <tr><td>Underdetermined</td><td>$m < n$</td><td>Infinitely many solutions (if consistent)</td><td>Free variables = nullity</td></tr>
+    <tr><td>Rank deficient</td><td>Any, $\text{rank} < \min(m,n)$</td><td>Either none or infinitely many</td><td>$\mathbf{b} \in \text{col}(A)$?</td></tr>
+  </table>
+
+  <div class="fbox gold">
+    <div class="flabel">Consistency Criterion</div>
+    $A\mathbf{x} = \mathbf{b}$ is consistent (has at least one solution) iff $\mathbf{b} \in \text{col}(A)$, equivalently iff $\text{rank}([A|\mathbf{b}]) = \text{rank}(A)$.
+  </div>
+
+  <p><strong>General solution structure:</strong> If $\hat{\mathbf{x}}$ is any particular solution, then all solutions are:</p>
+
+  <div class="fbox">
+    $$\mathbf{x} = \hat{\mathbf{x}} + \mathbf{x}_n \quad \text{for any } \mathbf{x}_n \in \text{null}(A)$$
+  </div>
+
+  <p>The general solution = one particular solution + anything in the null space.</p>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Solving Strategy</div>
+    <ol class="steps">
+      <li>Form augmented matrix $[A|\mathbf{b}]$ and row-reduce to RREF</li>
+      <li>Check consistency: if a row $[0\ 0\ \cdots\ 0\ |\ c]$ with $c \neq 0$ appears, no solution</li>
+      <li>Identify pivot columns (basic variables) and free columns (free variables)</li>
+      <li>Express basic variables in terms of free variables; set free variables = parameters</li>
+    </ol>
+  </div>
+
+  <h3 id="s4-ls">4.2 Least Squares Regression</h3>
+
+  <p>Given overdetermined $A\mathbf{x} = \mathbf{b}$ ($m > n$, typically no exact solution), find $\hat{\mathbf{x}}$ that minimises the sum of squared residuals:</p>
+
+  <div class="fbox gold">
+    $$\hat{\mathbf{x}} = \arg\min_\mathbf{x} \|\mathbf{b} - A\mathbf{x}\|^2 = \arg\min_\mathbf{x} \sum_{i=1}^m (b_i - \mathbf{a}_i^\top\mathbf{x})^2$$
+  </div>
+
+  <h4>Derivation via Normal Equations</h4>
+
+  <p>The residual $\mathbf{e} = \mathbf{b} - A\hat{\mathbf{x}}$ must be orthogonal to $\text{col}(A)$ at the optimum (the residual points in the "null of $A^\top$" direction):</p>
+
+  <div class="proof">
+    <strong>Calculus approach:</strong> $f(\mathbf{x}) = \|\mathbf{b} - A\mathbf{x}\|^2 = \mathbf{b}^\top\mathbf{b} - 2\mathbf{b}^\top A\mathbf{x} + \mathbf{x}^\top A^\top A\mathbf{x}$.<br>
+    Setting gradient to zero: $\nabla_\mathbf{x}f = -2A^\top\mathbf{b} + 2A^\top A\mathbf{x} = 0$.
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Normal Equations</div>
+    $$A^\top A\,\hat{\mathbf{x}} = A^\top\mathbf{b}$$
+    If $A$ has full column rank (columns linearly independent):
+    $$\hat{\mathbf{x}} = (A^\top A)^{-1}A^\top\mathbf{b}$$
+  </div>
+
+  <h4>Linear Regression Interpretation</h4>
+  <p>For simple linear regression with $n$ data points $(x_i, y_i)$ and model $y = \beta_0 + \beta_1 x$:</p>
+  <div class="fbox sky">
+    $$A = \begin{pmatrix}1 & x_1 \\ 1 & x_2 \\ \vdots & \vdots \\ 1 & x_n\end{pmatrix}, \quad \hat{\boldsymbol{\beta}} = \begin{pmatrix}\hat{\beta}_0\\\hat{\beta}_1\end{pmatrix} = (A^\top A)^{-1}A^\top\mathbf{y}$$
+    $$\hat{\beta}_1 = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sum(x_i - \bar{x})^2} = \frac{\text{Cov}(X,Y)}{\text{Var}(X)}, \quad \hat{\beta}_0 = \bar{y} - \hat{\beta}_1\bar{x}$$
+  </div>
+
+  <h4>Key Properties of the Least Squares Estimator</h4>
+
+  <table>
+    <tr><th>Property</th><th>Statement</th><th>Condition</th></tr>
+    <tr><td>Unbiasedness</td><td>$E[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta}$</td><td>$E[\boldsymbol{\varepsilon}] = 0$</td></tr>
+    <tr><td>Variance</td><td>$\text{Cov}(\hat{\boldsymbol{\beta}}) = \sigma^2(A^\top A)^{-1}$</td><td>$\text{Cov}(\boldsymbol{\varepsilon}) = \sigma^2 I$</td></tr>
+    <tr><td>BLUE (Gauss-Markov)</td><td>OLS is Best Linear Unbiased Estimator</td><td>Homoskedastic, uncorrelated errors</td></tr>
+    <tr><td>MLE</td><td>OLS = MLE when $\boldsymbol{\varepsilon} \sim N(0,\sigma^2 I)$</td><td>Normal errors</td></tr>
+    <tr><td>R-squared</td><td>$R^2 = 1 - \text{SS}_\text{res}/\text{SS}_\text{tot} = \cos^2\theta$ (projection angle)</td><td>With intercept</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Normal Equations vs QR</div>
+    The formula $\hat{\mathbf{x}} = (A^\top A)^{-1}A^\top\mathbf{b}$ is elegant but numerically fragile: forming $A^\top A$ squares the condition number $\kappa(A^\top A) = \kappa(A)^2$. If $A$ is nearly rank-deficient, $A^\top A$ is very ill-conditioned. In practice, use QR decomposition ($A = QR$, solve $R\hat{\mathbf{x}} = Q^\top\mathbf{b}$) or SVD ($\hat{\mathbf{x}} = A^+\mathbf{b}$).
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Factor Model Estimation</div>
+    In a multi-factor model $\mathbf{r}_t = \alpha + B\mathbf{f}_t + \boldsymbol{\varepsilon}_t$, estimating factor loadings $B$ from time series data is a least squares problem. The columns of $A$ are the factor returns (plus an intercept), and $\mathbf{b}$ is the asset return series. The OLS solution gives the beta exposures. The residuals $\hat{\boldsymbol{\varepsilon}}$ are the idiosyncratic returns.
+  </div>
+
+  <h3 id="s4-pca">4.3 Principal Component Analysis (PCA)</h3>
+
+  <p>PCA finds the directions of maximum variance in high-dimensional data — a change of basis to the coordinate system in which the data's covariance matrix is diagonal.</p>
+
+  <h4>PCA Algorithm</h4>
+
+  <ol class="steps">
+    <li><strong>Centre the data:</strong> Compute $\tilde{X} = X - \bar{X}$ (subtract column means). Data is $n$ observations × $p$ features, $\tilde{X} \in \mathbb{R}^{n \times p}$.</li>
+    <li><strong>Compute sample covariance:</strong> $S = \frac{1}{n-1}\tilde{X}^\top\tilde{X} \in \mathbb{R}^{p \times p}$</li>
+    <li><strong>Eigendecompose:</strong> $S = Q\Lambda Q^\top$ where $\Lambda = \text{diag}(\lambda_1 \geq \lambda_2 \geq \cdots \geq \lambda_p \geq 0)$ and columns of $Q$ are eigenvectors (principal components / PCs)</li>
+    <li><strong>Project:</strong> PC scores = $\tilde{X}Q_k$ where $Q_k$ contains the first $k$ eigenvectors (principal components)</li>
+    <li><strong>Choose $k$:</strong> Retain enough PCs to explain a target fraction of total variance (e.g.\ 95%)</li>
+  </ol>
+
+  <div class="fbox gold">
+    <div class="flabel">Variance Explained</div>
+    $$\text{Fraction of variance explained by first }k\text{ PCs} = \frac{\sum_{i=1}^k \lambda_i}{\sum_{i=1}^p \lambda_i} = \frac{\sum_{i=1}^k \lambda_i}{\text{tr}(S)}$$
+  </div>
+
+  <h4>PCA via SVD</h4>
+  <p>Compute SVD of the centred data: $\tilde{X} = U\Sigma V^\top$. Then:</p>
+  <ul>
+    <li>Columns of $V$ = principal components (same as eigenvectors of $S$)</li>
+    <li>Singular values relate to eigenvalues: $\lambda_i = \sigma_i^2/(n-1)$</li>
+    <li>PC scores = $U\Sigma = \tilde{X}V$</li>
+  </ul>
+  <p>SVD-based PCA is numerically superior to forming $S$ explicitly — avoids the condition number squaring problem.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 What PCA Is Actually Doing</div>
+    PCA solves the sequence of optimisation problems: find direction $\mathbf{w}_1$ maximising $\mathbf{w}_1^\top S\mathbf{w}_1$ subject to $\|\mathbf{w}_1\|=1$. Answer: first eigenvector of $S$. Then find $\mathbf{w}_2$ orthogonal to $\mathbf{w}_1$ maximising variance. Answer: second eigenvector. Etc. PCA is the Rayleigh quotient maximisation chain.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 PCA in Fixed Income: Level, Slope, Curvature</div>
+    Apply PCA to daily changes in yield curve rates (e.g., 2y, 5y, 10y, 30y). Empirically: PC1 ≈ parallel shift of the curve (explains ~80-90% of variance), PC2 ≈ slope change (short vs long rates, ≈ 8-10%), PC3 ≈ curvature (butterfly, ≈ 2-4%). These three PCs explain >95% of yield curve moves. This is the foundation of risk factor decomposition in rates trading.
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ PCA Pitfalls</div>
+    <ul>
+      <li><strong>Scale sensitivity:</strong> PCA is not scale-invariant. If features have vastly different scales, standardise first (divide by standard deviation) — otherwise PCA is dominated by high-variance features regardless of importance.</li>
+      <li><strong>Linearity:</strong> PCA finds linear combinations. Non-linear structure (clusters, manifolds) requires kernel PCA or other methods.</li>
+      <li><strong>Interpretability:</strong> Principal components are linear combinations of all original features and may be hard to interpret economically.</li>
+      <li><strong>Stationarity:</strong> PCA applied to financial returns assumes covariance is stable over time. In practice, correlations shift in crises.</li>
+    </ul>
+  </div>
+
+  <h3 id="s4-cov">4.4 Covariance Matrices</h3>
+
+  <p>The covariance matrix $\Sigma$ of a random vector $\mathbf{X} = (X_1, \ldots, X_p)^\top$ is the $p \times p$ matrix:</p>
+
+  <div class="fbox gold">
+    $$\Sigma_{ij} = \text{Cov}(X_i, X_j) = E[(X_i - \mu_i)(X_j - \mu_j)]$$
+    $$\Sigma = E[(\mathbf{X} - \boldsymbol{\mu})(\mathbf{X} - \boldsymbol{\mu})^\top]$$
+  </div>
+
+  <h4>Structural Properties</h4>
+  <ul>
+    <li><strong>Symmetric:</strong> $\Sigma = \Sigma^\top$ (since $\text{Cov}(X_i,X_j) = \text{Cov}(X_j,X_i)$)</li>
+    <li><strong>Positive semi-definite:</strong> $\mathbf{w}^\top\Sigma\mathbf{w} = \text{Var}(\mathbf{w}^\top\mathbf{X}) \geq 0$ for all $\mathbf{w}$</li>
+    <li><strong>Diagonal entries:</strong> $\Sigma_{ii} = \text{Var}(X_i) \geq 0$</li>
+    <li><strong>Trace:</strong> $\text{tr}(\Sigma) = \sum_i \text{Var}(X_i)$ = total variance</li>
+    <li><strong>Determinant:</strong> $\det(\Sigma) = 0$ iff variables are linearly dependent (one is an exact linear combination of others)</li>
+  </ul>
+
+  <h4>Linear Transformation of Covariance</h4>
+  <div class="fbox gold">
+    If $\mathbf{Y} = A\mathbf{X} + \mathbf{b}$, then $\text{Cov}(\mathbf{Y}) = A\,\Sigma\,A^\top$
+  </div>
+
+  <p>This is the <em>most used formula in quantitative finance</em>. Portfolio variance: $\mathbf{w}^\top\Sigma\mathbf{w}$. Hedged position variance: $(A\mathbf{w})^\top\Sigma(A\mathbf{w})$ where $A$ is the hedge ratio matrix.</p>
+
+  <h4>Correlation Matrix</h4>
+
+  <div class="fbox sky">
+    $$\text{Corr}(\mathbf{X}) = D^{-1}\Sigma D^{-1} \quad \text{where } D = \text{diag}(\sigma_1, \ldots, \sigma_p)$$
+    $$\Sigma = D\,\text{Corr}(\mathbf{X})\,D$$
+  </div>
+
+  <p>Entries of $\text{Corr}(\mathbf{X})$ are the pairwise correlations $\rho_{ij} \in [-1,1]$, diagonal entries are 1.</p>
+
+  <h4>Sample vs Population Covariance</h4>
+  <table>
+    <tr><th></th><th>Population</th><th>Sample (unbiased)</th></tr>
+    <tr><td>Formula</td><td>$\Sigma = E[(\mathbf{X}-\boldsymbol{\mu})(\mathbf{X}-\boldsymbol{\mu})^\top]$</td><td>$S = \frac{1}{n-1}\tilde{X}^\top\tilde{X}$</td></tr>
+    <tr><td>Denominator</td><td>$n$ (or $n$ for MLE)</td><td>$n-1$ (Bessel's correction)</td></tr>
+    <tr><td>Bias</td><td>N/A</td><td>$E[S] = \Sigma$ (unbiased)</td></tr>
+    <tr><td>Rank</td><td>Up to $p$</td><td>$\leq \min(n-1, p)$; rank deficient if $n \leq p$</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 High-Dimensional Covariance Estimation</div>
+    In practice with $p$ assets and $n$ trading days, if $p > n$ the sample covariance is rank deficient (singular) and cannot be inverted for portfolio optimisation. Solutions:
+    <ul>
+      <li><strong>Ledoit-Wolf shrinkage:</strong> $\hat{\Sigma} = (1-\alpha)S + \alpha T$ where $T$ is a structured target (e.g.\ scaled identity). Pulls extreme sample correlations toward a prior.</li>
+      <li><strong>Factor model:</strong> $\Sigma \approx BB^\top + D$ where $B$ are factor loadings (low-rank) and $D$ is diagonal idiosyncratic. Always invertible: $\Sigma^{-1} = D^{-1} - D^{-1}B(I+B^\top D^{-1}B)^{-1}B^\top D^{-1}$ (Woodbury).</li>
+      <li><strong>Random Matrix Theory:</strong> Eigenvalues below the Marchenko-Pastur bound are noise — zero them out.</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Core Formulas at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Formula</th><th>Key Fact</th></tr>
+    <tr><td>Matrix product transpose</td><td>$(AB)^\top = B^\top A^\top$</td><td>Reverses order</td></tr>
+    <tr><td>2×2 inverse</td><td>$\frac{1}{ad-bc}\begin{pmatrix}d&-b\\-c&a\end{pmatrix}$</td><td>Swap diagonal, negate off-diagonal, divide by det</td></tr>
+    <tr><td>Determinant: scalar</td><td>$\det(cA) = c^n\det(A)$</td><td>$n$ = matrix dimension; common trap</td></tr>
+    <tr><td>Rank-Nullity</td><td>$\text{rank}(A)+\text{nullity}(A) = n$</td><td>$n$ = number of columns</td></tr>
+    <tr><td>Trace = eigenvalue sum</td><td>$\text{tr}(A) = \sum\lambda_i$</td><td>Cyclic: $\text{tr}(ABC)=\text{tr}(BCA)$</td></tr>
+    <tr><td>Det = eigenvalue product</td><td>$\det(A) = \prod\lambda_i$</td><td>Zero eigenvalue ↔ singular</td></tr>
+    <tr><td>Eigenvector equation</td><td>$A\mathbf{v} = \lambda\mathbf{v}$</td><td>$\det(A-\lambda I)=0$ gives eigenvalues</td></tr>
+    <tr><td>Diagonalisation</td><td>$A = PDP^{-1}$</td><td>Columns of $P$ = eigenvectors</td></tr>
+    <tr><td>Symmetric spectral</td><td>$A = Q\Lambda Q^\top$</td><td>$Q$ orthogonal; always diagonalisable</td></tr>
+    <tr><td>SVD</td><td>$A = U\Sigma V^\top$</td><td>$\sigma_i = \sqrt{\lambda_i(A^\top A)}$</td></tr>
+    <tr><td>Cholesky</td><td>$A = LL^\top$</td><td>Only for PD matrices; simulate correlated normals</td></tr>
+    <tr><td>Gram-Schmidt step</td><td>$\mathbf{u}_k = \mathbf{v}_k - \sum_{j<k}(\mathbf{v}_k\cdot\mathbf{e}_j)\mathbf{e}_j$</td><td>Remove projection onto previous directions</td></tr>
+    <tr><td>Projection matrix</td><td>$P = A(A^\top A)^{-1}A^\top$</td><td>$P^2=P$, $P^\top=P$, $\text{tr}(P)=\text{rank}(P)$</td></tr>
+    <tr><td>Normal equations</td><td>$A^\top A\hat{\mathbf{x}} = A^\top\mathbf{b}$</td><td>Solves least squares; use QR for stability</td></tr>
+    <tr><td>PD definition</td><td>$\mathbf{x}^\top A\mathbf{x} > 0$ for $\mathbf{x}\neq 0$</td><td>Equiv: all $\lambda_i>0$, Cholesky exists</td></tr>
+    <tr><td>Covariance transform</td><td>$\text{Cov}(A\mathbf{X}) = A\Sigma A^\top$</td><td>Portfolio variance: $\mathbf{w}^\top\Sigma\mathbf{w}$</td></tr>
+    <tr><td>PCA variance</td><td>$\lambda_i / \text{tr}(S)$</td><td>Fraction explained by $i$-th PC</td></tr>
+  </table>
+
+  <h3>Decomposition Decision Tree</h3>
+  <table>
+    <tr><th>Question</th><th>Best Tool</th><th>Why</th></tr>
+    <tr><td>Solve $A\mathbf{x}=\mathbf{b}$ for square $A$</td><td>LU + triangular solve</td><td>$O(n^3)$ once, $O(n^2)$ per new $\mathbf{b}$</td></tr>
+    <tr><td>Solve $A\mathbf{x}=\mathbf{b}$ for PD $A$</td><td>Cholesky + triangular solve</td><td>2× faster than LU</td></tr>
+    <tr><td>Least squares (numerically stable)</td><td>QR decomposition</td><td>Avoids condition number squaring</td></tr>
+    <tr><td>Simulate correlated normals</td><td>Cholesky of $\Sigma$</td><td>$L\mathbf{Z} \sim N(0,\Sigma)$</td></tr>
+    <tr><td>Find principal components</td><td>SVD of $\tilde{X}$ or eigen of $S$</td><td>Equivalent; SVD numerically better</td></tr>
+    <tr><td>Low-rank approximation</td><td>Truncated SVD</td><td>Eckart-Young: optimal rank-$k$ approx</td></tr>
+    <tr><td>Compute $A^k$ efficiently</td><td>Eigendecomposition</td><td>$A^k = PD^kP^{-1}$; trivial powers</td></tr>
+    <tr><td>Check if $A$ is invertible</td><td>Check rank or $\det(A)$</td><td>$\det=0 \Leftrightarrow$ singular $\Leftrightarrow$ rank $< n$</td></tr>
+  </table>
+
+  <h3>The Big Picture: Linear Algebra in Quant Finance</h3>
+  <table>
+    <tr><th>Finance Problem</th><th>Linear Algebra Tool</th><th>Formula</th></tr>
+    <tr><td>Portfolio variance</td><td>Quadratic form</td><td>$\sigma_p^2 = \mathbf{w}^\top\Sigma\mathbf{w}$</td></tr>
+    <tr><td>Minimum variance portfolio</td><td>Constrained QP</td><td>$\min \mathbf{w}^\top\Sigma\mathbf{w}$ s.t.\ $\mathbf{1}^\top\mathbf{w}=1$</td></tr>
+    <tr><td>Factor exposure estimation</td><td>Least squares</td><td>$\hat{B} = (F^\top F)^{-1}F^\top R$</td></tr>
+    <tr><td>Correlated Monte Carlo</td><td>Cholesky</td><td>$\Sigma = LL^\top$, simulate $L\mathbf{Z}$</td></tr>
+    <tr><td>Yield curve decomposition</td><td>PCA</td><td>Level, slope, curvature = PC1,2,3</td></tr>
+    <tr><td>Risk factor attribution</td><td>SVD / PCA</td><td>$\Sigma \approx \sum_k \lambda_k \mathbf{v}_k\mathbf{v}_k^\top$</td></tr>
+    <tr><td>Updating portfolio inverse</td><td>Woodbury identity</td><td>$(A+UCV)^{-1} = A^{-1} - A^{-1}U(\cdot)^{-1}VA^{-1}$</td></tr>
+    <tr><td>Markov chain dynamics</td><td>Eigendecomposition</td><td>$\pi = P^n \pi_0$; compute via $PD^nP^{-1}$</td></tr>
+    <tr><td>Black-Scholes multi-asset</td><td>Cholesky of correlation</td><td>Correlated Brownian motions</td></tr>
+    <tr><td>Regression to betas</td><td>OLS normal equations</td><td>$\hat{\beta} = (X^\top X)^{-1}X^\top y$</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 3 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Matrix Operations · Determinants · Rank-Nullity · Trace · Eigenvalues · SVD · LU · Cholesky · QR · Four Subspaces · Orthogonal Projections · Gram-Schmidt · Positive Definite Matrices · Quadratic Forms · Least Squares · PCA · Covariance Matrices
+</footer>
+
+</body>
+</html>

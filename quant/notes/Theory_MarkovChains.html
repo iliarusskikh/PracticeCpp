@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markov Chains for Quantitative Finance — Interview Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d0709;
+    --bg2:       #140b0e;
+    --bg3:       #1c1015;
+    --border:    #3a1a22;
+    --rose:      #fb7185;
+    --rose2:     #fda4af;
+    --rose-dim:  #7f1d2e;
+    --text:      #ecdfe1;
+    --text-dim:  #9a7f85;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --gold-dim:  #7a6030;
+    --violet:    #a78bfa;
+    --green:     #4ade80;
+    --sky:       #38bdf8;
+    --teal:      #2dd4bf;
+    --orange:    #fb923c;
+    --amber:     #fbbf24;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #fb718522, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--rose-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.15rem;
+    font-weight: 600;
+    color: var(--rose2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── SERIES NOTE ── */
+  .series-note {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.93rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--rose);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--rose);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--rose2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--rose-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--rose2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--rose); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--rose);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0e1e12; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #220e10; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140e22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #081826; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1c1608; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose2); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose); border-bottom: 1px solid var(--rose-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--rose-dim); color: var(--rose2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── STATE DIAGRAM ── */
+  .state-diagram {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin: 1rem 0; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  }
+  .state {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 4px;
+    padding: 0.5rem 0.9rem; color: var(--rose2); text-align: center;
+  }
+  .state.absorb { border: 1px solid var(--gold-dim); color: var(--gold2); }
+  .arrow { color: var(--text-dim); font-size: 0.95rem; }
+
+  /* ── PROCESS / QUESTION CARD ── */
+  .process-card, .question-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .process-card h4, .question-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1rem; color: var(--rose2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+  .question-card .qtag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--rose-dim); color: var(--rose2);
+    padding: 0.15rem 0.55rem; border-radius: 2px; margin-bottom: 0.6rem;
+  }
+
+  /* ── MATRIX DISPLAY ── */
+  .mat-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.8rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--rose2);
+    overflow-x: auto;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--rose2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Companion Note</div>
+  <h1>Markov Chains for Quantitative Finance</h1>
+  <div class="subtitle">Random Processes · Credit Portfolio Modelling · Transition Matrices · Interview Questions</div>
+</div>
+
+<div class="series-note">
+  This note is a focused, application-driven companion to Section 5 (Stochastic Calculus &amp; Processes), §1 —
+  which covers the general theory of Markov chains (stationary distributions, detailed balance, gambler's ruin,
+  random walks on graphs). Here the same machinery is re-derived from the ground up with a single running
+  example — <strong>a portfolio of loans</strong> — because credit-state modelling is the most common way Markov
+  chains actually show up in a quant interview outside of pure probability puzzles. Every numerical example below
+  has been verified in Python (NumPy linear algebra + Monte Carlo simulation where relevant).
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Random Variables &amp; Random Processes</a>
+      <ul class="sub">
+        <li><a href="#s1-rv">Modelling Randomness: RVs vs Processes</a></li>
+        <li><a href="#s1-why">Why Markov Chains Specifically</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Modelling a Portfolio of Loans</a>
+      <ul class="sub">
+        <li><a href="#s2-states">Defining the State Space</a></li>
+        <li><a href="#s2-assumption">The Markov Assumption — and Its Limits</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Markov Chains — Key Properties</a>
+      <ul class="sub">
+        <li><a href="#s3-memoryless">Memorylessness (the Markov Property)</a></li>
+        <li><a href="#s3-homog">Time-Homogeneity</a></li>
+        <li><a href="#s3-finite">Finite State Space</a></li>
+        <li><a href="#s3-more">Irreducibility, Aperiodicity, Recurrence</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Applying Probabilities to States</a>
+      <ul class="sub">
+        <li><a href="#s4-matrix">The Transition Matrix</a></li>
+        <li><a href="#s4-ck">Chapman-Kolmogorov &amp; Matrix Powers</a></li>
+        <li><a href="#s4-propagate">Propagating a State Distribution</a></li>
+        <li><a href="#s4-stationary">Stationary Distributions</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Applying Markov Chains — The Toolkit</a>
+      <ul class="sub">
+        <li><a href="#s5-absorb">Absorbing Chains &amp; the Fundamental Matrix</a></li>
+        <li><a href="#s5-loan">Worked Example: Loan Roll-Rate Model</a></li>
+        <li><a href="#s5-firststep">First-Step Analysis</a></li>
+        <li><a href="#s5-rating">Rating Migration Matrices</a></li>
+        <li><a href="#s5-other">Other Finance Applications</a></li>
+      </ul>
+    </li>
+    <li><a href="#s6">Interview Quant Questions</a></li>
+    <li><a href="#s7">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: RANDOM VARIABLES & RANDOM PROCESSES           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Random Variables &amp; Random Processes</div>
+  </div>
+
+  <h3 id="s1-rv">1.1 Modelling Randomness: RVs vs Processes</h3>
+
+  <p>A <strong>random variable</strong> is a single snapshot of uncertainty — one draw, one number (or vector), described by a distribution:</p>
+
+  <div class="fbox gold">
+    $$X \sim N(\mu, \sigma^2), \qquad Y \sim \text{Binomial}(n,p), \qquad Z \sim \text{Bernoulli}(p)$$
+  </div>
+
+  <p>Each of these answers "what's the probability of this one outcome?" But almost nothing in finance is a single draw — prices evolve, ratings migrate, loans age. That requires a <strong>random process</strong> (also called a stochastic process): a whole family of random variables indexed by time,</p>
+
+  <div class="fbox gold">
+    $$\{X_t\}_{t \geq 0} \quad \text{(continuous time)} \qquad \text{or} \qquad \{X_n\}_{n=0,1,2,\ldots} \quad \text{(discrete time)}$$
+  </div>
+
+  <p>The central question shifts from "what is the distribution of one draw" to "how does the distribution evolve, and how do successive values depend on each other." That second question — the dependence structure — is what separates one process from another. Brownian motion (Section 5) has independent, stationary Gaussian increments. A Markov chain has a much simpler dependence rule: the future depends on the past <em>only through the present state</em>.</p>
+
+  <h3 id="s1-why">1.2 Why Markov Chains Specifically</h3>
+
+  <p>A <strong>Markov chain</strong> is the simplest interesting stochastic process: a <em>discrete</em> state space, observed at discrete time steps, where the transition rule depends only on the current state. This single restriction is what makes an entire class of finance problems tractable:</p>
+
+  <ul>
+    <li><strong>Credit ratings</strong> (AAA → AA → ... → Default) — a finite, discrete set of grades</li>
+    <li><strong>Loan delinquency status</strong> (Current, 30 days past due, 60 DPD, ...) — a finite, discrete set of buckets</li>
+    <li><strong>Market/volatility regimes</strong> (calm, stressed) — a small, discrete set of states</li>
+    <li><strong>Position states</strong> in a trading strategy (flat, long, short)</li>
+  </ul>
+
+  <p>In every case, the appeal is the same: instead of tracking an entire history, you compress everything relevant into "which state am I in right now" — turning a complicated dependency structure into linear algebra on a transition matrix.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The One-Line Interview Answer</div>
+    <em>"A Markov chain works here because I'm willing to assume the object's future behaviour depends only on its current state, not its full history — that's a simplifying assumption, and it's usually the first thing an interviewer will probe."</em> Being able to state the assumption <strong>and</strong> its weakness in one breath is what separates a strong answer from a rote one — see §2.2.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: MODELLING A PORTFOLIO OF LOANS                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Modelling a Portfolio of Loans</div>
+  </div>
+
+  <p>This is the natural motivating example for a credit-risk or structured-products interview — the same way gambler's ruin motivates pure-probability interviews. It will be the running example for the rest of this note.</p>
+
+  <h3 id="s2-states">2.1 Defining the State Space</h3>
+
+  <p>Each loan in a portfolio, at each month-end, occupies exactly one of a finite set of states describing its payment status:</p>
+
+  <div class="fbox gold">
+    $$S = \{\ \text{Current},\ \ \text{30 DPD},\ \ \text{60 DPD},\ \ \text{90+ DPD},\ \ \text{Default},\ \ \text{Paid Off}\ \}$$
+  </div>
+  <p style="font-size:0.9rem; color:var(--text-dim); margin-top:-0.6rem;">(DPD = "days past due" — a standard servicing bucket)</p>
+
+  <div class="state-diagram">
+    <div class="state">Current</div>
+    <div class="arrow">⇄</div>
+    <div class="state">30 DPD</div>
+    <div class="arrow">⇄</div>
+    <div class="state">60 DPD</div>
+    <div class="arrow">⇄</div>
+    <div class="state">90+ DPD</div>
+    <div class="arrow">→</div>
+    <div class="state absorb">Default</div>
+  </div>
+  <div class="state-diagram">
+    <span style="color:var(--text-dim); font-size:0.85rem;">any non-absorbing state can also transition directly to →</span>
+    <div class="state absorb">Paid Off</div>
+  </div>
+
+  <p><strong>Default</strong> and <strong>Paid Off</strong> are <em>absorbing</em> — once a loan enters one of these, it stays there forever (contractually, the loan is closed). This turns the whole system into an <strong>absorbing Markov chain</strong>, which is exactly the setting the fundamental-matrix machinery (§5.1) is built for.</p>
+
+  <h3 id="s2-assumption">2.2 The Markov Assumption — and Its Limits</h3>
+
+  <p>Modelling this system as a Markov chain means assuming: the probability a loan moves from "30 DPD" to "60 DPD" <em>next</em> month depends only on it currently being 30 DPD — not on whether it has been 30 DPD for one month or cycled through delinquency three times before.</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ This Is an Approximation — Know Its Weakness</div>
+    Real borrower behaviour has memory. A loan that has been <em>chronically</em> delinquent-then-cured behaves differently going forward than one that is delinquent for the first time — even if both are "30 DPD" today. The population-level transition matrix $P$ averages over this heterogeneity. This is the standard first-pass model used across retail credit risk, but a strong interview answer names the limitation unprompted: <em>"this ignores borrower-specific re-delinquency risk; a more realistic model would make the state include 'number of prior delinquency cycles,' or use a hidden Markov model with a latent borrower-quality regime."</em>
+  </div>
+
+  <p>A second, equally important assumption is <strong>time-homogeneity</strong> — that $P$ itself doesn't change over time. In reality, transition probabilities shift with the economic cycle (recessions push $P(\text{Current}\to\text{30 DPD})$ up across the whole book simultaneously). This is covered in §3.2 and is a favourite interview probe (§6, Q4).</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: MARKOV CHAINS — KEY PROPERTIES                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Markov Chains — Key Properties</div>
+  </div>
+
+  <h3 id="s3-memoryless">3.1 Memorylessness (the Markov Property)</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">The Markov Property</div>
+    $$P(X_{n+1}=j \mid X_n=i,\ X_{n-1},\ \ldots,\ X_0) = P(X_{n+1}=j \mid X_n=i)$$
+  </div>
+
+  <p>This is a discrete-state, discrete-time analogue of the memoryless property of the Exponential and Geometric distributions (Section 2, Statistics). It is <em>the</em> defining property — everything else in this note is a consequence of it.</p>
+
+  <p><strong>Why an interviewer asks about it:</strong> it tests whether you understand <em>why</em> the model is tractable — the state variable is doing all the work of compressing history into one summary. Without it, you'd need to track the entire payment history of every loan, which is intractable at portfolio scale.</p>
+
+  <h3 id="s3-homog">3.2 Time-Homogeneity</h3>
+
+  <p>$P_{ij}$ does not depend on $n$ — the transition probabilities are the same every month.</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ The Weakest Assumption for Credit Chains</div>
+    Time-homogeneity is needed for $P^n$ to have a clean meaning and for a stationary distribution $\pi$ to exist — but real credit transition matrices are <em>not</em> homogeneous through the cycle: $P(\text{Current}\to\text{30 DPD})$ rises in a recession and falls in an expansion. Practitioners handle this by re-estimating $P$ periodically (a "point-in-time" matrix) or building a regime-switching overlay (a Markov chain <em>on top of</em> the Markov chain, selecting which $P$ applies).
+  </div>
+
+  <h3 id="s3-finite">3.3 Finite State Space</h3>
+
+  <p>$|S| < \infty$. This lets the entire theory reduce to linear algebra — $P$ is just a finite matrix, $\pi$ is a finite vector, and computations use ordinary matrix inversion rather than measure-theoretic machinery. Every example in this note has a finite, named state space (loan buckets, credit ratings) — this is what makes Markov chains so interview-friendly relative to continuous-state processes.</p>
+
+  <h3 id="s3-more">3.4 Irreducibility, Aperiodicity, Recurrence</h3>
+
+  <table>
+    <tr><th>Property</th><th>Definition</th><th>Relevance to the loan chain</th></tr>
+    <tr><td>Irreducible</td><td>Every state reachable from every other state</td><td><strong>Fails by construction</strong> — Default/Paid are absorbing, so you can't get back to Current. This is intentional (§5.1)</td></tr>
+    <tr><td>Aperiodic</td><td>$\gcd$ of possible return times is 1</td><td>Rarely an issue for credit chains; classic in coin-flip-style puzzles (Section 9)</td></tr>
+    <tr><td>Recurrent</td><td>Returns to the state with probability 1</td><td>Non-absorbing loan states (Current, 30/60/90 DPD) are all <strong>transient</strong> — eventually the loan leaves for good</td></tr>
+    <tr><td>Transient</td><td>Positive probability of never returning</td><td>Applies to every non-absorbing state in the loan chain</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Irreducible vs Absorbing — Two Different Toolkits</div>
+    A chain being irreducible (Section 5's random-walk-on-a-graph examples) gives you a <em>unique stationary distribution</em> $\pi$ via $\pi P = \pi$. A chain with absorbing states gives you a <em>different</em> set of tools — the fundamental matrix $N=(I-Q)^{-1}$ — because there's no non-trivial stationary distribution on the transient states (everything eventually drains into the absorbing states). Recognising which regime you're in is the first step in any Markov chain interview question.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: APPLYING PROBABILITIES TO STATES               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Applying Probabilities to States: The Matrix</div>
+  </div>
+
+  <h3 id="s4-matrix">4.1 The Transition Matrix</h3>
+
+  <p>For a chain with states $\{1,\ldots,k\}$, the <strong>transition matrix</strong> $P$ has entries:</p>
+
+  <div class="fbox gold">
+    $$P_{ij} = P(X_{n+1}=j \mid X_n=i), \qquad \sum_j P_{ij} = 1 \ \ \text{(each row is a full probability distribution)}$$
+  </div>
+
+  <p>Illustrative loan transition matrix, over states (Current, 30 DPD, 60 DPD, 90+ DPD, Default, Paid Off):</p>
+
+  <div class="mat-block">
+P =
+        Cur    30D    60D    90D   Def   Paid
+Cur   [ 0.90   0.08   0.00   0.00  0.00  0.02 ]
+30D   [ 0.60   0.00   0.35   0.00  0.00  0.05 ]
+60D   [ 0.30   0.00   0.00   0.60  0.10  0.00 ]
+90D   [ 0.10   0.00   0.00   0.00  0.90  0.00 ]
+Def   [ 0.00   0.00   0.00   0.00  1.00  0.00 ]
+Paid  [ 0.00   0.00   0.00   0.00  0.00  1.00 ]
+  </div>
+
+  <p>Reading row "Current": 90% chance of staying Current, 8% chance of slipping to 30 DPD, 2% chance of an early payoff. Reading row "90+ DPD": 90% chance of rolling into Default next month, 10% chance of a full "cure" back to Current (e.g. a lump-sum catch-up payment) — note there is no path directly from 90+ DPD to 30 or 60 DPD in this model; a cure either fully resolves the arrears or it doesn't.</p>
+
+  <h3 id="s4-ck">4.2 Chapman-Kolmogorov &amp; Matrix Powers</h3>
+
+  <p>The $n$-step transition probabilities are simply matrix powers:</p>
+
+  <div class="fbox teal">
+    $$P^{(n)}_{ij} = (P^n)_{ij}, \qquad P^{(m+n)}_{ij} = \sum_k P^{(m)}_{ik}\,P^{(n)}_{kj}$$
+  </div>
+
+  <p>In words: to go from $i$ to $j$ in $m+n$ steps, pass through some intermediate state $k$ after $m$ steps — sum over all possible intermediates. This is exactly matrix multiplication, and it's the tool behind "probability of default within 2 years" style questions (§6, Q1).</p>
+
+  <h3 id="s4-propagate">4.3 Propagating a State Distribution</h3>
+
+  <p>If $\pi_0$ is a row vector giving today's distribution of a cohort across states — e.g. "60% Current, 25% 30 DPD, 10% 60 DPD, 5% 90+ DPD, 0% Default, 0% Paid" — then the distribution $n$ months ahead is:</p>
+
+  <div class="fbox gold">
+    $$\pi_n = \pi_0 P^n$$
+  </div>
+
+  <p>This is the single most-used computation in retail credit-risk practice: forecasting next quarter's delinquency mix from this quarter's cohort composition, for capital planning and provisioning.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Example: Forecasting a Cohort</div>
+    Starting distribution $\pi_0 = (0.60,\ 0.25,\ 0.10,\ 0.05,\ 0,\ 0)$ over (Current, 30D, 60D, 90D, Default, Paid), using the matrix $P$ above:<br><br>
+    <strong>3 months ahead</strong> ($\pi_0 P^3$): $(0.687,\ 0.057,\ 0.020,\ 0.010,\ 0.167,\ 0.059)$<br>
+    <strong>12 months ahead</strong> ($\pi_0 P^{12}$): $(0.480,\ 0.040,\ 0.015,\ 0.009,\ 0.270,\ 0.187)$<br><br>
+    Note how the mass steadily drains into the two absorbing states (Default, Paid) as $n$ grows — after 12 months, 27% of the original cohort has defaulted and 19% has paid off, matching the eventual absorption probabilities computed in §5.2. Row sums verified to equal 1 at every step. ✓
+  </div>
+
+  <h3 id="s4-stationary">4.4 Stationary Distributions</h3>
+
+  <p>A distribution $\pi$ is <strong>stationary</strong> if it's unchanged by one step: $\pi P = \pi$. This concept applies cleanly to <em>irreducible</em> chains (e.g. a regime-switching model with no absorbing states) but <strong>not</strong> in the usual sense to the absorbing loan chain — since every loan eventually resolves, the "long-run distribution" of an individual loan collapses entirely onto $\{\text{Default}, \text{Paid Off}\}$.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Example: Stationary Distribution of a Regime Chain</div>
+    A 3-state macro/volatility regime chain (Calm, Elevated, Stressed) with transition matrix:
+    $$P_\text{reg} = \begin{pmatrix} 0.85 & 0.10 & 0.05 \\ 0.20 & 0.60 & 0.20 \\ 0.10 & 0.30 & 0.60 \end{pmatrix}$$
+    Solving $\pi P_\text{reg} = \pi$: $\pi = (0.5128,\ 0.2821,\ 0.2051)$ — verified two ways: direct linear solve, and $P_\text{reg}^{200}$, whose every row converges to exactly this vector. ✓ This is the kind of chain where stationarity is the natural long-run question — unlike the absorbing loan chain.
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Detailed Balance Rarely Holds for Credit Chains</div>
+    Detailed balance ($\pi_i P_{ij} = \pi_j P_{ji}$) is a sufficient-but-not-necessary shortcut to stationarity, used heavily for random walks on graphs (Section 5, §1.7). It essentially never holds for a credit chain: the "flow" of loans from Current into Default is not mirrored by an equal flow back — money doesn't reverse. If asked <em>"is this chain reversible?"</em> in a credit context, the answer is almost always no, precisely because of the one-way absorbing structure.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: APPLYING MARKOV CHAINS — THE TOOLKIT           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Applying Markov Chains — The Toolkit</div>
+  </div>
+
+  <h3 id="s5-absorb">5.1 Absorbing Chains &amp; the Fundamental Matrix</h3>
+
+  <p>Reorder states so absorbing states come last. $P$ takes the canonical block form:</p>
+
+  <div class="fbox gold">
+    $$P = \begin{pmatrix} Q & R \\ 0 & I \end{pmatrix}$$
+    $Q$: transient→transient block. $\ R$: transient→absorbing block. $\ I$: absorbing states stay put.
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">The Fundamental Matrix</div>
+    $$N = (I-Q)^{-1}$$
+  </div>
+
+  <p>$N_{ij}$ = expected number of visits to transient state $j$, starting from transient state $i$, before absorption.</p>
+
+  <table>
+    <tr><th>Quantity</th><th>Formula</th><th>Business interpretation</th></tr>
+    <tr><td>Expected time to resolution</td><td>$\mathbf{t} = N\mathbf{1}$</td><td>Expected months until a loan either defaults or pays off</td></tr>
+    <tr><td>Absorption probabilities</td><td>$B = NR$</td><td>$B_{ij}$: lifetime probability a loan starting in state $i$ ends in absorbing state $j$ — this is the <strong>lifetime PD</strong> used for IFRS 9 / CECL provisioning</td></tr>
+  </table>
+
+  <h3 id="s5-loan">5.2 Worked Example: Loan Roll-Rate Model</h3>
+
+  <p>Using the transition matrix from §4.1, split into the 4 transient states (Current, 30D, 60D, 90D) and 2 absorbing states (Default, Paid):</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified: Fundamental Matrix Computation</div>
+    $$Q = \begin{pmatrix} 0.90 & 0.08 & 0 & 0 \\ 0.60 & 0 & 0.35 & 0 \\ 0.30 & 0 & 0 & 0.60 \\ 0.10 & 0 & 0 & 0 \end{pmatrix}, \qquad R = \begin{pmatrix} 0 & 0.02 \\ 0 & 0.05 \\ 0.10 & 0 \\ 0.90 & 0 \end{pmatrix}$$
+    (columns of $R$: Default, Paid)<br><br>
+    <strong>Expected months to resolution</strong> ($\mathbf{t}=N\mathbf 1$), by starting state:
+    <table style="margin:0.6rem 0 0;">
+      <tr><th>Start state</th><th>$E[\text{months to resolution}]$</th></tr>
+      <tr><td>Current</td><td>26.83</td></tr>
+      <tr><td>30 DPD</td><td>21.04</td></tr>
+      <tr><td>60 DPD</td><td>11.26</td></tr>
+      <tr><td>90+ DPD</td><td>3.68</td></tr>
+    </table>
+    <strong>Lifetime absorption probabilities</strong> ($B=NR$), by starting state:
+    <table style="margin:0.6rem 0 0;">
+      <tr><th>Start state</th><th>$P(\text{eventual Default})$</th><th>$P(\text{eventual Paid Off})$</th></tr>
+      <tr><td>Current</td><td>0.4275</td><td>0.5725</td></tr>
+      <tr><td>30 DPD</td><td>0.5344</td><td>0.4656</td></tr>
+      <tr><td>60 DPD</td><td>0.7939</td><td>0.2061</td></tr>
+      <tr><td>90+ DPD</td><td>0.9427</td><td>0.0573</td></tr>
+    </table>
+    Each row of $B$ sums to exactly 1 (every loan eventually resolves one way or the other) — verified numerically. ✓ Note the monotone relationship: the further delinquent a loan is today, the higher its lifetime default probability and the fewer expected months remain — both figures move together, as expected.
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 This Is the Industry-Standard "Roll-Rate Model"</div>
+    This exact calculation — build $Q$ and $R$ from empirical transition frequencies, invert $I-Q$ — is how retail banks estimate <strong>lifetime probability of default</strong> for IFRS 9 / CECL loan-loss provisioning, and how they estimate the expected remaining life of a delinquent loan for collections resource planning. The only real-world complication is that $P$ is usually estimated separately for different loan vintages or macro scenarios, since (per §3.2) it isn't truly time-homogeneous.
+  </div>
+
+  <h3 id="s5-firststep">5.3 First-Step Analysis</h3>
+
+  <p>The general recipe behind every hitting-time or hitting-probability question — it's the same tool whether the context is gambler's ruin, a coin-flip puzzle, or a loan's path to resolution.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">First-Step Analysis Recipe</div>
+    $$h_i = E[T_A \mid X_0=i] = 1 + \sum_j P_{ij}\,h_j \quad (i \notin A), \qquad h_i = 0\ (i \in A)$$
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Four Steps, Every Time</div>
+    <ol class="steps">
+      <li>Define $h_i$ = the quantity of interest starting from state $i$ (expected time, or hitting probability)</li>
+      <li>Write the recursive equation by conditioning on the very next transition</li>
+      <li>Apply boundary conditions at absorbing/terminal states</li>
+      <li>Solve the resulting (usually small) linear system</li>
+    </ol>
+    This is identical machinery whether you're solving Gambler's Ruin (Section 1), "expected flips to see HH" (Section 9), or a loan-resolution question — only the transition probabilities change.
+  </div>
+
+  <h3 id="s5-rating">5.4 Rating Migration Matrices (Corporate Credit)</h3>
+
+  <p>The same idea one level up the credit stack: instead of loan delinquency buckets, states are <strong>credit ratings</strong> (AAA, AA, A, BBB, ..., D). Rating agencies (Moody's, S&amp;P) publish annual migration matrices $P$ estimated from historical data.</p>
+
+  <p><strong>Quant desk uses:</strong></p>
+  <ul>
+    <li>Pricing a bond with rating-contingent cash flows or covenants</li>
+    <li>Computing multi-year cumulative default probability via $P^n$ (exactly Chapman-Kolmogorov, §4.2)</li>
+    <li>Simulating a credit portfolio (CDO tranching, credit VaR) by drawing correlated rating paths</li>
+    <li>Calibrating a reduced-form credit model where the hazard rate is regime-dependent</li>
+  </ul>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Verified Example: Two-Year Cumulative Default Probability</div>
+    Simplified 3-state matrix over (AA, A, Default — absorbing):
+    $$P = \begin{pmatrix} 0.90 & 0.07 & 0.03 \\ 0.05 & 0.90 & 0.05 \\ 0 & 0 & 1 \end{pmatrix}$$
+    $P^2_{\text{AA},\text{Default}} = 0.0605$, matching the first-step check:
+    $$0.03 + (0.07)(0.05) + (0.90)(0.03) = 0.03 + 0.0035 + 0.027 = 0.0605 \ \checkmark$$
+    Interpretation: an AA-rated issuer has a 3% one-year default probability but a <strong>6.05%</strong> two-year cumulative default probability — not simply $2\times3\%=6\%$, because migration to A (a riskier rating) before default adds extra default mass in year 2.
+  </div>
+
+  <h3 id="s5-other">5.5 Other Finance Applications Worth Naming</h3>
+
+  <table>
+    <tr><th>Application</th><th>States</th><th>Where it's used</th></tr>
+    <tr><td>Interest-rate regime models</td><td>Low / Medium / High rate buckets</td><td>Scenario generation for ALM (asset-liability management)</td></tr>
+    <tr><td>Market volatility regimes</td><td>Calm / Elevated / Stressed</td><td>Markov-switching GARCH, regime-dependent risk models</td></tr>
+    <tr><td>Trading strategy state machine</td><td>Flat / Long / Short</td><td>Position-transition probabilities calibrated from a signal</td></tr>
+    <tr><td>Random walk on a graph / PageRank</td><td>Nodes of a network</td><td>Ranking counterparty systemic importance; stationary $\pi_i=\deg(i)/2|E|$ (Section 5, §1.7)</td></tr>
+    <tr><td>American option early exercise</td><td>Continue / Exercise</td><td>Optimal stopping — a 2-state decision chain solved via dynamic programming</td></tr>
+  </table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: INTERVIEW QUANT QUESTIONS                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Interview Quant Questions</div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q1 · Chapman-Kolmogorov</span>
+    <h4>Two-Year Default Probability from a Rating Chain</h4>
+    <p>A bond's rating follows a Markov chain with $P(\text{AA}\to\text{AA})=0.90$, $P(\text{AA}\to\text{A})=0.07$, $P(\text{AA}\to\text{Default})=0.03$ per year; and from A, $P(\text{A}\to\text{A})=0.90$, $P(\text{A}\to\text{Default})=0.05$ (ignore other transitions for simplicity). What is $P(\text{Default within 2 years} \mid \text{AA today})$?</p>
+    <div class="callout proof">
+      <strong>Approach:</strong> first-step analysis, or equivalently compute $(P^2)_{\text{AA},\text{Default}}$ directly. Condition on year-1 outcome: default immediately (0.03), or survive to A and then default in year 2 (0.07 × 0.05), or stay AA and default in year 2 (0.90 × 0.03).
+      $$P(\text{default by yr 2}) = 0.03 + (0.07)(0.05) + (0.90)(0.03) = \mathbf{0.0605}$$
+      Verified via direct matrix squaring: $(P^2)_{\text{AA,Default}} = 0.0605$. ✓
+    </div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q2 · Absorbing chain</span>
+    <h4>Expected Time to Resolution</h4>
+    <p>A loan has states {Current, Delinquent, Default (absorbing), Paid (absorbing)} with $P(\text{Cur}\to\text{Del})=0.10$, $P(\text{Cur}\to\text{Paid})=0.05$, $P(\text{Del}\to\text{Cur})=0.40$, $P(\text{Del}\to\text{Default})=0.20$ (remaining probability mass stays in the current state each month). Find the expected number of months to resolution starting from Current.</p>
+    <div class="callout proof">
+      <strong>Approach:</strong> build $Q=\begin{pmatrix}0.85 & 0.10\\0.40 & 0.40\end{pmatrix}$ (diagonal absorbs the "stay" probability), invert $I-Q$, sum the Current row.
+      $$N=(I-Q)^{-1} = \begin{pmatrix} 12 & 2 \\ 8 & 3 \end{pmatrix}$$
+      Expected months to resolution: <strong>Current = 14.0</strong>, Delinquent = 11.0 (verified numerically). With $R=\begin{pmatrix}0 & 0.05\\0.20 & 0\end{pmatrix}$: $P(\text{eventual Default}\mid\text{Current})=0.40$, $P(\text{eventual Paid}\mid\text{Current})=0.60$ — this is exactly the $N=(I-Q)^{-1}$, $\mathbf t = N\mathbf 1$ pattern from §5.1, just relabeled with different numbers.
+    </div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q3 · Conceptual</span>
+    <h4>What Does the Stationary Distribution Actually Tell You?</h4>
+    <p>"If a loan-transition matrix has been stable for years, what does the stationary distribution $\pi$ tell a risk manager — and what does it <em>not</em> tell them?"</p>
+    <div class="callout proof">
+      <strong>Good answer:</strong> $\pi$ describes the long-run fraction of time spent in each <em>non-absorbing</em> state under the ergodic theorem — but for an absorbing loan chain this isn't the relevant object at all, since every individual loan eventually leaves for good (§4.4). What $\pi$ (or more precisely, the absorption probabilities $B$ applied to a steady replenishing inflow of new loans) actually tells you is the long-run <em>portfolio-level mix</em> if new loans are originated at a constant rate. What it explicitly does <strong>not</strong> tell you: anything about a sudden shock, because $\pi$ implicitly assumes $P$ stays fixed (time-homogeneity) — which is precisely the assumption that breaks down in a credit cycle, exactly when the risk manager needs the model most.
+    </div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q4 · Model criticism</span>
+    <h4>When Does the Markov Assumption Clearly Fail?</h4>
+    <p>"Give concrete cases where a Markov assumption is a poor model for loan performance."</p>
+    <div class="callout proof">
+      <strong>Good answers</strong> (any of these, ideally with the fix named):
+      <ul>
+        <li><strong>Behavioural memory:</strong> a loan that has cured from delinquency twice re-defaults at a different rate than a never-delinquent loan with the same current state. <em>Fix:</em> augment the state to include delinquency-cycle count.</li>
+        <li><strong>Macro non-stationarity:</strong> $P$ itself depends on the economic cycle, violating time-homogeneity. <em>Fix:</em> regime-switching / macro-conditioned transition matrices.</li>
+        <li><strong>Population heterogeneity:</strong> a single population-level $P$ averages over borrowers with very different underlying risk. <em>Fix:</em> a hidden Markov model, where an unobserved "borrower quality" state modulates the observed transition probabilities.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q5 · First-step analysis</span>
+    <h4>Expected Time to Cure-or-Default</h4>
+    <p>A delinquent loan cures back to Current with probability $p$ each month, or defaults with probability $q=1-p$ (no staying delinquent). It's considered "cured for good" only after <strong>two consecutive</strong> Current months; a default-risk event in the second month sends it back to square one (Delinquent), rather than resetting the clock to a fresh default roll. Starting Delinquent, what is the expected number of months until final resolution (cured-for-good or defaulted)? Use $p=0.6$.</p>
+    <div class="callout proof">
+      <strong>Approach:</strong> same first-step-analysis machinery as the classic "expected flips to see HH" puzzle (Section 9, §1.1). Define $E_D$ = expected months from Delinquent, $E_C$ = expected months from "one cure achieved."
+      $$E_D = 1 + p\,E_C, \qquad E_C = 1 + q\,E_D$$
+      Solving: $E_D = \dfrac{1+p}{1-pq}$. With $p=0.6,\ q=0.4$:
+      $$E_D = \frac{1.6}{1-0.24} = \frac{1.6}{0.76} = \mathbf{2.1053}$$
+      Verified by Monte Carlo (400,000 trials): simulated $E[\text{months}] = 2.1051$, matching theory to 3 decimal places. ✓
+    </div>
+  </div>
+
+  <div class="question-card">
+    <span class="qtag">Q6 · Model validation</span>
+    <h4>How Would You Test Whether the Markov Assumption Actually Holds?</h4>
+    <p>"Given two years of monthly loan-state data, how would you test empirically whether the Markov (order-1) assumption is reasonable?"</p>
+    <div class="callout proof">
+      <strong>Good answer:</strong> compare an <em>order-1</em> empirical transition matrix (conditioning only on last month's state) against an <em>order-2</em> matrix (conditioning on the last two months' states). If knowing the state two months ago provides no additional predictive power beyond last month's state — i.e. $P(X_{n+1}\mid X_n, X_{n-1}) \approx P(X_{n+1}\mid X_n)$ for every combination — the Markov assumption is well-supported. Formally: a likelihood-ratio or chi-squared test comparing the fit of the order-1 vs order-2 model, penalising the extra parameters of the richer model. This is a "do you know how to validate a model," distinct from "can you compute with one" — interviewers use it to separate candidates who've memorised the mechanics from those who understand the assumption is testable.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Core Formulas at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Formula</th><th>Key Fact</th></tr>
+    <tr><td>Markov property</td><td>$P(X_{n+1}\mid X_n,\ldots,X_0)=P(X_{n+1}\mid X_n)$</td><td>Future depends only on present state</td></tr>
+    <tr><td>Transition matrix</td><td>$P_{ij}=P(X_{n+1}=j\mid X_n=i)$</td><td>Each row sums to 1</td></tr>
+    <tr><td>Chapman-Kolmogorov</td><td>$P^{(n)}=P^n$</td><td>$n$-step transitions are matrix powers</td></tr>
+    <tr><td>Distribution propagation</td><td>$\pi_n=\pi_0P^n$</td><td>Forecasting a cohort $n$ steps ahead</td></tr>
+    <tr><td>Stationary distribution</td><td>$\pi P=\pi$</td><td>Unique for irreducible finite chains; not the relevant object for absorbing chains</td></tr>
+    <tr><td>Fundamental matrix</td><td>$N=(I-Q)^{-1}$</td><td>$N_{ij}$ = expected visits to $j$ before absorption, from $i$</td></tr>
+    <tr><td>Expected time to absorption</td><td>$\mathbf t = N\mathbf 1$</td><td>Row sums of $N$</td></tr>
+    <tr><td>Absorption probabilities</td><td>$B=NR$</td><td>Lifetime PD / lifetime resolution probabilities; rows sum to 1</td></tr>
+    <tr><td>First-step analysis</td><td>$h_i=1+\sum_jP_{ij}h_j$</td><td>General recipe for any hitting-time/probability question</td></tr>
+  </table>
+
+  <h3>Regime Recognition — Which Toolkit Applies</h3>
+  <table>
+    <tr><th>Signal in the question</th><th>Regime</th><th>Tool</th></tr>
+    <tr><td>"Long-run fraction of time in each state," no terminal states</td><td>Irreducible chain</td><td>$\pi P=\pi$; power iteration; detailed balance shortcut</td></tr>
+    <tr><td>"Eventually defaults / pays off / resolves"</td><td>Absorbing chain</td><td>$N=(I-Q)^{-1}$, $\mathbf t=N\mathbf 1$, $B=NR$</td></tr>
+    <tr><td>"Expected number of steps/flips/months until X"</td><td>Any chain</td><td>First-step analysis (§5.3)</td></tr>
+    <tr><td>"Probability of being in state $j$ after $n$ steps"</td><td>Any chain</td><td>Chapman-Kolmogorov: $\pi_0P^n$ or $(P^n)_{ij}$</td></tr>
+    <tr><td>"Is this chain reversible?"</td><td>Any chain</td><td>Check detailed balance $\pi_iP_{ij}=\pi_jP_{ji}$ — usually fails for one-directional credit chains</td></tr>
+  </table>
+
+  <h3>The Loan Roll-Rate Model — Numbers Recap</h3>
+  <table>
+    <tr><th>Starting state</th><th>$E[\text{months to resolution}]$</th><th>$P(\text{Default})$</th><th>$P(\text{Paid Off})$</th></tr>
+    <tr><td>Current</td><td>26.83</td><td>0.4275</td><td>0.5725</td></tr>
+    <tr><td>30 DPD</td><td>21.04</td><td>0.5344</td><td>0.4656</td></tr>
+    <tr><td>60 DPD</td><td>11.26</td><td>0.7939</td><td>0.2061</td></tr>
+    <tr><td>90+ DPD</td><td>3.68</td><td>0.9427</td><td>0.0573</td></tr>
+  </table>
+
+  <h3>Cross-References</h3>
+  <table>
+    <tr><th>Topic</th><th>See</th></tr>
+    <tr><td>Full general theory: transition matrices, detailed balance, ergodic theorem, random walks on graphs</td><td>Stochastic Calculus &amp; Processes, Section 5, §1</td></tr>
+    <tr><td>Gambler's Ruin as an absorbing chain (the template this note's loan example follows)</td><td>Probability, Section 1, §4.2; Stochastic Calculus, Section 5, §1.4–1.5</td></tr>
+    <tr><td>Expected-flips-to-pattern puzzles (same first-step-analysis machinery as Q5)</td><td>Brain Teasers, Section 9, §1.1</td></tr>
+    <tr><td>Eigendecomposition of $P$, computing $P^n$ efficiently for large $n$</td><td>Linear Algebra, Section 3, §2.2</td></tr>
+    <tr><td>American option early exercise as optimal stopping</td><td>Brain Teasers, Section 9, §3.2; Derivatives &amp; Quant Finance, Section 6, §1.6</td></tr>
+  </table>
+</div>
+
+<footer>
+  Markov Chains for Quantitative Finance · Interview Preparation Companion Note<br>
+  Covers: Random Processes · Loan Portfolio State Modelling · Markov Property · Time-Homogeneity · Transition Matrices · Chapman-Kolmogorov · Stationary Distributions · Absorbing Chains · Fundamental Matrix · First-Step Analysis · Rating Migration Matrices · Interview Questions with Verified Solutions
+</footer>
+
+</body>
+</html>

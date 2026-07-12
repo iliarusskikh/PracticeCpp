@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics & Distributions — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0c0e18;
+    --bg2:      #121520;
+    --bg3:      #181c2b;
+    --border:   #232840;
+    --teal:     #2dd4bf;
+    --teal-dim: #1a5f57;
+    --teal2:    #67e8f9;
+    --text:     #dde1ec;
+    --text-dim: #7a82a0;
+    --gold:     #c9a84c;
+    --gold2:    #e8c97a;
+    --gold-dim: #7a6030;
+    --accent:   #5b8af0;
+    --purple:   #a78bfa;
+    --green:    #4ade80;
+    --red:      #f87171;
+    --orange:   #fb923c;
+    --pink:     #f472b6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% -10%, #2dd4bf14, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--teal-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.3rem;
+    font-weight: 600;
+    color: var(--teal2);
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--teal);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--teal2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    color: var(--teal-dim);
+    min-width: 2.5rem;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--teal2);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.02rem;
+    color: var(--text);
+    margin: 2.4rem 0 0.9rem;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  h4 {
+    font-size: 1rem;
+    color: var(--teal);
+    margin: 1.5rem 0 0.5rem;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.purple { border-left-color: var(--purple); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.green  { border-left-color: var(--green); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 4px;
+    padding: 1rem 1.4rem;
+    margin: 1.2rem 0;
+    font-size: 0.95rem;
+  }
+  .callout.tip     { background: #152515; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #251515; border-left: 3px solid var(--red); }
+  .callout.insight { background: #181528; border-left: 3px solid var(--purple); }
+  .callout.example { background: #121f28; border-left: 3px solid var(--teal); }
+  .callout.finance { background: #1e1a10; border-left: 3px solid var(--gold); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--red); }
+  .callout.insight .ctitle { color: var(--purple); }
+  .callout.example .ctitle { color: var(--teal); }
+  .callout.finance .ctitle { color: var(--gold); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th {
+    font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--teal); border-bottom: 1px solid var(--teal-dim); padding: 0.6rem 0.8rem;
+    text-align: left; background: var(--bg2);
+  }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── DISTRIBUTION CARD ── */
+  .dist-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.4rem 1.8rem;
+    margin: 1.6rem 0;
+  }
+  .dist-card h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--teal2);
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    font-style: normal;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── PROOF BLOCK ── */
+  .proof {
+    background: var(--bg2);
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 0.9rem 1.3rem;
+    margin: 0.8rem 0;
+    font-size: 0.93rem;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .proof strong { color: var(--text); font-style: normal; }
+
+  /* ── CODE ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--teal); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--teal-dim); color: var(--teal2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── MISC ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer {
+    text-align: center; color: var(--text-dim); font-size: 0.82rem;
+    padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic;
+  }
+
+  .tag {
+    display: inline-block; background: var(--teal-dim); color: var(--teal2);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.12rem 0.45rem; border-radius: 2px; margin-right: 0.3rem;
+  }
+  .tag.gold { background: var(--gold-dim); color: var(--gold2); }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 2 of 9</div>
+  <h1>Statistics &amp; Distributions</h1>
+  <div class="subtitle">Expectation &amp; Variance · Distributions · Limit Theorems · Statistical Inference</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Expectation &amp; Variance</a>
+      <ul class="sub">
+        <li><a href="#s1-ev">E[X], Var(X) and key identities</a></li>
+        <li><a href="#s1-lotus">Law of the Unconscious Statistician</a></li>
+        <li><a href="#s1-cov">Covariance, Correlation &amp; the Indicator Trick</a></li>
+        <li><a href="#s1-cond">Conditional Expectation &amp; Tower Property</a></li>
+        <li><a href="#s1-mgf">Moment Generating Functions &amp; Factorial Moments</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Discrete Distributions</a>
+      <ul class="sub">
+        <li><a href="#s2-bern">Bernoulli &amp; Binomial</a></li>
+        <li><a href="#s2-geo">Geometric &amp; Negative Binomial</a></li>
+        <li><a href="#s2-pois">Poisson</a></li>
+        <li><a href="#s2-hyp">Hypergeometric &amp; Discrete Uniform</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Continuous Distributions</a>
+      <ul class="sub">
+        <li><a href="#s3-uni">Uniform</a></li>
+        <li><a href="#s3-norm">Normal</a></li>
+        <li><a href="#s3-exp">Exponential (memoryless)</a></li>
+        <li><a href="#s3-gamma">Gamma &amp; Beta</a></li>
+        <li><a href="#s3-lognorm">Log-Normal</a></li>
+        <li><a href="#s3-chisq">Chi-Squared, t, and F Distributions</a></li>
+        <li><a href="#s3-cdf">CDF &amp; PDF Relationships</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Limit Theorems &amp; Inequalities</a>
+      <ul class="sub">
+        <li><a href="#s4-lln">Law of Large Numbers</a></li>
+        <li><a href="#s4-clt">Central Limit Theorem</a></li>
+        <li><a href="#s4-delta">Delta Method</a></li>
+        <li><a href="#s4-ineq">Markov, Chebyshev &amp; Jensen's Inequalities</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Statistical Inference</a>
+      <ul class="sub">
+        <li><a href="#s5-mle">Maximum Likelihood Estimation</a></li>
+        <li><a href="#s5-mom">Method of Moments</a></li>
+        <li><a href="#s5-hyp">Hypothesis Testing</a></li>
+        <li><a href="#s5-ci">Confidence Intervals</a></li>
+        <li><a href="#s5-bayes">Bayesian Inference</a></li>
+        <li><a href="#s5-boot">Bootstrap</a></li>
+        <li><a href="#s5-ab">A/B Testing Basics</a></li>
+      </ul>
+    </li>
+    <li><a href="#s6">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: EXPECTATION & VARIANCE                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Expectation &amp; Variance</div>
+  </div>
+
+  <h3 id="s1-ev">1.1 Expected Value and Variance</h3>
+
+  <h4>Definition of E[X]</h4>
+
+  <div class="fbox teal">
+    <div class="flabel">Discrete</div>
+    $$E[X] = \sum_{x} x \cdot P(X = x)$$
+  </div>
+  <div class="fbox teal">
+    <div class="flabel">Continuous</div>
+    $$E[X] = \int_{-\infty}^{\infty} x \cdot f(x)\, dx$$
+  </div>
+
+  <p><strong>Existence:</strong> $E[X]$ exists and is finite when $\sum|x|P(X=x) < \infty$ (discrete) or $\int|x|f(x)dx < \infty$ (continuous). For heavy-tailed distributions (e.g.\ Cauchy), $E[X]$ does not exist.</p>
+
+  <h4>Linearity of Expectation</h4>
+
+  <p>The single most powerful tool in probability. For <em>any</em> random variables $X, Y$ and constants $a, b$:</p>
+
+  <div class="fbox gold">
+    $$E[aX + bY] = a\,E[X] + b\,E[Y]$$
+  </div>
+
+  <p><strong>This holds regardless of whether $X$ and $Y$ are independent.</strong> This is what makes the indicator trick so powerful — see §1.3.</p>
+
+  <h4>Variance</h4>
+
+  <div class="fbox gold">
+    $$\text{Var}(X) = E\!\left[(X - E[X])^2\right] = E[X^2] - (E[X])^2$$
+  </div>
+
+  <p>The computational form $E[X^2] - (E[X])^2$ is almost always easier to use. Key variance rules:</p>
+
+  <table>
+    <tr><th>Rule</th><th>Formula</th><th>Condition</th></tr>
+    <tr><td>Scaling</td><td>$\text{Var}(aX) = a^2\,\text{Var}(X)$</td><td>Always</td></tr>
+    <tr><td>Shift</td><td>$\text{Var}(X + c) = \text{Var}(X)$</td><td>Always</td></tr>
+    <tr><td>Sum (independent)</td><td>$\text{Var}(X+Y) = \text{Var}(X)+\text{Var}(Y)$</td><td>$X \perp Y$</td></tr>
+    <tr><td>Sum (general)</td><td>$\text{Var}(X+Y) = \text{Var}(X)+\text{Var}(Y)+2\,\text{Cov}(X,Y)$</td><td>Always</td></tr>
+    <tr><td>Standard deviation</td><td>$\text{SD}(aX) = |a|\,\text{SD}(X)$</td><td>Always</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Common Trap</div>
+    $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$ only when $X \perp Y$. For the sum of $n$ <em>identically distributed but correlated</em> random variables with common correlation $\rho$: $\text{Var}(\bar{X}) = \frac{\sigma^2}{n}[1 + (n-1)\rho]$. When $\rho > 0$, variance does <em>not</em> decrease as fast as $1/n$.
+  </div>
+
+  <h3 id="s1-lotus">1.2 Law of the Unconscious Statistician (LOTUS)</h3>
+
+  <p>To find $E[g(X)]$, you do <em>not</em> need the distribution of $g(X)$ — you integrate $g(x)$ against the distribution of $X$ directly:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">LOTUS — Discrete</div>
+    $$E[g(X)] = \sum_{x} g(x) \cdot P(X=x)$$
+  </div>
+  <div class="fbox gold">
+    <div class="flabel">LOTUS — Continuous</div>
+    $$E[g(X)] = \int_{-\infty}^{\infty} g(x) \cdot f_X(x)\, dx$$
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example</div>
+    If $X \sim \text{Uniform}(0,1)$, find $E[X^2]$.<br><br>
+    By LOTUS: $E[X^2] = \int_0^1 x^2 \cdot 1\, dx = \left[\frac{x^3}{3}\right]_0^1 = \frac{1}{3}$.<br>
+    Therefore $\text{Var}(X) = E[X^2] - (E[X])^2 = \frac{1}{3} - \frac{1}{4} = \frac{1}{12}$.
+  </div>
+
+  <h3 id="s1-cov">1.3 Covariance, Correlation &amp; the Indicator Variable Trick</h3>
+
+  <h4>Covariance</h4>
+
+  <div class="fbox teal">
+    $$\text{Cov}(X, Y) = E[(X - \mu_X)(Y - \mu_Y)] = E[XY] - E[X]E[Y]$$
+  </div>
+
+  <table>
+    <tr><th>Property</th><th>Formula</th></tr>
+    <tr><td>Symmetry</td><td>$\text{Cov}(X,Y) = \text{Cov}(Y,X)$</td></tr>
+    <tr><td>Self-covariance</td><td>$\text{Cov}(X,X) = \text{Var}(X)$</td></tr>
+    <tr><td>Independence</td><td>$X \perp Y \Rightarrow \text{Cov}(X,Y) = 0$ (converse false!)</td></tr>
+    <tr><td>Bilinearity</td><td>$\text{Cov}(aX+bY, Z) = a\,\text{Cov}(X,Z) + b\,\text{Cov}(Y,Z)$</td></tr>
+    <tr><td>Variance of sum</td><td>$\text{Var}(\sum X_i) = \sum_i \text{Var}(X_i) + 2\sum_{i<j}\text{Cov}(X_i,X_j)$</td></tr>
+  </table>
+
+  <h4>Correlation</h4>
+
+  <div class="fbox teal">
+    $$\rho(X, Y) = \frac{\text{Cov}(X,Y)}{\text{SD}(X)\,\text{SD}(Y)}, \qquad -1 \leq \rho \leq 1$$
+  </div>
+
+  <p>Correlation is the <em>normalised</em> (dimensionless) measure of linear association. $\rho = \pm 1$ iff $Y = aX + b$ for some constants. $\rho = 0$ means no linear relationship, but does <em>not</em> mean independence ($Y = X^2$ can have $\rho = 0$ with $X$).</p>
+
+  <h4>The Indicator Variable Trick</h4>
+
+  <p>For a binary (0/1) random variable $\mathbf{1}_A$ that equals 1 when event $A$ occurs:</p>
+
+  <div class="fbox gold">
+    $$E[\mathbf{1}_A] = P(A), \qquad \text{Var}(\mathbf{1}_A) = P(A)(1-P(A))$$
+  </div>
+
+  <p>Express a count $X = \sum_{i=1}^{n}\mathbf{1}_{A_i}$, then by linearity of expectation:</p>
+
+  <div class="fbox gold">
+    $$E[X] = \sum_{i=1}^{n} P(A_i)$$
+  </div>
+
+  <p><strong>This works even when the $\mathbf{1}_{A_i}$ are dependent.</strong></p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Classic Applications</div>
+    <strong>(a) Expected number of fixed points</strong> in a random permutation of $n$ items:<br>
+    $X_i = \mathbf{1}[\text{item }i\text{ is fixed}]$, $P(X_i=1) = 1/n$. $E[\text{fixed pts}] = n \cdot \frac{1}{n} = 1$. Always 1.<br><br>
+    <strong>(b) Expected number of matches (birthday problem)</strong> in $n$ people, 365 days:<br>
+    $\binom{n}{2}$ pairs, each matches with prob $1/365$. $E[\text{matches}] = \binom{n}{2}/365 = n(n-1)/730$.<br><br>
+    <strong>(c) Coupon Collector variance</strong> uses Cov between geometric waiting times computed via indicators.
+  </div>
+
+  <h3 id="s1-cond">1.4 Conditional Expectation &amp; Tower Property</h3>
+
+  <h4>Conditional Expectation E[X | Y]</h4>
+
+  <div class="fbox teal">
+    <div class="flabel">Discrete</div>
+    $$E[X \mid Y = y] = \sum_x x \cdot P(X = x \mid Y = y)$$
+  </div>
+
+  <p>$E[X \mid Y]$ is itself a random variable — a function of $Y$. When $Y$ is observed to be $y$, it takes value $E[X \mid Y = y]$.</p>
+
+  <h4>Tower Property (Law of Iterated Expectations)</h4>
+
+  <div class="fbox gold">
+    $$E[X] = E\!\left[E[X \mid Y]\right]$$
+  </div>
+
+  <p>In words: the expectation of $X$ is the (outer) expected value of the conditional expectation given $Y$. This is the expectation analogue of the Law of Total Probability.</p>
+
+  <h4>Law of Total Variance (Eve's Law)</h4>
+
+  <div class="fbox gold">
+    $$\text{Var}(X) = E[\text{Var}(X \mid Y)] + \text{Var}(E[X \mid Y])$$
+  </div>
+
+  <p>Decomposition: total variance = average within-group variance + variance of group means. Fundamental in hierarchical models, random effects, and variance reduction in Monte Carlo.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Tower Property Example</div>
+    <strong>Compound Poisson:</strong> Claims arrive at rate $\lambda$ per day. Each claim has expected size $\mu$ and variance $\sigma^2$. Let $N \sim \text{Poisson}(\lambda)$ be the count and $S = \sum_{i=1}^N X_i$ the total.<br><br>
+    $E[S] = E[E[S \mid N]] = E[N\mu] = \lambda\mu$<br><br>
+    $\text{Var}(S) = E[\text{Var}(S \mid N)] + \text{Var}(E[S \mid N])$<br>
+    $\quad\quad= E[N\sigma^2] + \text{Var}(N\mu) = \lambda\sigma^2 + \mu^2\lambda = \lambda(\sigma^2 + \mu^2)$
+  </div>
+
+  <h4>Key Properties of Conditional Expectation</h4>
+  <ul>
+    <li><strong>Linearity:</strong> $E[aX + bZ \mid Y] = aE[X \mid Y] + bE[Z \mid Y]$</li>
+    <li><strong>Known function:</strong> $E[g(Y) \cdot X \mid Y] = g(Y) \cdot E[X \mid Y]$ — can pull out functions of the conditioning variable</li>
+    <li><strong>Independence:</strong> If $X \perp Y$, then $E[X \mid Y] = E[X]$</li>
+    <li><strong>Tower (iterated):</strong> $E[E[X \mid Y, Z] \mid Y] = E[X \mid Y]$ — can always "forget" finer conditioning</li>
+  </ul>
+
+  <h3 id="s1-mgf">1.5 Moment Generating Functions &amp; Factorial Moments</h3>
+
+  <h4>Moment Generating Function (MGF)</h4>
+
+  <div class="fbox gold">
+    $$M_X(t) = E\!\left[e^{tX}\right] = \sum_{k=0}^{\infty} \frac{E[X^k]}{k!}\,t^k$$
+  </div>
+
+  <p>The $k$-th moment is recovered by differentiating and evaluating at $t=0$:</p>
+
+  <div class="fbox teal">
+    $$E[X^k] = M_X^{(k)}(0) = \left.\frac{d^k}{dt^k} M_X(t)\right|_{t=0}$$
+  </div>
+
+  <h4>Why MGFs Matter in Interviews</h4>
+  <ul>
+    <li><strong>Uniqueness:</strong> If two distributions share the same MGF (in a neighbourhood of 0), they are identical.</li>
+    <li><strong>Sum of independents:</strong> If $X \perp Y$, then $M_{X+Y}(t) = M_X(t) \cdot M_Y(t)$. This is how we prove sum of independent normals is normal, sum of Poissons is Poisson, etc.</li>
+    <li><strong>Large deviations:</strong> The log-MGF $\ln M_X(t)$ is the cumulant generating function (CGF). The first two cumulants are the mean and variance.</li>
+  </ul>
+
+  <h4>Factorial Moment Generating Function</h4>
+
+  <p>For discrete distributions, the <strong>probability generating function (PGF)</strong> is often more convenient:</p>
+
+  <div class="fbox teal">
+    $$G_X(z) = E[z^X] = \sum_{k=0}^{\infty} P(X=k)\,z^k$$
+  </div>
+
+  <p>The $k$-th <strong>factorial moment</strong> $E[X(X-1)(X-2)\cdots(X-k+1)]$ is obtained as $G_X^{(k)}(1)$. Factorial moments are natural for counting problems because $E[X(X-1)] = E[\text{number of ordered pairs of distinct successes}]$.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 MGF Table</div>
+    <table>
+      <tr><th>Distribution</th><th>MGF $M(t)$</th><th>Mean</th><th>Variance</th></tr>
+      <tr><td>Bernoulli$(p)$</td><td>$1-p+pe^t$</td><td>$p$</td><td>$p(1-p)$</td></tr>
+      <tr><td>Binomial$(n,p)$</td><td>$(1-p+pe^t)^n$</td><td>$np$</td><td>$np(1-p)$</td></tr>
+      <tr><td>Poisson$(\lambda)$</td><td>$e^{\lambda(e^t-1)}$</td><td>$\lambda$</td><td>$\lambda$</td></tr>
+      <tr><td>Geometric$(p)$</td><td>$\frac{pe^t}{1-(1-p)e^t}$</td><td>$1/p$</td><td>$(1-p)/p^2$</td></tr>
+      <tr><td>Normal$(\mu,\sigma^2)$</td><td>$e^{\mu t + \sigma^2 t^2/2}$</td><td>$\mu$</td><td>$\sigma^2$</td></tr>
+      <tr><td>Exponential$(\lambda)$</td><td>$\frac{\lambda}{\lambda - t},\; t<\lambda$</td><td>$1/\lambda$</td><td>$1/\lambda^2$</td></tr>
+      <tr><td>Gamma$(\alpha,\beta)$</td><td>$\left(\frac{\beta}{\beta-t}\right)^\alpha,\;t<\beta$</td><td>$\alpha/\beta$</td><td>$\alpha/\beta^2$</td></tr>
+    </table>
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Using the Normal MGF</div>
+    For $X \sim N(\mu, \sigma^2)$: $M_X(t) = e^{\mu t + \frac{1}{2}\sigma^2 t^2}$. Setting $t=1$: $E[e^X] = e^{\mu + \sigma^2/2}$ — the key log-normal expectation formula used throughout derivatives pricing.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: DISCRETE DISTRIBUTIONS                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Discrete Distributions</div>
+  </div>
+
+  <h3 id="s2-bern">2.1 Bernoulli &amp; Binomial</h3>
+
+  <div class="dist-card">
+    <h4>Bernoulli$(p)$</h4>
+    <p>A single trial: success (1) with probability $p$, failure (0) with probability $1-p = q$.</p>
+    <div class="fbox teal">
+      $P(X = k) = p^k(1-p)^{1-k}$ for $k \in \{0,1\}$
+      $\quad E[X] = p \qquad \text{Var}(X) = p(1-p) = pq$
+    </div>
+    <p>Note: variance is maximised at $p = 1/2$, giving $\text{Var} = 1/4$.</p>
+  </div>
+
+  <div class="dist-card">
+    <h4>Binomial$(n, p)$</h4>
+    <p>Number of successes in $n$ <em>independent</em> Bernoulli$(p)$ trials. $X = \sum_{i=1}^{n}X_i$ where $X_i \sim \text{Bern}(p)$.</p>
+    <div class="fbox teal">
+      $$P(X = k) = \binom{n}{k}p^k(1-p)^{n-k}, \quad k = 0,1,\ldots,n$$
+      $$E[X] = np \qquad \text{Var}(X) = np(1-p) \qquad M(t) = (q+pe^t)^n$$
+    </div>
+    <p><strong>Reproductive property:</strong> If $X \sim B(m,p)$ and $Y \sim B(n,p)$ independently, then $X + Y \sim B(m+n, p)$. Immediate from MGF: $M_{X+Y}(t) = (q+pe^t)^{m+n}$.</p>
+    <p><strong>Normal approximation:</strong> For large $n$ with $p$ not too close to 0 or 1: $X \approx N(np, np(1-p))$. Rule of thumb: works well when $np \geq 5$ and $n(1-p) \geq 5$.</p>
+    <p><strong>Poisson approximation:</strong> When $n \to \infty$, $p \to 0$, $np \to \lambda$: $B(n,p) \approx \text{Poisson}(\lambda)$.</p>
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance Connection</div>
+      The Binomial model for option pricing (Cox-Ross-Rubinstein) uses Binomial$(n,p)$ to model stock price paths. As $n \to \infty$, this converges to the Black-Scholes model.
+    </div>
+  </div>
+
+  <h3 id="s2-geo">2.2 Geometric &amp; Negative Binomial</h3>
+
+  <div class="dist-card">
+    <h4>Geometric$(p)$</h4>
+    <p>Number of trials until the <em>first</em> success. Two conventions exist — know both:</p>
+    <table>
+      <tr><th>Convention</th><th>PMF</th><th>Mean</th><th>Variance</th></tr>
+      <tr><td>$X$ = trials until first success (includes success)</td><td>$P(X=k)=(1-p)^{k-1}p$, $k \geq 1$</td><td>$1/p$</td><td>$(1-p)/p^2$</td></tr>
+      <tr><td>$X$ = failures before first success</td><td>$P(X=k)=(1-p)^{k}p$, $k \geq 0$</td><td>$(1-p)/p$</td><td>$(1-p)/p^2$</td></tr>
+    </table>
+
+    <h4>Memoryless Property</h4>
+    <div class="fbox gold">
+      $$P(X > m+n \mid X > m) = P(X > n)$$
+    </div>
+    <p>The geometric distribution is the <em>only</em> discrete distribution with this property. "Given you've already flipped $m$ tails, the number of additional flips until heads has the same distribution as starting fresh." This is the discrete analogue of the exponential distribution's memorylessness.</p>
+    <div class="callout insight">
+      <div class="ctitle">💡 Proof of Memorylessness</div>
+      $P(X > m+n \mid X > m) = \frac{P(X>m+n)}{P(X>m)} = \frac{(1-p)^{m+n}}{(1-p)^m} = (1-p)^n = P(X>n)$ ✓
+    </div>
+  </div>
+
+  <div class="dist-card">
+    <h4>Negative Binomial$(r, p)$</h4>
+    <p>Number of trials until the $r$-th success. This is the sum of $r$ independent Geometric$(p)$ random variables.</p>
+    <div class="fbox teal">
+      $$P(X=k) = \binom{k-1}{r-1}p^r(1-p)^{k-r}, \quad k = r, r+1, \ldots$$
+      $$E[X] = \frac{r}{p} \qquad \text{Var}(X) = \frac{r(1-p)}{p^2}$$
+    </div>
+    <p>Special case: $r=1$ gives the Geometric distribution. The Negative Binomial is also used as an overdispersed Poisson in count models (count data with variance exceeding mean).</p>
+  </div>
+
+  <h3 id="s2-pois">2.3 Poisson$(\lambda)$</h3>
+
+  <div class="dist-card">
+    <h4>Poisson$(\lambda)$</h4>
+    <p>Models the number of rare events in a fixed interval. $\lambda > 0$ is the rate parameter.</p>
+    <div class="fbox teal">
+      $$P(X = k) = \frac{e^{-\lambda}\lambda^k}{k!}, \quad k = 0, 1, 2, \ldots$$
+      $$E[X] = \lambda \qquad \text{Var}(X) = \lambda \qquad M(t) = e^{\lambda(e^t - 1)}$$
+    </div>
+
+    <h4>Key Properties</h4>
+    <ul>
+      <li><strong>Reproductive:</strong> If $X \sim \text{Pois}(\lambda_1)$ and $Y \sim \text{Pois}(\lambda_2)$ independently, then $X + Y \sim \text{Pois}(\lambda_1 + \lambda_2)$.</li>
+      <li><strong>Splitting:</strong> If $X \sim \text{Pois}(\lambda)$ and each event is independently type-A with probability $p$, then count of type-A events $\sim \text{Pois}(\lambda p)$ and type-B events $\sim \text{Pois}(\lambda(1-p))$, and these are <em>independent</em>.</li>
+      <li><strong>Limiting distribution:</strong> $B(n,p) \to \text{Pois}(\lambda)$ as $n \to \infty$, $p \to 0$, $np \to \lambda$.</li>
+      <li><strong>Mean = Variance:</strong> If sample variance $\gg$ sample mean (overdispersion), the Poisson assumption is violated.</li>
+    </ul>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance Connection</div>
+      Poisson processes model credit default events, trade arrivals (order flow), and jump components in jump-diffusion models (Merton model). The compound Poisson process $\sum_{i=1}^{N(t)} X_i$ where $N(t) \sim \text{Pois}(\lambda t)$ models aggregate loss/jump processes.
+    </div>
+
+    <div class="callout example">
+      <div class="ctitle">📋 Poisson Approximation Example</div>
+      A bank makes 1,000 loans. Each defaults independently with probability 0.003. What is the probability of exactly 2 defaults?<br><br>
+      Exact Binomial: $\binom{1000}{2}(0.003)^2(0.997)^{998}$. Tedious.<br><br>
+      Poisson approximation: $\lambda = np = 3$.<br>
+      $P(X=2) = e^{-3} \cdot 3^2 / 2! = 9e^{-3}/2 \approx 0.224$.
+    </div>
+  </div>
+
+  <h3 id="s2-hyp">2.4 Hypergeometric &amp; Discrete Uniform</h3>
+
+  <div class="dist-card">
+    <h4>Hypergeometric$(N, K, n)$</h4>
+    <p>Sampling <em>without replacement</em>: from a population of $N$ items ($K$ successes, $N-K$ failures), draw $n$ items. $X$ = number of successes drawn.</p>
+    <div class="fbox teal">
+      $$P(X=k) = \frac{\binom{K}{k}\binom{N-K}{n-k}}{\binom{N}{n}}, \quad k = \max(0,n+K-N),\ldots,\min(K,n)$$
+      $$E[X] = \frac{nK}{N} \qquad \text{Var}(X) = n\frac{K}{N}\frac{N-K}{N}\frac{N-n}{N-1}$$
+    </div>
+    <p>The factor $\frac{N-n}{N-1}$ is the <strong>finite population correction</strong>. As $N \to \infty$ with $K/N \to p$, the hypergeometric approaches Binomial$(n,p)$.</p>
+    <p><strong>Intuition:</strong> Binomial is sampling <em>with</em> replacement (each draw independent); Hypergeometric is sampling <em>without</em> replacement (dependent draws). Variance is smaller for hypergeometric since drawing without replacement reduces uncertainty.</p>
+  </div>
+
+  <div class="dist-card">
+    <h4>Discrete Uniform$\{1, 2, \ldots, n\}$</h4>
+    <div class="fbox teal">
+      $$P(X=k) = \frac{1}{n}, \quad k = 1, 2, \ldots, n$$
+      $$E[X] = \frac{n+1}{2} \qquad \text{Var}(X) = \frac{n^2-1}{12} = \frac{(n-1)(n+1)}{12}$$
+    </div>
+    <p>The variance formula is derived using $\sum_{k=1}^{n}k^2 = n(n+1)(2n+1)/6$.</p>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: CONTINUOUS DISTRIBUTIONS                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Continuous Distributions</div>
+  </div>
+
+  <h3 id="s3-cdf">3.0 CDF &amp; PDF Relationships (Foundations)</h3>
+
+  <p>For a continuous random variable $X$:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">CDF → PDF</div>
+    $$f(x) = \frac{d}{dx}F(x)$$
+  </div>
+  <div class="fbox gold">
+    <div class="flabel">PDF → CDF</div>
+    $$F(x) = P(X \leq x) = \int_{-\infty}^{x} f(t)\,dt$$
+  </div>
+
+  <p>Properties: $f(x) \geq 0$, $\int_{-\infty}^{\infty}f(x)dx = 1$, $F$ is non-decreasing with $F(-\infty) = 0$, $F(+\infty) = 1$.</p>
+
+  <p><strong>Probability of an interval:</strong> $P(a < X \leq b) = F(b) - F(a) = \int_a^b f(x)dx$.</p>
+
+  <p><strong>CDF transformation:</strong> If $X$ has continuous CDF $F$, then $U = F(X) \sim \text{Uniform}(0,1)$. This is the <em>probability integral transform</em>, fundamental to simulation and copulas.</p>
+
+  <p><strong>Quantile function:</strong> $F^{-1}(u) = \inf\{x : F(x) \geq u\}$. Generates samples: if $U \sim \text{Unif}(0,1)$, then $F^{-1}(U)$ has CDF $F$.</p>
+
+  <h3 id="s3-uni">3.1 Uniform$\,U(a, b)$</h3>
+
+  <div class="dist-card">
+    <h4>Uniform$(a, b)$</h4>
+    <div class="fbox teal">
+      $$f(x) = \frac{1}{b-a}, \quad a \leq x \leq b \qquad F(x) = \frac{x-a}{b-a}$$
+      $$E[X] = \frac{a+b}{2} \qquad \text{Var}(X) = \frac{(b-a)^2}{12}$$
+    </div>
+    <p><strong>$U(0,1)$:</strong> The standard uniform. Key: $E[X^n] = \frac{1}{n+1}$. Used as the basis for all simulation via inverse transform.</p>
+    <p><strong>Order statistics:</strong> For $n$ i.i.d. $U(0,1)$, the $k$-th order statistic $X_{(k)}$ has $E[X_{(k)}] = k/(n+1)$. This result comes up in rank-based tests and simulation.</p>
+  </div>
+
+  <h3 id="s3-norm">3.2 Normal$\,N(\mu, \sigma^2)$</h3>
+
+  <div class="dist-card">
+    <h4>Normal$(\mu, \sigma^2)$</h4>
+    <div class="fbox teal">
+      $$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+      $$E[X] = \mu \qquad \text{Var}(X) = \sigma^2 \qquad M(t) = e^{\mu t + \frac{1}{2}\sigma^2 t^2}$$
+    </div>
+
+    <h4>Standard Normal $Z \sim N(0,1)$</h4>
+    <p>Standardise: $Z = (X-\mu)/\sigma$. The CDF $\Phi(z) = P(Z \leq z)$ has no closed form — know these critical values:</p>
+
+    <table>
+      <tr><th>Confidence level</th><th>$z_{\alpha/2}$ (two-tailed)</th><th>Interval</th></tr>
+      <tr><td>68.27%</td><td>1.000</td><td>$\mu \pm \sigma$</td></tr>
+      <tr><td>90%</td><td>1.645</td><td>$\mu \pm 1.645\sigma$</td></tr>
+      <tr><td>95%</td><td>1.960</td><td>$\mu \pm 1.96\sigma$</td></tr>
+      <tr><td>99%</td><td>2.576</td><td>$\mu \pm 2.576\sigma$</td></tr>
+      <tr><td>99.73%</td><td>3.000</td><td>$\mu \pm 3\sigma$</td></tr>
+    </table>
+
+    <h4>Key Properties</h4>
+    <ul>
+      <li><strong>Linear transformation:</strong> If $X \sim N(\mu, \sigma^2)$, then $aX + b \sim N(a\mu+b, a^2\sigma^2)$.</li>
+      <li><strong>Sum of independents:</strong> $X \sim N(\mu_1,\sigma_1^2)$, $Y \sim N(\mu_2,\sigma_2^2)$ independent $\Rightarrow X+Y \sim N(\mu_1+\mu_2, \sigma_1^2+\sigma_2^2)$.</li>
+      <li><strong>Moments:</strong> All odd moments are zero (symmetry). Even moments: $E[Z^{2n}] = (2n-1)!! = 1\cdot3\cdot5\cdots(2n-1)$.</li>
+      <li><strong>Symmetry:</strong> $\Phi(-z) = 1 - \Phi(z)$, so $P(Z > z) = P(Z < -z)$.</li>
+    </ul>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Log-Returns</div>
+      Daily log-returns $r_t = \ln(S_t/S_{t-1})$ are approximately normal in the Black-Scholes model. If $r_t \sim N(\mu\Delta t, \sigma^2\Delta t)$, then over $T$ periods the total log-return $\sim N(\mu T, \sigma^2 T)$ — variance grows linearly in time.
+    </div>
+
+    <div class="callout trap">
+      <div class="ctitle">⚠ Normal Does Not Mean All Distributions Are Normal</div>
+      Financial returns have fat tails (excess kurtosis) and are negatively skewed — the Normal is a useful approximation but empirically wrong. Interviewers may ask about kurtosis: for $N(0,1)$, $E[Z^4] = 3$. "Excess kurtosis" of a distribution is $E[(X-\mu)^4]/\sigma^4 - 3$; normal has 0 excess kurtosis.
+    </div>
+  </div>
+
+  <h3 id="s3-exp">3.3 Exponential$(\lambda)$ — The Memoryless Distribution</h3>
+
+  <div class="dist-card">
+    <h4>Exponential$(\lambda)$</h4>
+    <div class="fbox teal">
+      $$f(x) = \lambda e^{-\lambda x}, \quad x \geq 0 \qquad F(x) = 1 - e^{-\lambda x}$$
+      $$E[X] = \frac{1}{\lambda} \qquad \text{Var}(X) = \frac{1}{\lambda^2} \qquad M(t) = \frac{\lambda}{\lambda - t},\;\; t < \lambda$$
+    </div>
+
+    <h4>Memoryless Property</h4>
+    <div class="fbox gold">
+      $$P(X > s + t \mid X > s) = P(X > t) \qquad \text{for all } s, t \geq 0$$
+    </div>
+    <p>The exponential is the <em>only</em> continuous distribution with this property. "If a light bulb has survived $s$ hours, its remaining lifetime has the same distribution as a new bulb."</p>
+
+    <div class="proof">
+      <strong>Proof:</strong> $P(X > s+t \mid X > s) = P(X > s+t) / P(X > s) = e^{-\lambda(s+t)} / e^{-\lambda s} = e^{-\lambda t} = P(X > t)$ ✓
+    </div>
+
+    <h4>Minimum of Exponentials</h4>
+    <p>If $X_1 \sim \text{Exp}(\lambda_1), \ldots, X_n \sim \text{Exp}(\lambda_n)$ are independent, then:</p>
+    <div class="fbox teal">
+      $$\min(X_1, \ldots, X_n) \sim \text{Exp}(\lambda_1 + \cdots + \lambda_n)$$
+    </div>
+    <p>The probability that $X_i$ achieves the minimum is $\lambda_i / (\lambda_1 + \cdots + \lambda_n)$. This is fundamental to the analysis of competing risks and queuing systems.</p>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance Connection</div>
+      Inter-arrival times in a Poisson process are i.i.d. Exponential$(\lambda)$. Credit default times are often modelled as exponential (constant hazard rate). The hazard rate $h(t) = f(t)/(1-F(t)) = \lambda$ is constant — the defining property of the exponential.
+    </div>
+  </div>
+
+  <h3 id="s3-gamma">3.4 Gamma &amp; Beta Distributions</h3>
+
+  <div class="dist-card">
+    <h4>Gamma$(\alpha, \beta)$ — Rate parameterisation</h4>
+    <p>Sum of $\alpha$ independent Exp$(\beta)$ r.v.'s when $\alpha$ is a positive integer (Erlang distribution).</p>
+    <div class="fbox teal">
+      $$f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}, \quad x > 0$$
+      $$E[X] = \frac{\alpha}{\beta} \qquad \text{Var}(X) = \frac{\alpha}{\beta^2} \qquad M(t) = \left(\frac{\beta}{\beta-t}\right)^\alpha,\;\;t<\beta$$
+    </div>
+    <p>The Gamma function: $\Gamma(\alpha) = \int_0^\infty t^{\alpha-1}e^{-t}dt$, with $\Gamma(n) = (n-1)!$ for positive integers and $\Gamma(1/2) = \sqrt{\pi}$.</p>
+    <p><strong>Special cases:</strong> $\Gamma(1,\beta) = \text{Exp}(\beta)$; $\Gamma(n/2, 1/2) = \chi^2(n)$ (chi-squared with $n$ d.f.).</p>
+  </div>
+
+  <div class="dist-card">
+    <h4>Beta$(\alpha, \beta)$</h4>
+    <p>Defined on $[0,1]$ — the natural distribution for modelling probabilities and proportions.</p>
+    <div class="fbox teal">
+      $$f(x) = \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha,\beta)}, \quad 0 < x < 1$$
+      $$E[X] = \frac{\alpha}{\alpha+\beta} \qquad \text{Var}(X) = \frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$$
+    </div>
+    <p>where $B(\alpha,\beta) = \Gamma(\alpha)\Gamma(\beta)/\Gamma(\alpha+\beta)$.</p>
+    <p><strong>Bayesian conjugate:</strong> Beta$(\alpha,\beta)$ is the conjugate prior for the Binomial likelihood. After observing $s$ successes in $n$ trials with Beta$(\alpha,\beta)$ prior:<br>
+    Posterior $\sim \text{Beta}(\alpha+s, \beta+n-s)$.</p>
+    <p><strong>Special cases:</strong> Beta$(1,1) = \text{Uniform}(0,1)$. Beta$(1/2,1/2)$ is the arcsine distribution (appears in the arcsine law for Brownian motion).</p>
+  </div>
+
+  <h3 id="s3-lognorm">3.5 Log-Normal</h3>
+
+  <div class="dist-card">
+    <h4>Log-Normal$(\mu, \sigma^2)$</h4>
+    <p>$X$ is log-normal if $\ln X \sim N(\mu, \sigma^2)$. Equivalently: $X = e^Y$ where $Y \sim N(\mu, \sigma^2)$.</p>
+    <div class="fbox teal">
+      $$f(x) = \frac{1}{x\sigma\sqrt{2\pi}}\exp\!\left(-\frac{(\ln x - \mu)^2}{2\sigma^2}\right), \quad x > 0$$
+      $$E[X] = e^{\mu + \sigma^2/2} \qquad \text{Var}(X) = (e^{\sigma^2}-1)\,e^{2\mu+\sigma^2}$$
+    </div>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 The Central Distribution in Finance</div>
+      Under Black-Scholes, the stock price $S_T = S_0 e^{(\mu - \sigma^2/2)T + \sigma W_T}$ is log-normally distributed. Because $\ln S_T \sim N$, the stock price is non-negative (a property Brownian motion alone lacks). The drift adjustment $-\sigma^2/2$ (Itô correction) ensures $E[S_T] = S_0 e^{\mu T}$ — not $S_0 e^{(\mu - \sigma^2/2)T}$.
+    </div>
+
+    <div class="callout trap">
+      <div class="ctitle">⚠ Mean vs Median of Log-Normal</div>
+      For $X \sim \text{LogNormal}(\mu,\sigma^2)$: Mean $= e^{\mu+\sigma^2/2}$, Median $= e^\mu$, Mode $= e^{\mu - \sigma^2}$. Mean $>$ Median $>$ Mode. The distribution is right-skewed. When $\sigma^2$ is large, the mean is much larger than the median — important when comparing "average" returns vs "typical" returns.
+    </div>
+  </div>
+
+  <h3 id="s3-chisq">3.6 Chi-Squared, $t$, and $F$ Distributions</h3>
+
+  <div class="dist-card">
+    <h4>Chi-Squared $\chi^2(k)$</h4>
+    <p>Sum of squares of $k$ independent standard normals: $\chi^2_k = \sum_{i=1}^k Z_i^2$ where $Z_i \sim N(0,1)$ i.i.d.</p>
+    <div class="fbox teal">
+      $$E[\chi^2_k] = k \qquad \text{Var}(\chi^2_k) = 2k \qquad \chi^2_k = \text{Gamma}(k/2,\, 1/2)$$
+    </div>
+    <p>Used in: goodness-of-fit tests, the distribution of sample variance $\frac{(n-1)S^2}{\sigma^2} \sim \chi^2(n-1)$ for normal data.</p>
+  </div>
+
+  <div class="dist-card">
+    <h4>Student's $t$-distribution $t(k)$</h4>
+    <p>$T = Z/\sqrt{V/k}$ where $Z \sim N(0,1)$ and $V \sim \chi^2(k)$ are independent.</p>
+    <div class="fbox teal">
+      $$E[T] = 0\;(k>1) \qquad \text{Var}(T) = \frac{k}{k-2}\;(k>2)$$
+    </div>
+    <p>As $k \to \infty$, $t(k) \to N(0,1)$. For small $k$, the $t$-distribution has heavy tails. Used for inference on the mean when population variance is unknown. For $k=1$: Cauchy distribution (no finite mean or variance).</p>
+  </div>
+
+  <div class="dist-card">
+    <h4>$F$-distribution $F(d_1, d_2)$</h4>
+    <p>$F = (V_1/d_1)/(V_2/d_2)$ where $V_1 \sim \chi^2(d_1)$, $V_2 \sim \chi^2(d_2)$ independent.</p>
+    <div class="fbox teal">
+      $$E[F] = \frac{d_2}{d_2-2}\;(d_2>2) \qquad \text{If }T\sim t(k)\text{ then }T^2 \sim F(1,k)$$
+    </div>
+    <p>Used in ANOVA and regression: the $F$-test compares variances. If $S_1^2$ and $S_2^2$ are sample variances from normal populations with equal variance, $S_1^2/S_2^2 \sim F(n_1-1, n_2-1)$.</p>
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The Family Tree</div>
+    All of $t$, $F$, and $\chi^2$ are derived from the Normal. Knowing the hierarchy — $Z^2 \sim \chi^2(1)$, $\sum Z_i^2 \sim \chi^2(k)$, $Z/\sqrt{\chi^2_k/k} \sim t(k)$, $\chi^2_{d_1}/d_1 \div \chi^2_{d_2}/d_2 \sim F(d_1,d_2)$ — lets you derive any of them on the fly.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: LIMIT THEOREMS & INEQUALITIES                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Limit Theorems &amp; Inequalities</div>
+  </div>
+
+  <h3 id="s4-lln">4.1 Law of Large Numbers</h3>
+
+  <p>Let $X_1, X_2, \ldots$ be i.i.d. with finite mean $\mu = E[X]$. Define the sample mean $\bar{X}_n = \frac{1}{n}\sum_{i=1}^n X_i$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Weak LLN (Khintchine)</div>
+    $$\bar{X}_n \xrightarrow{\,P\,} \mu \quad \text{as } n \to \infty$$
+    $$\text{i.e.,}\quad P\!\left(|\bar{X}_n - \mu| > \varepsilon\right) \to 0 \quad \forall\,\varepsilon > 0$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Strong LLN (Kolmogorov)</div>
+    $$\bar{X}_n \xrightarrow{\,\text{a.s.}\,} \mu \quad \text{as } n \to \infty$$
+    $$\text{i.e.,}\quad P\!\left(\lim_{n\to\infty}\bar{X}_n = \mu\right) = 1$$
+  </div>
+
+  <table>
+    <tr><th></th><th>Weak LLN</th><th>Strong LLN</th></tr>
+    <tr><td>Convergence type</td><td>In probability</td><td>Almost surely (with probability 1)</td></tr>
+    <tr><td>Requirement</td><td>Finite mean</td><td>Finite mean + i.i.d.</td></tr>
+    <tr><td>Interpretation</td><td>For any $\varepsilon$, probability of being far from $\mu$ vanishes</td><td>The sample path itself converges to $\mu$</td></tr>
+    <tr><td>Implication</td><td>Strong LLN $\Rightarrow$ Weak LLN</td><td>Strictly stronger statement</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance Application</div>
+    The LLN underpins Monte Carlo simulation: the average of $n$ simulated payoffs converges to the true expected payoff. The rate of convergence is $O(1/\sqrt{n})$ — to halve the Monte Carlo error, you need 4× the simulations.
+  </div>
+
+  <h3 id="s4-clt">4.2 Central Limit Theorem</h3>
+
+  <p>The CLT tells us the <em>distribution</em> of $\bar{X}_n$ for large $n$, not just its limit.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Central Limit Theorem (Lindeberg-Lévy)</div>
+    Let $X_1,\ldots,X_n$ be i.i.d. with mean $\mu$ and <strong>finite variance</strong> $\sigma^2 > 0$.
+    $$\sqrt{n}\,\frac{\bar{X}_n - \mu}{\sigma} \xrightarrow{\,d\,} N(0,1) \quad \text{as } n \to \infty$$
+    Equivalently: $\bar{X}_n \xrightarrow{\,d\,} N\!\left(\mu,\, \frac{\sigma^2}{n}\right)$
+  </div>
+
+  <p><strong>How fast?</strong> The Berry-Esseen theorem gives a quantitative rate: the error in the normal approximation is $O(1/\sqrt{n})$, with the constant depending on $E[|X|^3]$. In practice, $n \geq 30$ is often cited as sufficient, but this depends heavily on skewness.</p>
+
+  <h4>Using the CLT in Practice</h4>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example: Sample Mean Confidence</div>
+    $X_i$ has mean $\mu = 5$, variance $\sigma^2 = 4$, $n = 100$. What is $P(\bar{X} > 5.3)$?<br><br>
+    By CLT: $\bar{X} \approx N(5, 4/100) = N(5, 0.04)$, so $\text{SD}(\bar{X}) = 0.2$.<br><br>
+    $P(\bar{X} > 5.3) = P\!\left(Z > \frac{5.3 - 5}{0.2}\right) = P(Z > 1.5) = 1 - \Phi(1.5) \approx 6.7\%$
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ CLT Requirements</div>
+    <ul>
+      <li>Requires finite variance. The CLT fails for heavy-tailed distributions like Cauchy (which has no finite mean or variance). For heavy tails, generalised CLTs with stable distributions apply.</li>
+      <li>"i.i.d." can be relaxed (Lindeberg condition allows heterogeneous variances) but is required for the basic version.</li>
+      <li>The CLT describes the distribution of the <em>average</em>, not of individual observations.</li>
+    </ul>
+  </div>
+
+  <h3 id="s4-delta">4.3 Delta Method</h3>
+
+  <p>When $\sqrt{n}(\bar{X} - \mu) \to N(0, \sigma^2)$, what is the asymptotic distribution of $g(\bar{X})$ for a smooth function $g$?</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Delta Method (First Order)</div>
+    If $g$ is differentiable at $\mu$ with $g'(\mu) \neq 0$:
+    $$\sqrt{n}\,\bigl(g(\bar{X}_n) - g(\mu)\bigr) \xrightarrow{\,d\,} N\!\left(0,\; [g'(\mu)]^2\,\sigma^2\right)$$
+    In finite-sample terms: $\text{Var}(g(\bar{X})) \approx [g'(\mu)]^2 \cdot \frac{\sigma^2}{n}$
+  </div>
+
+  <div class="proof">
+    <strong>Proof sketch:</strong> Taylor expand $g(\bar{X}) \approx g(\mu) + g'(\mu)(\bar{X} - \mu)$. The remainder is $o_p(1/\sqrt{n})$. Multiply through by $\sqrt{n}$ and apply CLT to $\sqrt{n}(\bar{X} - \mu)$.
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Worked Examples</div>
+    <strong>(a) Log transformation:</strong> $g(x) = \ln x$, $g'(x) = 1/x$. If $E[X] = \mu$, $\text{Var}(X) = \sigma^2$:
+    $$\text{Var}(\ln \bar{X}) \approx \frac{1}{\mu^2} \cdot \frac{\sigma^2}{n} = \frac{\sigma^2}{n\mu^2} = \frac{\text{CV}^2}{n}$$
+    where CV = $\sigma/\mu$ is the coefficient of variation.<br><br>
+    <strong>(b) Square root:</strong> $g(x) = \sqrt{x}$, $g'(x) = 1/(2\sqrt{x})$.
+    $\text{Var}(\sqrt{\bar{X}}) \approx \frac{1}{4\mu} \cdot \frac{\sigma^2}{n}$<br><br>
+    <strong>(c) Variance-stabilising transform:</strong> Find $g$ such that $[g'(\mu)]^2 \sigma^2(\mu) = $ constant. For Poisson, $g(x) = \sqrt{x}$ stabilises variance.
+  </div>
+
+  <h3 id="s4-ineq">4.4 Markov, Chebyshev &amp; Jensen's Inequalities</h3>
+
+  <h4>Markov's Inequality</h4>
+
+  <div class="fbox orange">
+    <div class="flabel">Markov's Inequality</div>
+    For $X \geq 0$ and $a > 0$:
+    $$P(X \geq a) \leq \frac{E[X]}{a}$$
+  </div>
+
+  <div class="proof">
+    <strong>Proof:</strong> $E[X] = \int_0^\infty x\,f(x)\,dx \geq \int_a^\infty x\,f(x)\,dx \geq a\int_a^\infty f(x)\,dx = a\,P(X\geq a)$. Divide by $a$.
+  </div>
+
+  <p>Very loose bound — only assumes non-negativity and a finite mean. It's the parent of Chebyshev's inequality.</p>
+
+  <h4>Chebyshev's Inequality</h4>
+
+  <div class="fbox orange">
+    <div class="flabel">Chebyshev's Inequality</div>
+    For any random variable $X$ with finite mean $\mu$ and variance $\sigma^2$, and any $k > 0$:
+    $$P\!\left(|X - \mu| \geq k\sigma\right) \leq \frac{1}{k^2}$$
+    Equivalently: $P\!\left(|X - \mu| \geq t\right) \leq \frac{\sigma^2}{t^2}$
+  </div>
+
+  <div class="proof">
+    <strong>Proof:</strong> Apply Markov to the non-negative r.v. $(X-\mu)^2 \geq 0$ with $a = k^2\sigma^2$: $P((X-\mu)^2 \geq k^2\sigma^2) \leq E[(X-\mu)^2]/(k^2\sigma^2) = 1/k^2$.
+  </div>
+
+  <table>
+    <tr><th>$k$</th><th>Chebyshev bound</th><th>Normal (actual)</th></tr>
+    <tr><td>1</td><td>$\leq 100\%$</td><td>31.7%</td></tr>
+    <tr><td>2</td><td>$\leq 25\%$</td><td>4.55%</td></tr>
+    <tr><td>3</td><td>$\leq 11.1\%$</td><td>0.27%</td></tr>
+    <tr><td>4</td><td>$\leq 6.25\%$</td><td>0.006%</td></tr>
+  </table>
+
+  <p>Chebyshev is distribution-free (works for any distribution) but conservative. The normal actual values show how much tighter the bound is for well-behaved distributions.</p>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Chebyshev → Proof of Weak LLN</div>
+    $P(|\bar{X}_n - \mu| \geq \varepsilon) \leq \frac{\text{Var}(\bar{X}_n)}{\varepsilon^2} = \frac{\sigma^2}{n\varepsilon^2} \to 0$ as $n \to \infty$. This is the standard proof of the Weak LLN!
+  </div>
+
+  <h4>Jensen's Inequality</h4>
+
+  <div class="fbox gold">
+    <div class="flabel">Jensen's Inequality</div>
+    If $g$ is a <strong>convex</strong> function ($g''(x) \geq 0$), then:
+    $$E[g(X)] \geq g(E[X])$$
+    If $g$ is <strong>concave</strong> ($g''(x) \leq 0$):
+    $$E[g(X)] \leq g(E[X])$$
+  </div>
+
+  <div class="proof">
+    <strong>Intuition:</strong> Convexity means $g$ lies above any tangent line. Taking expectations of both sides of $g(X) \geq g(\mu) + g'(\mu)(X-\mu)$ gives $E[g(X)] \geq g(\mu) + g'(\mu)(E[X]-\mu) = g(\mu) = g(E[X])$.
+  </div>
+
+  <table>
+    <tr><th>Function $g(x)$</th><th>Convex / Concave</th><th>Jensen result</th><th>Application</th></tr>
+    <tr><td>$e^x$</td><td>Convex</td><td>$E[e^X] \geq e^{E[X]}$</td><td>Log-normal mean: $e^{\mu + \sigma^2/2} \geq e^\mu$</td></tr>
+    <tr><td>$x^2$</td><td>Convex</td><td>$E[X^2] \geq (E[X])^2$</td><td>Variance $\geq 0$: $\text{Var}(X) = E[X^2] - (E[X])^2 \geq 0$</td></tr>
+    <tr><td>$\ln x$ ($x>0$)</td><td>Concave</td><td>$E[\ln X] \leq \ln E[X]$</td><td>Arithmetic mean $\geq$ geometric mean</td></tr>
+    <tr><td>$\sqrt{x}$ ($x>0$)</td><td>Concave</td><td>$E[\sqrt{X}] \leq \sqrt{E[X]}$</td><td>Volatility drag; risk aversion</td></tr>
+    <tr><td>$1/x$ ($x>0$)</td><td>Convex</td><td>$E[1/X] \geq 1/E[X]$</td><td>Harmonic mean $\leq$ arithmetic mean</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Jensen's Inequality in Finance: Volatility Drag</div>
+    If daily returns are i.i.d. with $E[R] = \mu$ and $\text{Var}(R) = \sigma^2$, then the compound return over $T$ periods is $\prod_{t=1}^T (1+R_t)$. By Jensen (since $\ln$ is concave):<br><br>
+    $E[\ln(1+R)] \leq \ln(E[1+R]) = \ln(1+\mu)$<br><br>
+    The compounded growth rate is $E[\ln(1+R)] \approx \mu - \sigma^2/2$ for small $\mu, \sigma$. The $-\sigma^2/2$ is the <em>volatility drag</em> — variance reduces the geometric (compounded) return below the arithmetic mean. This is the Itô correction in continuous time.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: STATISTICAL INFERENCE                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Statistical Inference</div>
+  </div>
+
+  <h3 id="s5-mle">5.1 Maximum Likelihood Estimation (MLE)</h3>
+
+  <p>Given observations $x_1, \ldots, x_n$ from a parametric family $f(x;\theta)$, the MLE $\hat{\theta}$ is the parameter value that maximises the likelihood of having observed the data:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Likelihood and Log-Likelihood</div>
+    $$L(\theta) = \prod_{i=1}^n f(x_i;\theta) \qquad \ell(\theta) = \ln L(\theta) = \sum_{i=1}^n \ln f(x_i;\theta)$$
+    $$\hat{\theta}_\text{MLE} = \arg\max_\theta \ell(\theta)$$
+  </div>
+
+  <p>We maximise the log-likelihood because: (1) log converts products to sums; (2) log is monotone so argmax is preserved; (3) better numerical stability.</p>
+
+  <h4>Procedure: Score Equation</h4>
+  <ol class="steps">
+    <li>Write down $f(x;\theta)$ (or PMF for discrete)</li>
+    <li>Form $\ell(\theta) = \sum \ln f(x_i;\theta)$</li>
+    <li>Solve the <em>score equation</em>: $\frac{\partial \ell}{\partial \theta} = 0$</li>
+    <li>Verify it is a maximum (check second derivative $< 0$ or analyse boundary)</li>
+  </ol>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Classic MLE Examples</div>
+    <strong>Normal distribution:</strong> For $X_i \sim N(\mu, \sigma^2)$:
+    $$\hat{\mu} = \bar{x} = \frac{1}{n}\sum x_i, \qquad \hat{\sigma}^2 = \frac{1}{n}\sum(x_i - \bar{x})^2$$
+    Note: MLE gives $1/n$ not $1/(n-1)$ — it is biased! The unbiased estimator $S^2 = \frac{1}{n-1}\sum(x_i-\bar{x})^2$ is preferred in practice.<br><br>
+    <strong>Poisson distribution:</strong> For $X_i \sim \text{Poisson}(\lambda)$: $\hat{\lambda} = \bar{x}$<br><br>
+    <strong>Exponential distribution:</strong> For $X_i \sim \text{Exp}(\lambda)$: $\hat{\lambda} = 1/\bar{x}$<br><br>
+    <strong>Binomial$(\theta)$ from single $X \sim B(n,p)$:</strong> $\hat{p} = x/n$
+  </div>
+
+  <h4>Properties of MLE</h4>
+  <table>
+    <tr><th>Property</th><th>Statement</th></tr>
+    <tr><td>Consistency</td><td>$\hat{\theta}_n \xrightarrow{P} \theta^*$ (converges to true value)</td></tr>
+    <tr><td>Asymptotic normality</td><td>$\sqrt{n}(\hat{\theta}-\theta^*) \xrightarrow{d} N(0, \mathcal{I}(\theta^*)^{-1})$</td></tr>
+    <tr><td>Efficiency</td><td>Achieves the Cramér-Rao lower bound asymptotically</td></tr>
+    <tr><td>Invariance</td><td>$\widehat{g(\theta)} = g(\hat{\theta})$ — MLE of any function is that function of the MLE</td></tr>
+  </table>
+
+  <p><strong>Fisher Information:</strong> $\mathcal{I}(\theta) = E\!\left[\left(\frac{\partial \ln f}{\partial \theta}\right)^2\right] = -E\!\left[\frac{\partial^2 \ln f}{\partial \theta^2}\right]$. The Cramér-Rao bound says $\text{Var}(\hat{\theta}) \geq 1/(n\mathcal{I}(\theta))$ for any unbiased estimator.</p>
+
+  <h3 id="s5-mom">5.2 Method of Moments (MoM)</h3>
+
+  <p>Equate theoretical moments (functions of $\theta$) to sample moments:</p>
+
+  <div class="fbox teal">
+    $$E[X^k] = m_k(\theta) \quad \longleftrightarrow \quad \frac{1}{n}\sum_{i=1}^n x_i^k = \hat{m}_k$$
+  </div>
+
+  <p>Solve these equations for $\theta$. With $p$ parameters, match the first $p$ moments.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Gamma Distribution Example</div>
+    For Gamma$(\alpha, \beta)$: $E[X] = \alpha/\beta$, $E[X^2] = \alpha(\alpha+1)/\beta^2$, so $\text{Var}(X) = \alpha/\beta^2$.
+    From data: $\hat{\mu} = \bar{x}$, $\hat{\sigma}^2 = s^2$. MoM estimators:<br><br>
+    $\hat{\beta} = \bar{x}/s^2 \qquad \hat{\alpha} = \bar{x}^2/s^2$
+  </div>
+
+  <p><strong>MLE vs MoM:</strong> MLE is generally more efficient (lower variance) and invariant; MoM is simpler to compute and doesn't require optimisation. MoM may give starting values for MLE numerical optimisation.</p>
+
+  <h3 id="s5-hyp">5.3 Hypothesis Testing</h3>
+
+  <h4>Framework</h4>
+  <table>
+    <tr><th>Element</th><th>Definition</th></tr>
+    <tr><td>Null hypothesis $H_0$</td><td>The default / status quo claim (e.g.\ $\mu = 0$)</td></tr>
+    <tr><td>Alternative $H_1$</td><td>What we're trying to detect ($\mu \neq 0$, $\mu > 0$, $\mu < 0$)</td></tr>
+    <tr><td>Test statistic $T$</td><td>A function of data designed to be "extreme" under $H_1$</td></tr>
+    <tr><td>Significance level $\alpha$</td><td>Pre-specified tolerable Type I error rate (typically 0.05)</td></tr>
+    <tr><td>$p$-value</td><td>$P(\text{data as extreme or more} \mid H_0 \text{ true})$</td></tr>
+    <tr><td>Rejection region</td><td>Values of $T$ for which we reject $H_0$</td></tr>
+  </table>
+
+  <div class="fbox gold">
+    <div class="flabel">Decision Rule</div>
+    Reject $H_0$ iff $p\text{-value} \leq \alpha$ $\;\Longleftrightarrow\;$ $|T| \geq z_{\alpha/2}$ (for two-sided normal test)
+  </div>
+
+  <h4>Error Types and Power</h4>
+  <table>
+    <tr><th></th><th>$H_0$ true</th><th>$H_0$ false</th></tr>
+    <tr><td>Reject $H_0$</td><td><strong>Type I error</strong> (False Positive) — prob $\alpha$</td><td>Correct (True Positive) — prob = Power</td></tr>
+    <tr><td>Fail to reject $H_0$</td><td>Correct (True Negative)</td><td><strong>Type II error</strong> (False Negative) — prob $\beta$</td></tr>
+  </table>
+
+  <div class="fbox teal">
+    $$\text{Power} = P(\text{reject } H_0 \mid H_1 \text{ true}) = 1 - \beta$$
+  </div>
+
+  <p>Power increases with: larger sample size $n$, larger true effect size $|\mu_1 - \mu_0|$, smaller $\sigma^2$, larger $\alpha$ (looser threshold).</p>
+
+  <h4>Common Tests</h4>
+  <table>
+    <tr><th>Test</th><th>Statistic</th><th>Distribution under $H_0$</th></tr>
+    <tr><td>One-sample $z$-test (known $\sigma$)</td><td>$Z = \frac{\bar{X} - \mu_0}{\sigma/\sqrt{n}}$</td><td>$N(0,1)$</td></tr>
+    <tr><td>One-sample $t$-test (unknown $\sigma$)</td><td>$T = \frac{\bar{X} - \mu_0}{S/\sqrt{n}}$</td><td>$t(n-1)$</td></tr>
+    <tr><td>Two-sample $t$-test</td><td>$T = \frac{\bar{X}_1 - \bar{X}_2}{S_p\sqrt{1/n_1+1/n_2}}$</td><td>$t(n_1+n_2-2)$</td></tr>
+    <tr><td>Proportion test</td><td>$Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}$</td><td>$N(0,1)$ (large $n$)</td></tr>
+    <tr><td>Chi-squared goodness-of-fit</td><td>$\sum \frac{(O_i - E_i)^2}{E_i}$</td><td>$\chi^2(k-1)$</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ $p$-value Misconceptions (Interviewers Test This)</div>
+    The $p$-value is <strong>NOT</strong>:
+    <ul>
+      <li>The probability that $H_0$ is true</li>
+      <li>The probability that $H_1$ is true</li>
+      <li>The probability the result occurred by chance</li>
+    </ul>
+    It IS: $P(\text{observing data at least as extreme as we did} \mid H_0 \text{ is true})$. To get $P(H_0 \mid \text{data})$, you need Bayes — which requires a prior on the hypotheses.
+  </div>
+
+  <h3 id="s5-ci">5.4 Confidence Intervals</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">95% CI for Normal Mean (known σ)</div>
+    $$\left[\bar{X} - 1.96\,\frac{\sigma}{\sqrt{n}},\;\; \bar{X} + 1.96\,\frac{\sigma}{\sqrt{n}}\right]$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">95% CI for Normal Mean (unknown σ, use t-distribution)</div>
+    $$\left[\bar{X} - t^*_{n-1}\,\frac{S}{\sqrt{n}},\;\; \bar{X} + t^*_{n-1}\,\frac{S}{\sqrt{n}}\right]$$
+    where $t^*_{n-1}$ is the $97.5$th percentile of $t(n-1)$
+  </div>
+
+  <p><strong>Correct interpretation:</strong> "If we repeated this procedure many times, 95% of the resulting intervals would contain the true parameter." The interval is random, not the parameter.</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Common Misinterpretation</div>
+    A 95% CI does NOT mean "there is a 95% probability the true $\mu$ is in this interval." The true $\mu$ is fixed — it's either in the interval or it isn't. The 95% refers to the long-run coverage of the procedure.
+  </div>
+
+  <h4>CI Width and Sample Size</h4>
+  <p>Width of 95% CI $= 2 \times 1.96 \times \sigma/\sqrt{n}$. To halve the width, quadruple $n$. To achieve margin of error $\pm m$:</p>
+
+  <div class="fbox teal">
+    $$n \geq \left(\frac{z_{\alpha/2}\,\sigma}{m}\right)^2$$
+  </div>
+
+  <h3 id="s5-bayes">5.5 Bayesian Inference</h3>
+
+  <p>Instead of a point estimate, Bayesian inference gives a full <em>posterior distribution</em> over the parameter:</p>
+
+  <div class="fbox gold">
+    $$\underbrace{p(\theta \mid \text{data})}_{\text{posterior}} \propto \underbrace{p(\text{data} \mid \theta)}_{\text{likelihood}} \times \underbrace{p(\theta)}_{\text{prior}}$$
+  </div>
+
+  <h4>Conjugate Priors</h4>
+  <p>When the posterior is in the same family as the prior, we call it a <em>conjugate prior</em>. These give closed-form posteriors:</p>
+
+  <table>
+    <tr><th>Likelihood</th><th>Conjugate Prior</th><th>Posterior</th></tr>
+    <tr><td>Binomial$(n,p)$</td><td>Beta$(\alpha,\beta)$</td><td>Beta$(\alpha+s, \beta+n-s)$</td></tr>
+    <tr><td>Poisson$(\lambda)$</td><td>Gamma$(\alpha,\beta)$</td><td>Gamma$(\alpha+\sum x_i, \beta+n)$</td></tr>
+    <tr><td>Normal$(\mu, \sigma^2)$ — unknown $\mu$</td><td>Normal$(\mu_0, \tau^2)$</td><td>Normal (precision-weighted average)</td></tr>
+    <tr><td>Exponential$(\lambda)$</td><td>Gamma$(\alpha,\beta)$</td><td>Gamma$(\alpha+n, \beta+\sum x_i)$</td></tr>
+  </table>
+
+  <h4>Point Estimates from Posterior</h4>
+  <ul>
+    <li><strong>Posterior mean:</strong> Minimises expected squared error loss</li>
+    <li><strong>Posterior median:</strong> Minimises expected absolute error loss</li>
+    <li><strong>MAP (mode):</strong> Maximises posterior; equals MLE when prior is uniform</li>
+  </ul>
+
+  <p><strong>Credible intervals:</strong> Unlike frequentist CIs, the Bayesian $95\%$ credible interval $[a,b]$ satisfies $P(a \leq \theta \leq b \mid \text{data}) = 0.95$ — a direct probability statement about the parameter.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Bayesian vs Frequentist in Quant Finance</div>
+    Bayesian updating is used in factor models (updating beliefs about alpha signals), regime-switching models, and optimal portfolio theory (Black-Litterman). The Black-Litterman model is explicitly Bayesian: it blends a market equilibrium prior with investor views.
+  </div>
+
+  <h3 id="s5-boot">5.6 Bootstrap</h3>
+
+  <p>When the sampling distribution of a statistic is unknown or analytically intractable, the bootstrap estimates it by <em>resampling from the data itself</em>.</p>
+
+  <h4>Non-Parametric Bootstrap Algorithm</h4>
+  <ol class="steps">
+    <li>Compute the statistic $\hat{\theta}$ from original data $\{x_1,\ldots,x_n\}$</li>
+    <li>Draw a bootstrap sample $\{x_1^*,\ldots,x_n^*\}$ by sampling with replacement from the original data</li>
+    <li>Compute $\hat{\theta}^*$ from the bootstrap sample</li>
+    <li>Repeat steps 2–3 for $B$ bootstrap replicates (typically $B = 1000$–$10{,}000$)</li>
+    <li>The distribution of $\hat{\theta}^* - \hat{\theta}$ approximates the sampling distribution of $\hat{\theta} - \theta$</li>
+  </ol>
+
+  <h4>Bootstrap Confidence Interval Methods</h4>
+  <table>
+    <tr><th>Method</th><th>95% CI</th><th>Notes</th></tr>
+    <tr><td>Percentile</td><td>$[Q_{0.025}(\hat{\theta}^*),\; Q_{0.975}(\hat{\theta}^*)]$</td><td>Simple; can have coverage issues</td></tr>
+    <tr><td>Basic / pivot</td><td>$[2\hat{\theta} - Q_{0.975},\; 2\hat{\theta} - Q_{0.025}]$</td><td>Corrects for bias</td></tr>
+    <tr><td>BCa</td><td>Bias-corrected and accelerated</td><td>Best coverage; more complex</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 When is Bootstrap Valid?</div>
+    Bootstrap works when the statistic is "smooth" (differentiable) in the data. It can fail for: max/min statistics (extreme order statistics), non-smooth statistics, or when the sample is very small. It also doesn't solve the bias problem — if the estimator is biased, the bootstrap distribution centres around the biased estimate.
+  </div>
+
+  <h3 id="s5-ab">5.7 A/B Testing Basics</h3>
+
+  <p>A/B testing is a randomised controlled experiment comparing two variants (treatment vs control). It is a direct application of two-sample hypothesis testing.</p>
+
+  <h4>Standard A/B Test Setup</h4>
+  <ul>
+    <li><strong>Metric:</strong> Conversion rate, revenue, click-through rate, etc.</li>
+    <li><strong>$H_0$:</strong> $p_A = p_B$ (no difference)</li>
+    <li><strong>$H_1$:</strong> $p_A \neq p_B$ (two-sided) or $p_A > p_B$ (one-sided)</li>
+    <li><strong>Test statistic:</strong> $Z = \frac{\hat{p}_A - \hat{p}_B}{\sqrt{\hat{p}(1-\hat{p})(1/n_A + 1/n_B)}}$ where $\hat{p} = (n_A\hat{p}_A + n_B\hat{p}_B)/(n_A+n_B)$</li>
+  </ul>
+
+  <h4>Sample Size Determination</h4>
+
+  <div class="fbox teal">
+    <div class="flabel">Required sample size per group (equal allocation)</div>
+    $$n = \frac{(z_{\alpha/2} + z_\beta)^2 \cdot (p_A(1-p_A) + p_B(1-p_B))}{(p_A - p_B)^2}$$
+    For equal variances $\sigma^2$ and continuous outcomes:
+    $$n = \frac{2\sigma^2(z_{\alpha/2} + z_\beta)^2}{\delta^2}$$
+    where $\delta = \mu_A - \mu_B$ is the minimum detectable effect
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Example</div>
+    Baseline conversion rate 5% ($p_B = 0.05$). We want 80% power to detect a 1pp lift to 6% ($p_A = 0.06$). $\alpha = 0.05$ (two-sided), so $z_{\alpha/2} = 1.96$, $z_\beta = 0.84$.<br><br>
+    $n = \frac{(1.96+0.84)^2 \times (0.05\times0.95 + 0.06\times0.94)}{(0.01)^2} = \frac{7.84 \times 0.1039}{0.0001} \approx 8146$ per group
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ A/B Testing Pitfalls</div>
+    <ul>
+      <li><strong>Peeking problem:</strong> Checking results continuously and stopping early when $p < 0.05$ inflates Type I error. Pre-specify sample size or use sequential testing methods.</li>
+      <li><strong>Multiple testing:</strong> Running 20 A/B tests simultaneously, you'd expect 1 false positive at $\alpha = 0.05$. Apply Bonferroni correction: use $\alpha/m$ for $m$ tests.</li>
+      <li><strong>SUTVA violation:</strong> Stable Unit Treatment Value Assumption requires no interference between users. Network effects violate this.</li>
+      <li><strong>Novelty effect:</strong> Short-term lift may reverse as users adjust to the change.</li>
+      <li><strong>Simpson's paradox:</strong> Aggregate statistics can reverse when stratified by a confounding variable.</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Distribution Summary</h3>
+  <table>
+    <tr>
+      <th>Distribution</th>
+      <th>Parameters</th>
+      <th>Mean</th>
+      <th>Variance</th>
+      <th>Key Property</th>
+    </tr>
+    <tr><td>Bernoulli</td><td>$p$</td><td>$p$</td><td>$p(1-p)$</td><td>Single trial</td></tr>
+    <tr><td>Binomial</td><td>$n, p$</td><td>$np$</td><td>$np(1-p)$</td><td>Sum of Bernoullis; approx Normal</td></tr>
+    <tr><td>Geometric</td><td>$p$</td><td>$1/p$</td><td>$(1-p)/p^2$</td><td>Discrete memoryless</td></tr>
+    <tr><td>Neg. Binomial</td><td>$r, p$</td><td>$r/p$</td><td>$r(1-p)/p^2$</td><td>Sum of Geometrics; overdispersed</td></tr>
+    <tr><td>Poisson</td><td>$\lambda$</td><td>$\lambda$</td><td>$\lambda$</td><td>Mean = Variance; rare events</td></tr>
+    <tr><td>Hypergeometric</td><td>$N, K, n$</td><td>$nK/N$</td><td>$\text{Bin var} \times \frac{N-n}{N-1}$</td><td>Without replacement</td></tr>
+    <tr><td>Discrete Uniform</td><td>$n$</td><td>$(n+1)/2$</td><td>$(n^2-1)/12$</td><td>Equal probability</td></tr>
+    <tr><td>Uniform$(a,b)$</td><td>$a, b$</td><td>$(a+b)/2$</td><td>$(b-a)^2/12$</td><td>Basis of simulation</td></tr>
+    <tr><td>Normal</td><td>$\mu, \sigma^2$</td><td>$\mu$</td><td>$\sigma^2$</td><td>CLT limit; symmetric; closed under linear transforms</td></tr>
+    <tr><td>Exponential</td><td>$\lambda$</td><td>$1/\lambda$</td><td>$1/\lambda^2$</td><td>Continuous memoryless; inter-arrival times</td></tr>
+    <tr><td>Gamma</td><td>$\alpha, \beta$</td><td>$\alpha/\beta$</td><td>$\alpha/\beta^2$</td><td>Sum of Exponentials; conjugate for Poisson</td></tr>
+    <tr><td>Beta</td><td>$\alpha, \beta$</td><td>$\alpha/(\alpha+\beta)$</td><td>see §3.4</td><td>On $[0,1]$; conjugate for Binomial</td></tr>
+    <tr><td>Log-Normal</td><td>$\mu, \sigma^2$</td><td>$e^{\mu+\sigma^2/2}$</td><td>$(e^{\sigma^2}-1)e^{2\mu+\sigma^2}$</td><td>Stock prices; right-skewed</td></tr>
+    <tr><td>$\chi^2(k)$</td><td>$k$</td><td>$k$</td><td>$2k$</td><td>Sum of squared normals</td></tr>
+    <tr><td>$t(k)$</td><td>$k$</td><td>$0$</td><td>$k/(k-2)$</td><td>Normal with unknown $\sigma$; heavy tails</td></tr>
+    <tr><td>$F(d_1,d_2)$</td><td>$d_1, d_2$</td><td>$d_2/(d_2-2)$</td><td>—</td><td>Ratio of chi-squareds; ANOVA</td></tr>
+  </table>
+
+  <h3>Key Formula Identities</h3>
+  <table>
+    <tr><th>Topic</th><th>Formula</th><th>When to Use</th></tr>
+    <tr><td>LOTUS</td><td>$E[g(X)] = \int g(x)f(x)dx$</td><td>Computing moments of transformations</td></tr>
+    <tr><td>Variance shortcut</td><td>$\text{Var}(X) = E[X^2] - (E[X])^2$</td><td>Always — much faster than definition</td></tr>
+    <tr><td>Tower property</td><td>$E[X] = E[E[X|Y]]$</td><td>Two-stage random experiments</td></tr>
+    <tr><td>Eve's Law</td><td>$\text{Var}(X) = E[\text{Var}(X|Y)] + \text{Var}(E[X|Y])$</td><td>Hierarchical models; variance decomposition</td></tr>
+    <tr><td>Markov</td><td>$P(X\geq a) \leq E[X]/a$</td><td>Quick upper bound for non-negative r.v.</td></tr>
+    <tr><td>Chebyshev</td><td>$P(|X-\mu|\geq k\sigma) \leq 1/k^2$</td><td>Distribution-free tail bound</td></tr>
+    <tr><td>Jensen (convex)</td><td>$E[g(X)] \geq g(E[X])$</td><td>$g = e^x, x^2, 1/x$</td></tr>
+    <tr><td>Jensen (concave)</td><td>$E[g(X)] \leq g(E[X])$</td><td>$g = \ln x, \sqrt{x}$</td></tr>
+    <tr><td>CLT</td><td>$\bar{X} \xrightarrow{d} N(\mu, \sigma^2/n)$</td><td>Large-sample inference; Monte Carlo error</td></tr>
+    <tr><td>Delta method</td><td>$\text{Var}(g(\bar{X})) \approx [g'(\mu)]^2 \sigma^2/n$</td><td>Asymptotic variance of transformed estimators</td></tr>
+    <tr><td>95% CI</td><td>$\bar{X} \pm 1.96\,\sigma/\sqrt{n}$</td><td>Standard confidence interval</td></tr>
+    <tr><td>MGF sum</td><td>$M_{X+Y}(t) = M_X(t)M_Y(t)$</td><td>Independence: proving closure under addition</td></tr>
+    <tr><td>Log-normal mean</td><td>$E[e^X] = e^{\mu+\sigma^2/2}$</td><td>Black-Scholes; Jensen's equality for normal</td></tr>
+  </table>
+
+  <h3>The Hierarchy of Convergence</h3>
+  <p>Understanding convergence types is tested in quant interviews. From strongest to weakest:</p>
+
+  <div class="fbox teal">
+    $$\text{a.s.} \Rightarrow \text{in probability} \Rightarrow \text{in distribution}$$
+    $$\text{(strong LLN)} \quad\quad \text{(weak LLN)} \quad\quad \text{(CLT)}$$
+  </div>
+
+  <p>Convergence in $L^p$ (mean $p$-th power) implies convergence in probability. Convergence in distribution is the weakest: you can have $X_n \xrightarrow{d} X$ while $X_n - X$ does not converge to 0 (e.g.\ if $X_n$ and $X$ are independent).</p>
+
+</div>
+
+<footer>
+  Section 2 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Expectation &amp; Variance · LOTUS · Indicator Trick · Tower Property · MGF · Discrete &amp; Continuous Distributions · Limit Theorems · Markov · Chebyshev · Jensen · MLE · MoM · Hypothesis Testing · Confidence Intervals · Bayesian Inference · Bootstrap · A/B Testing
+</footer>
+
+</body>
+</html>

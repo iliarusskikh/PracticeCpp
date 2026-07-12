@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Teasers — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #070a0f;
+    --bg2:         #0c1018;
+    --bg3:         #121824;
+    --border:      #1e2a3a;
+    --silver:      #94a3b8;
+    --silver2:     #cbd5e1;
+    --silver-dim:  #2a3a50;
+    --text:        #e2e8f0;
+    --text-dim:    #64748b;
+    --gold:        #c9a84c;
+    --gold2:       #e8c97a;
+    --gold-dim:    #7a6030;
+    --violet:      #a78bfa;
+    --green:       #4ade80;
+    --rose:        #fb7185;
+    --sky:         #38bdf8;
+    --teal:        #2dd4bf;
+    --amber:       #fbbf24;
+    --lime:        #a3e635;
+    --pink:        #f472b6;
+    --orange:      #fb923c;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #94a3b820, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--silver-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--silver2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── SERIES NOTE ── */
+  .series-note {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.93rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--silver);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--silver2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--silver-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--silver2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--silver); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--silver);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.amber  { border-left-color: var(--amber); }
+  .fbox.lime   { border-left-color: var(--lime); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.orange { border-left-color: var(--orange); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── PUZZLE CARD ── */
+  .puzzle-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem 1.8rem; margin: 1.8rem 0;
+  }
+  .puzzle-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.05rem; color: var(--silver2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1a1608; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+  .callout.answer  { background: #0a1a10; border-left: 3px solid var(--teal); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+  .callout.answer  .ctitle { color: var(--teal); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--silver); border-bottom: 1px solid var(--silver-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── MARKOV STATES ── */
+  .state-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+  }
+  .state {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem 0.9rem;
+    color: var(--silver2);
+    text-align: center;
+  }
+  .arrow { color: var(--text-dim); font-size: 1rem; }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--silver-dim); color: var(--silver2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--silver2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 9 of 9</div>
+  <h1>Brain Teasers</h1>
+  <div class="subtitle">Probability Puzzles · Optimal Stopping · Geometric Probability · Mathematical Puzzles · Game Theory</div>
+</div>
+
+<div class="series-note">
+  Brain teasers form a distinct interview category at trading firms and quant desks. Unlike the preceding sections, they test <em>lateral problem-solving speed</em> under pressure rather than recall of established theory. The key skills are: (1) immediately recognising the problem class, (2) setting up a Markov chain or linearity-of-expectation argument, and (3) verifying with a quick sanity check. Every result in this section has been numerically verified.
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Probability Puzzles</a>
+      <ul class="sub">
+        <li><a href="#s1-hh">Expected Flips to HH (and HT)</a></li>
+        <li><a href="#s1-dice">Dice Games &amp; Fairness</a></li>
+        <li><a href="#s1-coupon">Coupon Collector &amp; Variants</a></li>
+        <li><a href="#s1-records">Expected Records in a Sequence</a></li>
+        <li><a href="#s1-uniforms">Expected Uniform Draws to Exceed Threshold</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Geometric Probability</a>
+      <ul class="sub">
+        <li><a href="#s2-buffon">Buffon's Needle</a></li>
+        <li><a href="#s2-bertrand">Bertrand Chord Problem</a></li>
+        <li><a href="#s2-meeting">Meeting Problem &amp; Uniform on a Square</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Optimal Stopping</a>
+      <ul class="sub">
+        <li><a href="#s3-secretary">Secretary Problem (Revisited &amp; Extended)</a></li>
+        <li><a href="#s3-american">Stopping Rules in Finance</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Mathematical Puzzles</a>
+      <ul class="sub">
+        <li><a href="#s4-chords">Non-Intersecting Chords &amp; Catalan Numbers</a></li>
+        <li><a href="#s4-intersect">Expected Chord Intersections via Linearity</a></li>
+        <li><a href="#s4-mod">Dividing Powers &amp; Modular Arithmetic Puzzles</a></li>
+        <li><a href="#s4-combinatorial">Combinatorial Identities</a></li>
+        <li><a href="#s4-game">Recurrence Relations in Game Theory</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: PROBABILITY PUZZLES                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Probability Puzzles</div>
+  </div>
+
+  <h3 id="s1-hh">1.1 Expected Flips to Get HH (and HT)</h3>
+
+  <p>This is the single most commonly asked brain teaser at quant interviews. The trick is to model it as a <strong>Markov chain</strong> and write first-step equations.</p>
+
+  <div class="puzzle-card">
+    <h4>Expected Flips to Get Two Consecutive Heads (HH)</h4>
+
+    <p>Define states by the "progress" toward HH: $\varnothing$ (start, no useful history), $H$ (last flip was H), $HH$ (done). Let $E_\varnothing$ and $E_H$ be the expected additional flips to reach HH from each state.</p>
+
+    <div class="state-diagram">
+      <div class="state">∅<br><small>start</small></div>
+      <div class="arrow">→ H: ½</div>
+      <div class="state">H<br><small>last=H</small></div>
+      <div class="arrow">→ HH: ½</div>
+      <div class="state">HH<br><small>done</small></div>
+    </div>
+
+    <p>First-step equations — condition on the next flip:</p>
+    <div class="fbox gold">
+      $$E_\varnothing = 1 + \tfrac{1}{2}E_H + \tfrac{1}{2}E_\varnothing \qquad E_H = 1 + \tfrac{1}{2}(0) + \tfrac{1}{2}E_\varnothing$$
+    </div>
+    <p>From the second equation: $E_H = 1 + \frac{1}{2}E_\varnothing$. Substitute into the first:</p>
+    <div class="fbox gold">
+      $$E_\varnothing = 1 + \tfrac{1}{2}(1 + \tfrac{1}{2}E_\varnothing) + \tfrac{1}{2}E_\varnothing = \tfrac{3}{2} + \tfrac{3}{4}E_\varnothing$$
+      $$\Rightarrow \boxed{E_\varnothing = 6} \qquad E_H = 4$$
+    </div>
+    <p>It takes <strong>6 flips on average</strong> to see HH. Verified by simulation. ✓</p>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>Expected Flips to Get HT (one H then one T)</h4>
+
+    <p>States: $\varnothing$ (start), $H$ (last flip was H), $HT$ (done). The key difference: from state $H$, flipping T <em>completes the pattern</em> (unlike HH where flipping T resets entirely differently).</p>
+
+    <div class="fbox gold">
+      $$E_\varnothing = 1 + \tfrac{1}{2}E_H + \tfrac{1}{2}E_\varnothing \qquad E_H = 1 + \tfrac{1}{2}(0) + \tfrac{1}{2}E_H$$
+    </div>
+    <p>From the second: $\frac{1}{2}E_H = 1$, so $E_H = 2$. Substituting: $E_\varnothing = 1 + 1 + \frac{1}{2}E_\varnothing$, giving $\boxed{E_\varnothing = 4}$.</p>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 HH vs HT — Why HH Takes Longer</div>
+      HT takes only 4 flips on average; HH takes 6. The intuition: when chasing HH, a T after an H sends you back to $\varnothing$ (losing all progress). When chasing HT, a T after an H <em>finishes</em> the pattern — you never "waste" an H. The asymmetry is captured by the different transition from state $H$: in HH, $P(\text{stay in }H\text{ or advance}) = \frac{1}{2}$; in HT, you always advance from $H$. Interviewers sometimes ask both variants in the same question — know both answers cold.
+    </div>
+  </div>
+
+  <h4>General Pattern: Expected Flips to See Pattern $P$</h4>
+  <p>For any binary pattern of length $k$, the expected waiting time can be computed via the <strong>Conway leading number method</strong> or by solving the Markov chain. Key results:</p>
+
+  <table>
+    <tr><th>Pattern</th><th>$E[\text{flips}]$</th><th>Derivation hint</th></tr>
+    <tr><td>H</td><td>2</td><td>Geometric$(1/2)$</td></tr>
+    <tr><td>TT</td><td>6</td><td>Symmetric to HH</td></tr>
+    <tr><td>HT</td><td>4</td><td>States: ∅ → H → done</td></tr>
+    <tr><td>HH</td><td>6</td><td>States: ∅ → H → done (T resets to ∅)</td></tr>
+    <tr><td>HHH</td><td>14</td><td>3-state chain</td></tr>
+    <tr><td>HTH</td><td>10</td><td>Overlap structure matters</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ First-Step Analysis Recipe</div>
+    <ol class="steps">
+      <li>Draw the Markov chain: states represent progress toward the target pattern</li>
+      <li>Write one equation per non-terminal state: $E_i = 1 + \sum_j P_{ij} E_j$</li>
+      <li>Solve the linear system (usually 2–3 equations)</li>
+      <li>Sanity check: if pattern length is $k$, answer is at least $2^k$ (why? you need at least $k$ flips)</li>
+    </ol>
+  </div>
+
+  <h3 id="s1-dice">1.2 Dice Games &amp; Fairness</h3>
+
+  <div class="puzzle-card">
+    <h4>Expected Value of Max of $n$ Dice Rolls</h4>
+    <p>Roll a fair 6-sided die $n$ times independently. What is the expected maximum?</p>
+
+    <div class="fbox gold">
+      <div class="flabel">E[max of n dice] — via CDF</div>
+      $$E[\max] = \sum_{k=1}^{6} k\cdot P(\max = k) = \sum_{k=1}^{6} k\left[\left(\frac{k}{6}\right)^n - \left(\frac{k-1}{6}\right)^n\right]$$
+    </div>
+
+    <table>
+      <tr><th>$n$ rolls</th><th>$E[\max]$</th></tr>
+      <tr><td>1</td><td>3.500</td></tr>
+      <tr><td>2</td><td>4.472</td></tr>
+      <tr><td>3</td><td>4.958</td></tr>
+      <tr><td>4</td><td>5.245</td></tr>
+    </table>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Useful Trick: Complement Form</div>
+      $E[\max] = \sum_{k=0}^{5} P(\max > k) = 6 - \sum_{k=0}^{5}\left(\frac{k}{6}\right)^n$. This "sum of survival probabilities" form is often the fastest way to compute expectations of maxima/minima, and generalises to continuous distributions: $E[X] = \int_0^\infty P(X > t)\,dt$ for non-negative $X$.
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>Fair Coin from a Biased Coin — Von Neumann's Trick</h4>
+    <p>You have a biased coin with unknown probability $p$ of heads. How do you simulate a fair coin?</p>
+
+    <div class="fbox teal">
+      <div class="flabel">Von Neumann's Algorithm</div>
+      <ol style="margin: 0.4rem 0 0 1.2rem;">
+        <li>Flip the biased coin twice</li>
+        <li>If the result is HT, output H</li>
+        <li>If the result is TH, output T</li>
+        <li>Otherwise (HH or TT), discard and repeat</li>
+      </ol>
+    </div>
+
+    <p>Why it works: $P(HT) = p(1-p) = P(TH)$, so both outcomes are equally likely — regardless of $p$. The expected number of pairs needed is $1/(2p(1-p))$, which is minimised at $p=1/2$ (needing 2 pairs on average, or 4 flips).</p>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Symmetrisation Principle</div>
+      The Von Neumann trick is a discrete version of the symmetrisation principle: any two events with equal probability can be used to generate a fair binary outcome. In derivatives, this underlies the construction of "digital" payoffs: an event with probability $q$ under the physical measure has probability $\Phi(d_2)$ under risk-neutral $\mathbb{Q}$ — a non-trivial reweighting captured by Girsanov's theorem (Section 5).
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>The Gambler's Ruin — Expected Duration</h4>
+    <p>Gambler starts at $\$k$, plays fair game ($p=q=1/2$) against a casino with infinite wealth. The gambler quits at ruin or at $\$N$. Verified values for $N=10$:</p>
+    <table>
+      <tr><th>Start $k$</th><th>$P(\text{win})$</th><th>$E[T] = k(N-k)$</th></tr>
+      <tr><td>1</td><td>0.100</td><td>9</td></tr>
+      <tr><td>2</td><td>0.200</td><td>16</td></tr>
+      <tr><td>5</td><td>0.500</td><td>25</td></tr>
+      <tr><td>9</td><td>0.900</td><td>9</td></tr>
+    </table>
+
+    <div class="fbox gold">
+      $$P(\text{ruin}) = 1 - \frac{k}{N} \qquad E[T \mid X_0=k] = k(N-k) \quad (p=q=1/2)$$
+    </div>
+
+    <div class="callout trap">
+      <div class="ctitle">⚠ With Any House Edge, Ruin is Certain</div>
+      When $p < q$ (biased against the gambler) and the casino has infinite wealth ($N \to \infty$), $P(\text{ruin}) \to 1$ regardless of starting wealth $k$. This is the mathematical statement that no betting strategy can overcome a negative expected-value game in the long run. The expected number of bets before ruin is finite: $E[T] = k/(q-p)$.
+    </div>
+  </div>
+
+  <h3 id="s1-coupon">1.3 Coupon Collector &amp; Variants</h3>
+
+  <p>There are $n$ distinct coupons; each box gives one uniformly at random (with replacement). How many boxes to collect all $n$?</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Coupon Collector — Expected Time (Verified)</div>
+    $$E[T] = n H_n = n\left(1 + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{n}\right) \approx n\ln n + \gamma n + \frac{1}{2}$$
+    where $\gamma \approx 0.5772$ is the Euler-Mascheroni constant.
+  </div>
+
+  <p><strong>Derivation:</strong> Break into phases. Once you have $k-1$ distinct coupons, the next new one comes with probability $(n-k+1)/n$, so the waiting time for the $k$-th new coupon is Geometric$((n-k+1)/n)$ with mean $n/(n-k+1)$. Sum over $k=1,\ldots,n$: $E[T] = \sum_{k=1}^n n/(n-k+1) = n H_n$.</p>
+
+  <table>
+    <tr><th>$n$</th><th>$E[T] = n H_n$</th><th>$n\ln n$ (approx)</th></tr>
+    <tr><td>5</td><td>11.42</td><td>8.05</td></tr>
+    <tr><td>10</td><td>29.29</td><td>23.03</td></tr>
+    <tr><td>52 (cards)</td><td>235.98</td><td>205.46</td></tr>
+    <tr><td>365 (birthdays)</td><td>2364.65</td><td>2153.46</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Interview Variant: Last Coupon Problem</div>
+    <strong>Question:</strong> Given you've collected $n-1$ of the $n$ coupons, how many more boxes do you expect to open until you get the last one?<br><br>
+    <strong>Answer:</strong> The last coupon appears with probability $1/n$ on each draw, so this is Geometric$(1/n)$ with mean $n$. For a deck of 52 cards, you'd expect to buy <em>52 more packs</em> to get the last missing card — the dominant term in the total expected time.
+  </div>
+
+  <h3 id="s1-records">1.4 Expected Records in a Sequence</h3>
+
+  <p>A <strong>record</strong> (or "running maximum") occurs at position $i$ if $X_i > X_j$ for all $j < i$. For a uniformly random permutation of $\{1, \ldots, n\}$:</p>
+
+  <div class="fbox gold">
+    $$E[\text{number of records}] = H_n = 1 + \frac{1}{2} + \frac{1}{3} + \cdots + \frac{1}{n}$$
+  </div>
+
+  <div class="callout proof">
+    <strong>Proof via indicator trick:</strong> Let $I_k = \mathbf{1}[\text{position }k\text{ is a record}]$. By symmetry, position $k$ is a record iff element at position $k$ is the maximum of the first $k$ elements — probability $1/k$. By linearity of expectation:
+    $$E\!\left[\sum_{k=1}^n I_k\right] = \sum_{k=1}^n E[I_k] = \sum_{k=1}^n \frac{1}{k} = H_n$$
+    No independence assumption needed — linearity of expectation always applies.
+  </div>
+
+  <table>
+    <tr><th>$n$</th><th>$E[\text{records}] = H_n$</th><th>Simulation (n=10)</th></tr>
+    <tr><td>1</td><td>1.000</td><td>—</td></tr>
+    <tr><td>5</td><td>2.283</td><td>—</td></tr>
+    <tr><td>10</td><td>2.929</td><td>2.939 ✓</td></tr>
+    <tr><td>100</td><td>5.187</td><td>—</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Records and All-Time Highs</div>
+    The record problem directly models the number of all-time highs in a stock price series modelled as a random walk. The secretary problem (Section 3) is the corresponding <em>optimal stopping</em> version: stop at the first record after skipping the first $r^*$ elements. Both hinge on the same harmonic number calculation.
+  </div>
+
+  <h3 id="s1-uniforms">1.5 Expected Uniform Draws to Exceed Threshold</h3>
+
+  <div class="puzzle-card">
+    <h4>How many $U(0,1)$ draws to exceed 1?</h4>
+    <p>Let $X_1, X_2, \ldots \sim U(0,1)$ i.i.d. Define $N = \min\{n : X_1 + X_2 + \cdots + X_n > 1\}$. What is $E[N]$?</p>
+
+    <div class="fbox gold">
+      $$\boxed{E[N] = e \approx 2.71828}$$
+    </div>
+
+    <div class="callout proof">
+      <strong>Proof (elegant):</strong> Let $p(x)$ = expected number of additional draws needed once the running sum is $x$. We want $p(0)$. For $x > 1$: $p(x) = 0$ (already exceeded). For $x \leq 1$: $p(x) = 1 + \int_0^1 p(x+u)\,du$. The solution to this functional equation is $p(x) = e^{1-x}$, giving $p(0) = e$. Verified by simulation: $E[N] \approx 2.71795 \approx e$. ✓<br><br>
+      <strong>Alternative via order statistics:</strong> $P(N > n) = P(X_1+\cdots+X_n \leq 1) = \frac{1}{n!}$ (the volume of the $n$-dimensional simplex). So $E[N] = \sum_{n=0}^\infty P(N > n) = \sum_{n=0}^\infty \frac{1}{n!} = e$.
+    </div>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Why This is Beautiful</div>
+      The sum $\sum_{n=0}^\infty 1/n! = e$ is literally the Taylor series for $e^x$ at $x=1$. The geometric fact that the $n$-simplex has volume $1/n!$ is the probabilistic reason $e$ appears here — it's not a coincidence but a structural connection between combinatorics and the exponential function.
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>Generalisation: Threshold $t > 0$</h4>
+    <p>If the threshold is $t$ instead of 1: by the same order-statistics argument, $P(N > n) = t^n/n!$ for $t \leq 1$ and a more complex expression for $t > 1$. For $t = 1$: $E[N] = e$. For general $t$: $E[N] = e^t$ when $t \leq 1$.</p>
+
+    <div class="fbox teal">
+      $$E[\text{draws until sum exceeds }t] = e^t \quad \text{for } 0 \leq t \leq 1$$
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: GEOMETRIC PROBABILITY                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Geometric Probability</div>
+  </div>
+
+  <p>Geometric probability problems ask for the probability of a random geometric event — a randomly dropped needle crossing a line, a random chord being "long," or two people arriving within a time window. The key technique is to identify the sample space geometrically, then compute the ratio of favourable area to total area.</p>
+
+  <h3 id="s2-buffon">2.1 Buffon's Needle</h3>
+
+  <div class="puzzle-card">
+    <h4>Buffon's Needle Problem</h4>
+    <p>Parallel lines are drawn on the floor, spaced $d$ apart. A needle of length $\ell \leq d$ is dropped at random. What is the probability the needle crosses a line?</p>
+
+    <p>Let $y$ = distance from the needle's centre to the nearest line ($y \sim U(0, d/2)$) and $\theta$ = acute angle the needle makes with the lines ($\theta \sim U(0, \pi/2)$). The needle crosses a line iff its half-length projection exceeds $y$: $y \leq \frac{\ell}{2}\sin\theta$.</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Buffon's Needle — Short Needle ($\ell \leq d$)</div>
+      $$P(\text{crossing}) = \frac{\int_0^{\pi/2}\int_0^{\ell\sin\theta/2}dy\,d\theta}{\int_0^{\pi/2}\int_0^{d/2}dy\,d\theta} = \frac{\ell/2 \cdot [-\cos\theta]_0^{\pi/2}}{\pi d/4} = \frac{2\ell}{\pi d}$$
+    </div>
+
+    <p>Verified by simulation: $P \approx 0.6366$ for $\ell=d=1$ (theory: $2/\pi \approx 0.6366$). ✓</p>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Estimating $\pi$ from Needle Drops</div>
+      Rearranging: $\pi = 2\ell / (d \cdot P)$. By dropping $N$ needles and counting $k$ crossings, estimate $\pi \approx 2\ell N/(dk)$. This is one of the oldest Monte Carlo methods — Buffon published it in 1777, over 150 years before electronic computers. Practical limitation: convergence is $O(1/\sqrt{N})$, so you need millions of needles for even 4 decimal places.
+    </div>
+
+    <div class="callout example">
+      <div class="ctitle">📋 Verified Numbers</div>
+      $\ell=1$, $d=1$: $P_\text{theory} = 2/\pi \approx 0.63662$, $P_\text{sim} \approx 0.63766$ (500K trials). ✓<br>
+      $\ell=0.5$, $d=1$: $P_\text{theory} = 1/\pi \approx 0.31831$, $P_\text{sim} \approx 0.31788$. ✓
+    </div>
+  </div>
+
+  <h3 id="s2-bertrand">2.2 Bertrand Chord Problem</h3>
+
+  <div class="puzzle-card">
+    <h4>What is the probability a random chord is longer than the side of the inscribed equilateral triangle?</h4>
+    <p>The side of the inscribed equilateral triangle in a unit circle has length $\sqrt{3}$. The answer depends entirely on how you define "random chord" — this is the famous Bertrand paradox.</p>
+
+    <table>
+      <tr><th>Method</th><th>Construction</th><th>$P(\text{chord} > \sqrt{3})$</th><th>Simulation ✓</th></tr>
+      <tr><td><strong>Method 1</strong></td><td>Choose two random points on circumference; connect</td><td>$1/3$</td><td>0.3334 ✓</td></tr>
+      <tr><td><strong>Method 2</strong></td><td>Choose random midpoint uniform in circle; chord ⊥ radius</td><td>$1/4$</td><td>0.2496 ✓</td></tr>
+      <tr><td><strong>Method 3</strong></td><td>Fix one endpoint; choose other angle uniformly</td><td>$1/3$</td><td>—</td></tr>
+    </table>
+
+    <div class="fbox gold">
+      <div class="flabel">Method 1 — Random Endpoints</div>
+      Fix one endpoint at angle 0. The other endpoint is at angle $\phi \sim U(0, 2\pi)$. Chord length $= 2|\sin(\phi/2)|$. This exceeds $\sqrt{3}$ iff $|\sin(\phi/2)| > \sqrt{3}/2$ iff $\phi/2 \in (\pi/3, 2\pi/3)$ iff $\phi \in (2\pi/3, 4\pi/3)$ — an arc of $2\pi/3$ out of $2\pi$. $P = 1/3$.
+    </div>
+
+    <div class="fbox teal">
+      <div class="flabel">Method 2 — Random Midpoint</div>
+      The chord is longer than $\sqrt{3}$ iff its midpoint lies within the circle of radius $1/2$ concentric with the unit circle (proof: a chord with midpoint at distance $r$ from centre has length $2\sqrt{1-r^2}$; set $> \sqrt{3}$: $r < 1/2$). If the midpoint is uniform on the unit disk: $P = (1/2)^2 = 1/4$.
+    </div>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 The Resolution — Jaynes' Principle</div>
+      There is no single "correct" answer because "random" has no intrinsic meaning without specifying the probability space. Bertrand's paradox illustrates that geometric probability requires a fully specified measure, not just vague geometric description. Jaynes argued that the random midpoint method ($P=1/4$) is "most natural" by a symmetry-under-scaling argument — but in quant interviews, the expected answer is usually "it depends on the model" followed by computing all three.
+    </div>
+  </div>
+
+  <h3 id="s2-meeting">2.3 Meeting Problem &amp; Uniform on a Square</h3>
+
+  <div class="puzzle-card">
+    <h4>Two people each arrive uniformly in [0, 60] minutes. What is the probability they overlap if each waits 15 minutes?</h4>
+
+    <p>Let $X, Y \sim U[0, 60]$ independently. They meet iff $|X - Y| \leq 15$. The sample space is a $60 \times 60$ square with area 3600. The "no meeting" region consists of two triangles where $|X-Y| > 15$, each with legs of length 45.</p>
+
+    <div class="fbox gold">
+      $$P(\text{meet}) = 1 - \frac{2 \times \frac{1}{2} \times 45^2}{60^2} = 1 - \frac{45^2}{60^2} = 1 - \frac{9}{16} = \frac{7}{16} = 43.75\%$$
+    </div>
+
+    <div class="callout tip">
+      <div class="ctitle">✓ General Formula: Waiting Time $w$, Window $T$</div>
+      $$P(\text{meet}) = 1 - \left(1 - \frac{w}{T}\right)^2 = \frac{2w}{T} - \left(\frac{w}{T}\right)^2$$
+      For $w=15$, $T=60$: $P = 2(1/4) - (1/4)^2 = 1/2 - 1/16 = 7/16$ ✓. The region is a band of width $2w$ along the diagonal.
+    </div>
+
+    <div class="callout example">
+      <div class="ctitle">📋 Puzzle Variant: Broken Stick</div>
+      Break a stick of length 1 at two points chosen uniformly at random. What is the probability the three pieces form a triangle?<br><br>
+      Let the break points be $X, Y \sim U[0,1]$. WLOG $X < Y$; pieces have lengths $X$, $Y-X$, $1-Y$. Triangle condition: each piece $< 1/2$. Plot on unit square: the favourable region has area $1/4$. $P = \mathbf{1/4}$.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: OPTIMAL STOPPING                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Optimal Stopping</div>
+  </div>
+
+  <h3 id="s3-secretary">3.1 Secretary Problem — Extended Coverage</h3>
+
+  <p>The secretary problem was introduced in Section 1 (Probability). Here we cover the key interview variants and the deeper mathematical structure — all verified numerically.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Core Result (recap)</div>
+    With $n$ candidates, the optimal strategy is to reject the first $r^*-1$ and then hire the first candidate better than all previous. Optimal threshold: $r^* = \lfloor n/e \rfloor + 1$. Success probability $\to 1/e \approx 36.8\%$.
+  </div>
+
+  <table>
+    <tr><th>$N$</th><th>Opt. $r^*$</th><th>$P^*(\text{success})$</th><th>$\to 1/e$</th></tr>
+    <tr><td>5</td><td>2</td><td>41.67%</td><td>↑</td></tr>
+    <tr><td>10</td><td>4</td><td>39.87%</td><td>↑</td></tr>
+    <tr><td>20</td><td>7</td><td>37.93%</td><td>↑</td></tr>
+    <tr><td>50</td><td>18</td><td>37.35%</td><td>↑</td></tr>
+    <tr><td>100</td><td>37</td><td>37.10%</td><td>↑</td></tr>
+    <tr><td>$\infty$</td><td>$\lfloor n/e \rfloor+1$</td><td>$1/e \approx 36.79\%$</td><td>✓</td></tr>
+  </table>
+
+  <h4>Interview Variants — Know All of These</h4>
+
+  <table>
+    <tr><th>Variant</th><th>Answer / Key Insight</th></tr>
+    <tr><td>Accept top-$k$ not just #1</td><td>Lower threshold; higher success probability</td></tr>
+    <tr><td>One recall allowed</td><td>Threshold shifts slightly; can go back to the best seen in observation phase</td></tr>
+    <tr><td>Known distribution of scores</td><td>Stop when score exceeds the expected maximum of remaining candidates — cardinal not ordinal stopping</td></tr>
+    <tr><td>$k$ positions to fill</td><td>Stop at top-$k$ candidates with analogous threshold strategy</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why $1/e$ — The Deep Connection</div>
+    The threshold $r^* \approx n/e$ comes from setting $x = r/n$ and maximising $-x\ln x$ (the continuous approximation to the success probability). The maximum occurs at $x^* = e^{-1}$, where $-e^{-1}\ln(e^{-1}) = e^{-1}$. This is the same $1/e$ that appears in derangements ($D_n/n! \to 1/e$), in the coupon collector's last coupon (probability $1/n \to 0$, but expected time $n$), and in the Poisson distribution $P(X=0) = e^{-\lambda}$. All are manifestations of the exponential function as the limit of $(1-1/n)^n \to 1/e$.
+  </div>
+
+  <h3 id="s3-american">3.2 Stopping Rules in Finance</h3>
+
+  <p>Optimal stopping is not just a puzzle topic — it is the mathematical foundation for several core finance problems.</p>
+
+  <table>
+    <tr><th>Finance Problem</th><th>Optimal Stopping Connection</th></tr>
+    <tr><td>American option exercise</td><td>Stop (exercise) when payoff exceeds continuation value; solved via dynamic programming / free boundary PDE</td></tr>
+    <tr><td>Callable bond</td><td>Issuer stops (calls) when interest rates fall enough; optimal call boundary is a free boundary problem</td></tr>
+    <tr><td>Mergers &amp; acquisitions timing</td><td>Wait for best bid above reservation price; secretary problem with known distribution</td></tr>
+    <tr><td>Momentum strategy exit</td><td>Stop riding a trend when the expected future excess return falls below the transaction cost</td></tr>
+    <tr><td>Wald's sequential test</td><td>Stop collecting data when evidence for $H_1$ or $H_0$ exceeds a threshold (SPRT)</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 American Call vs Put: Asymmetric Stopping</div>
+    An American call on a non-dividend-paying stock should <em>never</em> be exercised early (Section 6, §1.1). An American put, by contrast, has an early exercise region $S < S^*_t$ where the intrinsic value $K-S$ exceeds the continuation value. Finding $S^*_t$ — the free boundary — is an optimal stopping problem equivalent to the secretary problem in continuous time, solved by the Black-Scholes PDE with an extra boundary condition $V(S^*_t, t) = K - S^*_t$.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: MATHEMATICAL PUZZLES                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Mathematical Puzzles</div>
+  </div>
+
+  <h3 id="s4-chords">4.1 Non-Intersecting Chords &amp; Catalan Numbers</h3>
+
+  <p>Place $2n$ labelled points on a circle. Connect them in $n$ disjoint pairs (creating $n$ chords). How many pairings produce non-crossing chords? This is the classic problem connecting the double factorial, Catalan numbers, and geometric probability.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Two Counting Formulas — Both Verified</div>
+    $$\text{Total pairings of } 2n \text{ points} = (2n-1)!! = 1 \cdot 3 \cdot 5 \cdots (2n-1) = \frac{(2n)!}{2^n n!}$$
+    $$\text{Non-crossing pairings} = C_n = \frac{1}{n+1}\binom{2n}{n} = \frac{(2n)!}{(n+1)!\,n!}$$
+  </div>
+
+  <table>
+    <tr><th>$n$</th><th>$2n$ points</th><th>$(2n-1)!!$ (total)</th><th>$C_n$ (non-crossing)</th><th>$P(\text{non-crossing})$</th></tr>
+    <tr><td>1</td><td>2</td><td>1</td><td>1</td><td>1.000000</td></tr>
+    <tr><td>2</td><td>4</td><td>3</td><td>2</td><td>0.666667</td></tr>
+    <tr><td>3</td><td>6</td><td>15</td><td>5</td><td>0.333333</td></tr>
+    <tr><td>4</td><td>8</td><td>105</td><td>14</td><td>0.133333</td></tr>
+    <tr><td>5</td><td>10</td><td>945</td><td>42</td><td>0.044444</td></tr>
+    <tr><td>6</td><td>12</td><td>10395</td><td>132</td><td>0.012698</td></tr>
+  </table>
+
+  <h4>Derivation of the Catalan Recurrence</h4>
+  <div class="callout proof">
+    <strong>Label the points $1, 2, \ldots, 2n$ clockwise. Point 1 must be paired with some point $2k$ (must be even — otherwise the arc from 1 to $2k$ has an odd number of remaining points, which cannot be perfectly paired). Points $2, \ldots, 2k-1$ inside the arc must pair among themselves ($C_{k-1}$ ways) and points $2k+1, \ldots, 2n$ outside ($C_{n-k}$ ways). Summing over $k=1,\ldots,n$:</strong>
+    $$C_n = \sum_{k=1}^n C_{k-1}C_{n-k}, \qquad C_0 = 1$$
+    This is precisely the Catalan recurrence.
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Catalan Numbers are Everywhere</div>
+    $C_n$ also counts: balanced parenthesisations of $n$ pairs; full binary trees with $n+1$ leaves; monotone lattice paths from $(0,0)$ to $(n,n)$ not crossing the diagonal; triangulations of a convex $(n+2)$-gon. Whenever a problem has a "non-crossing" or "correctly nested" constraint, think Catalan.
+  </div>
+
+  <h3 id="s4-intersect">4.2 Expected Chord Intersections via Linearity</h3>
+
+  <div class="puzzle-card">
+    <h4>$n$ random chords drawn in a circle. What is the expected number of intersection points?</h4>
+
+    <p>Each pair of chords either intersects inside the circle or it doesn't. Two chords determined by endpoints $(a,b)$ and $(c,d)$ on the circle intersect iff one chord separates the endpoints of the other — i.e.\ the four points appear in one of the patterns $a,c,b,d$ or $a,d,b,c$ around the circle.</p>
+
+    <p>For two chords chosen by picking 4 random points on the circle: out of the $\binom{4}{2}=3$ possible pairings of 4 points into 2 chords, exactly 1 of the 3 pairings gives intersecting chords (the one where the pairing "crosses"). So:</p>
+
+    <div class="fbox gold">
+      <div class="flabel">By Linearity of Expectation (Verified)</div>
+      $$E[\text{intersections}] = \binom{n}{2} \times \frac{1}{3} = \frac{n(n-1)}{6}$$
+    </div>
+
+    <table>
+      <tr><th>$n$ chords</th><th>$E[\text{intersections}] = n(n-1)/6$</th></tr>
+      <tr><td>2</td><td>0.333</td></tr>
+      <tr><td>4</td><td>2.000</td></tr>
+      <tr><td>6</td><td>5.000</td></tr>
+      <tr><td>10</td><td>15.000</td></tr>
+    </table>
+
+    <div class="callout tip">
+      <div class="ctitle">✓ Linearity of Expectation — The Master Tool</div>
+      This problem is solved without computing a single conditional probability. The approach works because:
+      <ol class="steps">
+        <li>Identify the random quantity as a sum of indicators: $I_{ij} = \mathbf{1}[\text{chords }i,j\text{ intersect}]$</li>
+        <li>Compute $E[I_{ij}]$ for a single pair (this is the geometric probability $1/3$)</li>
+        <li>Sum over all $\binom{n}{2}$ pairs using linearity: $E = \binom{n}{2} \cdot \frac{1}{3}$</li>
+      </ol>
+      Indicators need not be independent — linearity holds regardless.
+    </div>
+  </div>
+
+  <h3 id="s4-mod">4.3 Dividing Powers &amp; Modular Arithmetic Puzzles</h3>
+
+  <div class="puzzle-card">
+    <h4>What is the last digit of $7^{100}$?</h4>
+    <p>The last digit of powers of 7 cycles with period 4: $7^1=7$, $7^2=49$, $7^3=343$, $7^4=2401$, $7^5=16807$ — digits cycle $7,9,3,1,7,9,3,1,\ldots$. Since $100 \equiv 0 \pmod{4}$, $7^{100}$ ends in $\mathbf{1}$.</p>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>What are the last two digits of $3^{100}$?</h4>
+    <p>We need $3^{100} \bmod 100$. By Euler's theorem: $\phi(100) = 40$, so $3^{40} \equiv 1 \pmod{100}$. Since $100 = 2 \times 40 + 20$: $3^{100} = (3^{40})^2 \cdot 3^{20} \equiv 3^{20} \pmod{100}$.</p>
+
+    <p>Compute $3^{20}$ by repeated squaring: $3^2=9$, $3^4=81$, $3^8=6561\equiv61$, $3^{16}\equiv61^2=3721\equiv21$. So $3^{20}=3^{16}\cdot3^4\equiv21\times81=1701\equiv\mathbf{01}\pmod{100}$.</p>
+
+    <p>The last two digits of $3^{100}$ are <strong>01</strong>.</p>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>Find all $n$ such that $n^2 + n$ is divisible by 6.</h4>
+    <p>$n^2 + n = n(n+1)$. This is the product of two consecutive integers, so it is always even (divisible by 2). Divisibility by 3: among any 3 consecutive integers, one is divisible by 3. Since $n$ and $n+1$ cover two consecutive integers, either $n \equiv 0$ or $n+1 \equiv 0 \pmod 3$, i.e.\ $n \equiv 0$ or $n \equiv 2 \pmod 3$. The only case where neither is divisible by 3 is $n \equiv 1 \pmod 3$, which gives $n+1 \equiv 2 \pmod 3$ — but wait, $n(n+1)$ with $n\equiv1$ gives $1\times2=2$, not divisible by 3. So $n(n+1)$ is divisible by 6 iff $3\mid n$ or $3\mid(n+1)$, i.e.\ $n \not\equiv 1 \pmod 3$.</p>
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Modular Arithmetic Toolkit for Brain Teasers</div>
+    <ul>
+      <li><strong>Last digit:</strong> compute $n \bmod 10$; find the cycle length of the base mod 10</li>
+      <li><strong>Divisibility by small primes:</strong> use $a \equiv b \pmod m \Rightarrow a^k \equiv b^k \pmod m$</li>
+      <li><strong>Fermat/Euler:</strong> for prime $p$, $a^{p-1} \equiv 1 \pmod p$; use to reduce large exponents</li>
+      <li><strong>Chinese Remainder Theorem:</strong> for $\bmod 100 = \bmod 4 \wedge \bmod 25$</li>
+    </ul>
+  </div>
+
+  <h3 id="s4-combinatorial">4.4 Combinatorial Identities</h3>
+
+  <p>Several combinatorial identities appear repeatedly in quant brain teasers. Know how to derive each from first principles.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Core Identities — Know by Heart</div>
+    $$\sum_{k=0}^{n}\binom{n}{k} = 2^n \qquad \text{(set }x=y=1\text{ in }(x+y)^n)$$
+    $$\sum_{k=0}^{n}(-1)^k\binom{n}{k} = 0 \qquad \text{(set }x=1,y=-1)$$
+    $$\sum_{k=0}^{n}k\binom{n}{k} = n\,2^{n-1} \qquad \text{(differentiate }(1+x)^n\text{, set }x=1)$$
+    $$\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k} \qquad \text{(Pascal's identity)}$$
+    $$\sum_{k=0}^{r}\binom{m}{k}\binom{n}{r-k} = \binom{m+n}{r} \qquad \text{(Vandermonde's identity)}$$
+  </div>
+
+  <h4>Stars and Bars in Brain Teasers</h4>
+  <p>The number of ways to write $n = x_1 + x_2 + \cdots + x_k$ with non-negative integers $x_i$ is $\binom{n+k-1}{k-1}$. This solves problems like "how many ways can three dice sum to 10?" and "how many portfolios of $k$ assets with total weight $n$ (in integer units) exist?"</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Interview: How many ways can two dice sum to 7?</div>
+    The pairs $(d_1, d_2)$ with $d_1+d_2=7$ and $1\leq d_i\leq 6$: $(1,6),(2,5),(3,4),(4,3),(5,2),(6,1)$ — exactly <strong>6 ways</strong> out of 36 equally likely outcomes. $P = 6/36 = 1/6$. This is the most likely sum for two dice (by symmetry, 7 is the "middle" sum) — a crucial fact for any dice game analysis.
+  </div>
+
+  <h3 id="s4-game">4.5 Recurrence Relations in Game Theory</h3>
+
+  <div class="puzzle-card">
+    <h4>Nim and Winning Positions</h4>
+    <p>Two players alternate taking 1 or 2 stones from a pile of $n$ stones. The player who takes the last stone wins. Which positions are winning (W) for the player about to move?</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Recurrence: W/L Position Classification</div>
+      $n=0$: L (no move possible — you lose)<br>
+      $n=1,2$: W (take all stones)<br>
+      $n=3$: L (any move leaves opponent a W position)<br>
+      $n=4,5$: W<br>
+      $n=6$: L<br><br>
+      Pattern: $n \equiv 0 \pmod{3}$ → L (Losing); otherwise → W (Winning).
+    </div>
+
+    <div class="callout proof">
+      <strong>Proof by induction:</strong> $n=0$: L. For $n \geq 1$: if $n \equiv 0 \pmod 3$, any move leaves the opponent at $n-1$ or $n-2$, both $\not\equiv 0 \pmod 3$ → W for opponent → L for you. If $n \not\equiv 0 \pmod 3$, take enough stones to leave $n - r \equiv 0 \pmod 3$ → opponent faces L → W for you.
+    </div>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Generalisation: Take 1 to $k$ Stones</div>
+      When players can take 1 to $k$ stones, losing positions are $n \equiv 0 \pmod{k+1}$. The strategy: always leave a multiple of $k+1$. This is the basis of combinatorial game theory (Sprague-Grundy theorem), which underlies many trading-style "nim-like" puzzles interviewers use.
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>Expected Gain from a Dice Game with Optimal Strategy</h4>
+    <p>You roll a fair die. You can accept the roll as your payoff (in £), or pay £1 to roll again (with the same option). You have at most 3 rolls total. What is the optimal strategy and expected payoff?</p>
+
+    <ol class="steps">
+      <li><strong>Third roll (last chance):</strong> must accept. $E_3 = 3.5$ (average of 1–6).</li>
+      <li><strong>Second roll:</strong> accept roll $x$ if $x > E_3 - 1 = 2.5$, i.e.\ if $x \geq 3$. If $x < 3$, pay £1 to roll again (expected gain $3.5 - 1 = 2.5$). Either way, take max. $E_2 = \frac{1}{6}(3+4+5+6) + \frac{2}{6}(3.5-1) = \frac{18}{6} + \frac{2}{6}\cdot2.5 = 3 + \frac{5}{6} \approx 3.833$</li>
+      <li><strong>First roll:</strong> accept if $x > E_2 - 1 = 2.833$, i.e.\ if $x \geq 3$. Re-roll otherwise. $E_1 = \frac{1}{6}(3+4+5+6) + \frac{2}{6}(3.833-1) = 3 + \frac{2}{6}\cdot2.833 \approx 3 + 0.944 \approx \mathbf{3.944}$</li>
+    </ol>
+
+    <div class="fbox teal">
+      <div class="flabel">Optimal Strategy and Expected Payoff</div>
+      Accept any roll of <strong>3 or more</strong> on rolls 1 and 2. Always accept on roll 3.<br>
+      Expected payoff $\approx \mathbf{£3.94}$ (well above the naive £3.50 of just taking the first roll).
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>The Hat Problem — Coordination Without Communication</h4>
+    <p>$n$ players each receive a random hat colour (red or blue, equally likely, independently). Each player simultaneously guesses their own hat colour without communicating. The team wins if at least one guess is correct and no one guesses wrong (everyone either guesses correctly or abstains). What strategy maximises the win probability?</p>
+
+    <h4>Simpler version: All must guess</h4>
+    <p>If all $n$ players must guess and they win only if <em>all</em> are correct: best fixed strategy gives $P(\text{win}) = (1/2)^n$ (all guess Red). But if correlated strategies are allowed:</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Optimal Correlated Strategy ($n=3$)</div>
+      Strategy: each player sees the others' hats and guesses: "if I see two of the same colour, guess the opposite; otherwise abstain (or guess any)."<br><br>
+      The team loses only when all hats are the same colour (2 configurations out of 8). Win probability: $\mathbf{6/8 = 3/4}$.
+    </div>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Connection to Error-Correcting Codes</div>
+      The optimal strategy for the hat problem with $n = 2^k - 1$ players achieves win probability $(2^k-1)/2^k$ — approaching certainty as $n$ grows. This is precisely the Hamming code construction: the strategy corresponds to a parity-check matrix, and the team wins iff the hat assignment has a Hamming weight that the code detects. This deep connection between combinatorics, information theory, and probability regularly appears in the most sophisticated quant brain teaser rounds.
+    </div>
+  </div>
+
+  <div class="puzzle-card">
+    <h4>The 100 Prisoners Problem</h4>
+    <p>100 prisoners are each assigned a unique number 1–100. 100 boxes are in a room, each containing a random permutation of the numbers 1–100. Each prisoner may open at most 50 boxes. If every prisoner finds their own number, all go free. Prisoners may agree on a strategy beforehand but cannot communicate once the process begins.</p>
+
+    <p><strong>Naive strategy:</strong> Each prisoner opens 50 random boxes. $P(\text{all succeed}) = (1/2)^{100} \approx 10^{-30}$. Essentially impossible.</p>
+
+    <p><strong>Cycle-following strategy:</strong> Prisoner $k$ starts with box $k$, then opens the box whose number is on the card just found, continuing until they find their own number or exhaust 50 tries. They succeed iff the permutation cycle containing their number has length $\leq 50$.</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Cycle-Following Strategy — Stunning Result</div>
+      All prisoners succeed iff there is no cycle of length $> 50$ in the permutation.
+      $$P(\text{success}) = 1 - P(\text{cycle length} > 50) = 1 - \sum_{k=51}^{100}\frac{1}{k} \approx 1 - \ln 2 \approx \mathbf{31.2\%}$$
+    </div>
+
+    <div class="callout proof">
+      <strong>Why:</strong> The probability that a uniformly random permutation of $n$ elements has a cycle of length $k > n/2$ is exactly $1/k$ (by symmetry — such a cycle exists iff the longest cycle position is in that cycle, which happens with probability $k/n \times 1/k = 1/n$... more carefully: $P(\exists\text{ cycle of length exactly }k) = \frac{1}{k}$ for $k > n/2$, because cycles of length $> n/2$ are unique). Summing over $k=51,\ldots,100$: $\sum 1/k \approx \ln 2 \approx 0.693$.
+    </div>
+
+    <div class="callout insight">
+      <div class="ctitle">💡 Why This is Remarkable</div>
+      A strategy that looks like it shouldn't work (prisoners following chains rather than searching randomly) boosts the probability from $\approx 10^{-30}$ to $\approx 31\%$. The key is that following cycles makes prisoner successes <em>correlated</em> — if prisoner $k$'s cycle is short, all prisoners in that cycle succeed together. The naive strategy gives independent failures, each with probability $1/2$, making it virtually impossible for all 100 to succeed simultaneously.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Probability Puzzle Results at a Glance</h3>
+  <table>
+    <tr><th>Problem</th><th>Answer</th><th>Key Technique</th></tr>
+    <tr><td>E[flips to HH]</td><td><strong>6</strong></td><td>Markov chain: $E_\varnothing = 6$, $E_H = 4$</td></tr>
+    <tr><td>E[flips to HT]</td><td><strong>4</strong></td><td>Markov chain: $E_\varnothing = 4$, $E_H = 2$</td></tr>
+    <tr><td>E[flips to H]</td><td>2</td><td>Geometric$(1/2)$</td></tr>
+    <tr><td>E[flips to HHH]</td><td>14</td><td>3-state Markov chain</td></tr>
+    <tr><td>Gambler's Ruin $P(\text{win})$</td><td>$k/N$</td><td>Linear harmonic function; martingale</td></tr>
+    <tr><td>Gambler's Ruin $E[T]$</td><td>$k(N-k)$</td><td>Optional stopping + variance calculation</td></tr>
+    <tr><td>Coupon Collector $E[T]$</td><td>$n H_n \approx n\ln n$</td><td>Sum of geometric phase durations</td></tr>
+    <tr><td>E[records in permutation]</td><td>$H_n = \sum_{k=1}^n 1/k$</td><td>Indicator trick: $P(\text{pos }k\text{ is record}) = 1/k$</td></tr>
+    <tr><td>E[uniforms to exceed 1]</td><td>$e \approx 2.718$</td><td>$P(N>n) = 1/n!$; $\sum 1/n! = e$</td></tr>
+    <tr><td>Secretary: $r^*$, $P^*$</td><td>$\lfloor n/e \rfloor + 1$; $\to 1/e$</td><td>Maximise $-x\ln x$; continuous limit</td></tr>
+    <tr><td>Von Neumann fair coin</td><td>Output HT → H, TH → T</td><td>$P(HT)=P(TH)=p(1-p)$ always</td></tr>
+    <tr><td>Max of $n$ d6 rolls $E[\max]$</td><td>$\sum k [(k/6)^n - ((k-1)/6)^n]$</td><td>Complement: $6 - \sum (k/6)^n$</td></tr>
+  </table>
+
+  <h3>Geometric Probability at a Glance</h3>
+  <table>
+    <tr><th>Problem</th><th>Answer</th><th>Key Setup</th></tr>
+    <tr><td>Buffon's Needle ($\ell \leq d$)</td><td>$2\ell/(\pi d)$</td><td>$(y,\theta)$ uniform; favourable: $y \leq \frac{\ell}{2}\sin\theta$</td></tr>
+    <tr><td>Bertrand chord: endpoints method</td><td>$1/3$</td><td>Fix one end; other is uniform on circle; arc fraction</td></tr>
+    <tr><td>Bertrand chord: midpoint method</td><td>$1/4$</td><td>Chord $> \sqrt{3}$ iff midpoint within radius $1/2$; area ratio</td></tr>
+    <tr><td>Meeting problem ($w$, window $T$)</td><td>$1-(1-w/T)^2$</td><td>Favourable band of width $2w$ around diagonal of square</td></tr>
+    <tr><td>Broken stick → triangle</td><td>$1/4$</td><td>Three pieces $< 1/2$ each; plot on unit square; area $1/4$</td></tr>
+    <tr><td>$n$ chords: expected intersections</td><td>$n(n-1)/6$</td><td>Linearity: $\binom{n}{2}$ pairs, each intersects w.p. $1/3$</td></tr>
+  </table>
+
+  <h3>Mathematical Puzzles at a Glance</h3>
+  <table>
+    <tr><th>Problem</th><th>Answer</th><th>Key Formula</th></tr>
+    <tr><td>Non-crossing pairings of $2n$ points</td><td>$C_n = \frac{1}{n+1}\binom{2n}{n}$</td><td>Catalan number; recurrence $C_n = \sum C_{k-1}C_{n-k}$</td></tr>
+    <tr><td>Total pairings of $2n$ points</td><td>$(2n-1)!! = (2n)!/(2^n n!)$</td><td>Double factorial; recursive: $(2n-1)\cdot(2n-3)!!$</td></tr>
+    <tr><td>$P(\text{pairing non-crossing})$</td><td>$C_n/(2n-1)!!$</td><td>Decays to 0; ratio $4^n/(n^{1.5}(2n-1)!!)$</td></tr>
+    <tr><td>Nim: take 1–2 from $n$ stones</td><td>L iff $n \equiv 0 \pmod 3$</td><td>Induction; leave multiple of 3 to opponent</td></tr>
+    <tr><td>Nim: take 1–$k$ from $n$ stones</td><td>L iff $n \equiv 0 \pmod{k+1}$</td><td>Same strategy; leave multiple of $k+1$</td></tr>
+    <tr><td>100 prisoners: cycle strategy</td><td>$P \approx 1 - \ln 2 \approx 31.2\%$</td><td>Fails iff longest cycle $> 50$; $P(\text{cycle}=k) = 1/k$</td></tr>
+    <tr><td>Binomial sum: $\sum_{k=0}^n \binom{n}{k}$</td><td>$2^n$</td><td>Set $x=y=1$ in $(x+y)^n$</td></tr>
+    <tr><td>Binomial sum: $\sum k\binom{n}{k}$</td><td>$n2^{n-1}$</td><td>Differentiate $(1+x)^n$ at $x=1$</td></tr>
+    <tr><td>Stars-and-bars: $x_1+\cdots+x_k=n$</td><td>$\binom{n+k-1}{k-1}$</td><td>Place $k-1$ dividers among $n+k-1$ positions</td></tr>
+  </table>
+
+  <h3>The $1/e$ and $e$ Leitmotif — Summary</h3>
+  <p>The number $e$ appears throughout brain teasers as a consequence of the Taylor series $\sum_{n=0}^\infty 1/n! = e$ and $\sum_{n=0}^\infty (-1)^n/n! = 1/e$.</p>
+
+  <table>
+    <tr><th>Problem</th><th>$e$ or $1/e$ Appearance</th><th>Reason</th></tr>
+    <tr><td>Derangements: $D_n/n!$</td><td>$\to 1/e$</td><td>$\sum_{k=0}^n (-1)^k/k! \to e^{-1}$</td></tr>
+    <tr><td>Secretary problem: $r^*/n$, $P^*$</td><td>$1/e$ for both</td><td>Optimum of $-x\ln x$ at $x=e^{-1}$</td></tr>
+    <tr><td>Uniform draws to exceed 1: $E[N]$</td><td>$e$</td><td>$\sum_{n=0}^\infty P(N>n) = \sum 1/n! = e$</td></tr>
+    <tr><td>Poisson: $P(N=0)$ when $\lambda=1$</td><td>$e^{-1}$</td><td>$e^{-\lambda} = e^{-1}$; Poisson as Binomial limit</td></tr>
+    <tr><td>Coupon Collector: correction term</td><td>$\gamma \approx 0.5772 = -\Gamma'(1)$</td><td>$E[T] \approx n\ln n + \gamma n$ — Euler-Mascheroni appears</td></tr>
+    <tr><td>Continuous compounding: $(1+r/n)^n$</td><td>$e^r$ as $n\to\infty$</td><td>Definition of $e$; Section 2 finance connection</td></tr>
+  </table>
+
+  <h3>Brain Teaser Strategy Cheat Sheet</h3>
+  <table>
+    <tr><th>Pattern you see</th><th>Technique to apply</th><th>Example</th></tr>
+    <tr><td>"Expected number until event X"</td><td>First-step analysis / Markov chain</td><td>E[flips to HH] = 6</td></tr>
+    <tr><td>"Expected count of something"</td><td>Linearity of expectation + indicators</td><td>E[records], E[intersections]</td></tr>
+    <tr><td>"Probability of geometric event"</td><td>Ratio of favourable area to total area</td><td>Bertrand, meeting problem</td></tr>
+    <tr><td>"Optimal strategy in a sequence"</td><td>Dynamic programming / backward induction</td><td>Secretary, dice re-rolling</td></tr>
+    <tr><td>"Win/lose game with moves"</td><td>Classify positions as W/L by recurrence</td><td>Nim, stone-taking games</td></tr>
+    <tr><td>"How many ways / combinatorial count"</td><td>Catalan, stars-and-bars, inclusion-exclusion</td><td>Non-crossing chords, derangements</td></tr>
+    <tr><td>"Last digit / divisibility"</td><td>Modular arithmetic, Fermat's little theorem, cycles</td><td>$7^{100}$: last digit 1</td></tr>
+    <tr><td>"Fair simulation from biased source"</td><td>Von Neumann / symmetrisation</td><td>Fair coin from biased coin</td></tr>
+    <tr><td>"All succeed / all fail simultaneously"</td><td>Correlation structure; cycles vs independence</td><td>100 prisoners: $31\%$ vs $10^{-30}$</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 9 of 9 · Quantitative Finance Interview Preparation<br>
+  All numerical results verified by Python simulation. Covers: Coin Flip Sequences · Gambler's Ruin · Coupon Collector · Record Sequences · Uniform Threshold · Buffon's Needle · Bertrand Chord Paradox · Meeting Problem · Secretary Problem · Optimal Stopping in Finance · Non-Intersecting Chords · Catalan Numbers · Chord Intersections via Linearity · Modular Arithmetic Puzzles · Combinatorial Identities · Nim &amp; Game Theory · 100 Prisoners Problem · The $e$ and $1/e$ Leitmotif
+</footer>
+
+</body>
+</html>

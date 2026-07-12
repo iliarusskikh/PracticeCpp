@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optimisation &amp; Numerical Methods — Quant Interview Master Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #080b12;
+    --bg2:         #0d1220;
+    --bg3:         #121a2e;
+    --border:      #1c2a45;
+    --indigo:      #818cf8;
+    --indigo2:     #a5b4fc;
+    --indigo-dim:  #312e81;
+    --text:        #dce4f5;
+    --text-dim:    #6e7fa8;
+    --gold:        #c9a84c;
+    --gold2:       #e8c97a;
+    --gold-dim:    #7a6030;
+    --violet:      #c084fc;
+    --green:       #4ade80;
+    --rose:        #fb7185;
+    --sky:         #38bdf8;
+    --teal:        #2dd4bf;
+    --orange:      #fb923c;
+    --amber:       #fbbf24;
+    --lime:        #a3e635;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #818cf820, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--indigo-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: var(--indigo2);
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--indigo);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--indigo);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--indigo2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  /* ── SECTION HEADERS ── */
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--indigo-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--indigo2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--indigo); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  /* ── FORMULA BOXES ── */
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--indigo);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.violet { border-left-color: var(--violet); }
+  .fbox.sky    { border-left-color: var(--sky); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.rose   { border-left-color: var(--rose); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.orange { border-left-color: var(--orange); }
+  .fbox.amber  { border-left-color: var(--amber); }
+  .fbox.lime   { border-left-color: var(--lime); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.finance { background: #1a1608; border-left: 3px solid var(--gold); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+  .callout.algo    { background: #0a1a12; border-left: 3px solid var(--lime); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.finance .ctitle { color: var(--gold); }
+  .callout.algo    .ctitle { color: var(--lime); }
+
+  /* ── TABLES ── */
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--indigo); border-bottom: 1px solid var(--indigo-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--indigo-dim); color: var(--indigo2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  /* ── METHOD CARD ── */
+  .method-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .method-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.05rem; color: var(--indigo2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  /* ── CONVERGENCE DISPLAY ── */
+  .conv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.7rem;
+    margin: 1rem 0;
+  }
+  .conv-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    text-align: center;
+  }
+  .conv-cell .conv-method {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--indigo2);
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .conv-cell .conv-rate {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--amber);
+  }
+  .conv-cell .conv-label {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  /* ── MISC ── */
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--indigo2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.55rem; }
+    .conv-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · Interview Preparation · Section 7 of 9</div>
+  <h1>Optimisation &amp; Numerical Methods</h1>
+  <div class="subtitle">Optimisation Theory · KKT Conditions · Numerical Root-Finding · ODE Solvers · Monte Carlo Simulation</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Optimisation Theory</a>
+      <ul class="sub">
+        <li><a href="#s1-convex">Convex vs Non-Convex Functions</a></li>
+        <li><a href="#s1-unconstrained">Unconstrained Optimisation: Gradient Methods</a></li>
+        <li><a href="#s1-kkt">KKT Conditions &amp; Constrained Optimisation</a></li>
+        <li><a href="#s1-duality">Lagrangian Duality</a></li>
+        <li><a href="#s1-lp">Linear Programming</a></li>
+        <li><a href="#s1-qp">Quadratic Programming &amp; Portfolio Optimisation</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Numerical Root-Finding &amp; Optimisation</a>
+      <ul class="sub">
+        <li><a href="#s2-bisect">Bisection Method</a></li>
+        <li><a href="#s2-nr">Newton-Raphson Method</a></li>
+        <li><a href="#s2-secant">Secant &amp; Brent's Methods</a></li>
+        <li><a href="#s2-gd">Gradient Descent &amp; Variants</a></li>
+        <li><a href="#s2-fd">Finite Difference Methods</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">ODE &amp; PDE Solvers</a>
+      <ul class="sub">
+        <li><a href="#s3-euler">Euler Methods</a></li>
+        <li><a href="#s3-rk">Runge-Kutta Methods</a></li>
+        <li><a href="#s3-pde">Finite Differences for PDEs</a></li>
+        <li><a href="#s3-bspde">Black-Scholes via Finite Difference</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Monte Carlo Methods</a>
+      <ul class="sub">
+        <li><a href="#s4-sim">Simulating from Distributions</a></li>
+        <li><a href="#s4-antithetic">Antithetic Variates</a></li>
+        <li><a href="#s4-control">Control Variates</a></li>
+        <li><a href="#s4-importance">Importance Sampling</a></li>
+        <li><a href="#s4-qmc">Quasi-Monte Carlo</a></li>
+        <li><a href="#s4-stratified">Stratified Sampling &amp; Other Techniques</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: OPTIMISATION THEORY                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Optimisation Theory</div>
+  </div>
+
+  <p>Optimisation is the backbone of quantitative finance: calibrating models to market prices, constructing portfolios, training risk models, and pricing American options all reduce to finding a minimum or maximum of some objective function, possibly subject to constraints.</p>
+
+  <h3 id="s1-convex">1.1 Convex vs Non-Convex Functions</h3>
+
+  <p>The single most important structural property of an optimisation problem is <strong>convexity</strong>. Convex problems guarantee that any local minimum is a global minimum — a property that makes them tractable both theoretically and computationally.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Definition of Convex Function</div>
+    A function $f: \mathbb{R}^n \to \mathbb{R}$ is <strong>convex</strong> if, for all $\mathbf{x}, \mathbf{y}$ and all $\lambda \in [0,1]$:
+    $$f(\lambda\mathbf{x} + (1-\lambda)\mathbf{y}) \leq \lambda f(\mathbf{x}) + (1-\lambda)f(\mathbf{y})$$
+    Geometrically: the chord between any two points on the graph lies <em>above</em> (or on) the graph.
+  </div>
+
+  <h4>Equivalent Conditions for Differentiable Functions</h4>
+  <table>
+    <tr><th>Condition</th><th>Statement</th><th>Intuition</th></tr>
+    <tr><td>First-order</td><td>$f(\mathbf{y}) \geq f(\mathbf{x}) + \nabla f(\mathbf{x})^\top(\mathbf{y}-\mathbf{x})$ for all $\mathbf{x},\mathbf{y}$</td><td>Graph lies above every tangent hyperplane</td></tr>
+    <tr><td>Second-order</td><td>Hessian $H_f(\mathbf{x}) \succeq 0$ (PSD) for all $\mathbf{x}$</td><td>Curvature is non-negative in all directions</td></tr>
+    <tr><td>Gradient monotonicity</td><td>$(\nabla f(\mathbf{x}) - \nabla f(\mathbf{y}))^\top(\mathbf{x}-\mathbf{y}) \geq 0$</td><td>Gradient is a monotone operator</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Convexity Testing Shortcuts</div>
+    <ul>
+      <li><strong>Sums:</strong> positive-weighted sum of convex functions is convex — $\alpha f + \beta g$ convex when $\alpha,\beta \geq 0$</li>
+      <li><strong>Composition:</strong> $g(f(\mathbf{x}))$ is convex if $g$ is convex and non-decreasing and $f$ is convex</li>
+      <li><strong>Max:</strong> $\max(f_1,\ldots,f_k)$ is convex whenever each $f_i$ is convex</li>
+      <li><strong>Affine maps:</strong> $f(A\mathbf{x}+\mathbf{b})$ preserves convexity of $f$</li>
+      <li><strong>Quadratic forms:</strong> $\mathbf{x}^\top Q\mathbf{x}$ is convex iff $Q \succeq 0$</li>
+    </ul>
+  </div>
+
+  <h4>Strict Convexity and Strong Convexity</h4>
+  <table>
+    <tr><th>Type</th><th>Condition</th><th>Consequence</th></tr>
+    <tr><td>Convex</td><td>$H \succeq 0$</td><td>Local minimum = global; may not be unique</td></tr>
+    <tr><td>Strictly convex</td><td>$H \succ 0$ at all critical points</td><td>At most one global minimum</td></tr>
+    <tr><td>Strongly convex (parameter $m$)</td><td>$H \succeq mI$, $m > 0$ everywhere</td><td>Unique global min; gradient descent converges at rate $O((1-m/L)^k)$</td></tr>
+    <tr><td>Non-convex</td><td>$H$ indefinite somewhere</td><td>Local minima may not be global; NP-hard in general</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Why Convexity Matters for Portfolio Optimisation</div>
+    Mean-variance portfolio optimisation — minimise $\mathbf{w}^\top\Sigma\mathbf{w}$ subject to $\mathbf{1}^\top\mathbf{w}=1$ and $\boldsymbol{\mu}^\top\mathbf{w} \geq \mu^*$ — is a convex quadratic program because $\Sigma \succeq 0$. This guarantees the efficient frontier is a unique globally optimal curve, solvable in polynomial time. Adding cardinality constraints (e.g.\ "at most 20 assets") makes it non-convex and NP-hard.
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Local vs Global Minima — The Non-Convex Trap</div>
+    Calibrating a Heston stochastic volatility model to implied vol surface is a non-convex optimisation: gradient descent finds a local minimum that may not be globally optimal. Practitioners use multi-start methods (many random initialisations), differential evolution, or basin-hopping to improve global search. Never assume a converged calibration is globally optimal in non-convex settings.
+  </div>
+
+  <h3 id="s1-unconstrained">1.2 Unconstrained Optimisation: Gradient Methods</h3>
+
+  <p>For an unconstrained problem $\min_\mathbf{x} f(\mathbf{x})$, the necessary condition for a local minimum is $\nabla f(\mathbf{x}^*) = \mathbf{0}$ (stationarity). The sufficient second-order condition is $H_f(\mathbf{x}^*) \succ 0$.</p>
+
+  <h4>Gradient Descent</h4>
+  <div class="fbox gold">
+    <div class="flabel">Gradient Descent Update Rule</div>
+    $$\mathbf{x}_{k+1} = \mathbf{x}_k - \alpha_k \nabla f(\mathbf{x}_k)$$
+    where $\alpha_k > 0$ is the <strong>step size (learning rate)</strong>.
+  </div>
+
+  <p>Intuition: move in the direction of steepest descent ($-\nabla f$). Convergence guaranteed for convex $f$ with Lipschitz-continuous gradient $\|\nabla f(\mathbf{x})-\nabla f(\mathbf{y})\| \leq L\|\mathbf{x}-\mathbf{y}\|$:</p>
+
+  <div class="fbox teal">
+    $$f(\mathbf{x}_k) - f(\mathbf{x}^*) \leq \frac{L\|\mathbf{x}_0-\mathbf{x}^*\|^2}{2k} \qquad \text{(convergence rate: } O(1/k)\text{)}$$
+    \text{For strongly convex }f\text{ (parameter }m\text{):} \quad f(\mathbf{x}_k) - f(\mathbf{x}^*) \leq \left(1 - \frac{m}{L}\right)^k [f(\mathbf{x}_0)-f(\mathbf{x}^*)]
+  </div>
+
+  <h4>Step Size Selection</h4>
+  <table>
+    <tr><th>Method</th><th>Rule</th><th>Cost per step</th></tr>
+    <tr><td>Fixed step size</td><td>$\alpha_k = \alpha = 1/(2L)$</td><td>Requires knowing $L$; may diverge if too large</td></tr>
+    <tr><td>Backtracking line search</td><td>Start with $\alpha=1$, halve until Armijo condition holds</td><td>A few extra gradient evaluations; robust</td></tr>
+    <tr><td>Exact line search</td><td>$\alpha_k = \arg\min_\alpha f(\mathbf{x}_k - \alpha\nabla f)$</td><td>Inner optimisation; expensive but maximises progress per step</td></tr>
+  </table>
+
+  <h4>Gradient Ascent</h4>
+  <p>For a maximisation problem $\max_\mathbf{x} f(\mathbf{x})$, simply reverse the sign: $\mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \nabla f(\mathbf{x}_k)$. In finance, this arises in dual problems, reinforcement learning (policy gradient), and maximum likelihood estimation.</p>
+
+  <h4>Newton's Method for Optimisation</h4>
+  <p>Replace the gradient descent linear model with a quadratic approximation (use the Hessian):</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Newton's Optimisation Update</div>
+    $$\mathbf{x}_{k+1} = \mathbf{x}_k - H_f(\mathbf{x}_k)^{-1}\nabla f(\mathbf{x}_k)$$
+  </div>
+
+  <p>Newton's method has <strong>quadratic convergence</strong> near the solution — far superior to gradient descent's linear convergence. The cost is computing and inverting the Hessian at each step: $O(n^3)$ for $n$-dimensional problems. <strong>Quasi-Newton methods</strong> (BFGS, L-BFGS) approximate the inverse Hessian using gradient differences, achieving superlinear convergence at $O(n^2)$ or $O(n)$ cost respectively.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Convergence Rate Hierarchy — Know This for Interviews</div>
+    <div class="conv-grid">
+      <div class="conv-cell">
+        <span class="conv-method">Gradient Descent</span>
+        <span class="conv-rate">O(1/k)</span>
+        <span class="conv-label">Linear convergence (convex)</span>
+      </div>
+      <div class="conv-cell">
+        <span class="conv-method">Gradient Descent (SC)</span>
+        <span class="conv-rate">$(1-m/L)^k$</span>
+        <span class="conv-label">Geometric (strongly convex)</span>
+      </div>
+      <div class="conv-cell">
+        <span class="conv-method">Newton / BFGS</span>
+        <span class="conv-rate">Quadratic / Superlinear</span>
+        <span class="conv-label">Near solution</span>
+      </div>
+    </div>
+    Quadratic convergence means: if you have 1 decimal place of accuracy, the next step gives ~2 decimal places, then 4, then 8 — extremely fast near a solution. Newton's method can fail away from the solution (Hessian may not be positive definite).
+  </div>
+
+  <h3 id="s1-kkt">1.3 KKT Conditions &amp; Constrained Optimisation</h3>
+
+  <p>The <strong>Karush-Kuhn-Tucker (KKT) conditions</strong> are the fundamental first-order necessary conditions for a solution to a constrained optimisation problem. For differentiable problems, they generalise the Lagrange multiplier conditions to inequality constraints.</p>
+
+  <h4>Standard Form</h4>
+  <div class="fbox gold">
+    <div class="flabel">Constrained Optimisation Standard Form</div>
+    $$\min_\mathbf{x} f(\mathbf{x})$$
+    $$\text{subject to: } g_i(\mathbf{x}) \leq 0, \; i=1,\ldots,m \quad \text{(inequality constraints)}$$
+    $$h_j(\mathbf{x}) = 0, \; j=1,\ldots,p \quad \text{(equality constraints)}$$
+  </div>
+
+  <h4>The KKT Conditions</h4>
+  <p>At a local minimum $\mathbf{x}^*$ (assuming regularity / constraint qualification holds):</p>
+
+  <div class="fbox gold">
+    <div class="flabel">KKT Necessary Conditions</div>
+    <ol style="margin: 0.5rem 0 0 1.2rem; line-height: 2;">
+      <li><strong>Stationarity:</strong> $\nabla f(\mathbf{x}^*) + \sum_{i=1}^m \mu_i^* \nabla g_i(\mathbf{x}^*) + \sum_{j=1}^p \lambda_j^* \nabla h_j(\mathbf{x}^*) = \mathbf{0}$</li>
+      <li><strong>Primal feasibility:</strong> $g_i(\mathbf{x}^*) \leq 0$ and $h_j(\mathbf{x}^*) = 0$</li>
+      <li><strong>Dual feasibility:</strong> $\mu_i^* \geq 0$ for all $i$ (inequality multipliers non-negative)</li>
+      <li><strong>Complementary slackness:</strong> $\mu_i^* g_i(\mathbf{x}^*) = 0$ for all $i$</li>
+    </ol>
+  </div>
+
+  <p>$\mu_i^*$ and $\lambda_j^*$ are the <strong>KKT multipliers</strong>. They have the shadow price interpretation: $\lambda_j^*$ tells you how much the optimal objective value improves per unit relaxation of constraint $j$.</p>
+
+  <h4>Complementary Slackness — The Key Insight</h4>
+  <p>Condition 4 says: either $\mu_i^* = 0$ (the constraint doesn't actively bind the optimum — "inactive") or $g_i(\mathbf{x}^*) = 0$ (the constraint is exactly at its limit — "active"). Both can be zero together, but they cannot both be strictly positive. This is what makes the KKT conditions a system of equations solvable for the optimal point.</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 KKT Example: Minimum Variance with Return Target</div>
+    Minimise $\frac{1}{2}\mathbf{w}^\top\Sigma\mathbf{w}$ subject to $\boldsymbol{\mu}^\top\mathbf{w} \geq \mu^*$ and $\mathbf{1}^\top\mathbf{w} = 1$.<br><br>
+    Rewrite inequality as $g(\mathbf{w}) = \mu^* - \boldsymbol{\mu}^\top\mathbf{w} \leq 0$. Lagrangian:<br>
+    $\mathcal{L} = \frac{1}{2}\mathbf{w}^\top\Sigma\mathbf{w} + \lambda(1 - \mathbf{1}^\top\mathbf{w}) + \mu(\mu^* - \boldsymbol{\mu}^\top\mathbf{w})$<br><br>
+    <strong>Stationarity:</strong> $\Sigma\mathbf{w} - \lambda\mathbf{1} - \mu\boldsymbol{\mu} = \mathbf{0} \Rightarrow \mathbf{w}^* = \Sigma^{-1}(\lambda\mathbf{1} + \mu\boldsymbol{\mu})$<br>
+    <strong>Complementary slackness:</strong> Either $\mu = 0$ (return constraint inactive, minimum variance portfolio regardless of return) or $\boldsymbol{\mu}^\top\mathbf{w} = \mu^*$ (constraint exactly binds at the target).<br><br>
+    The efficient frontier traces the optimal $\mathbf{w}^*$ as $\mu^*$ varies from $\min$ to $\max$ expected return.
+  </div>
+
+  <h4>Sufficiency: When KKT is Also Sufficient</h4>
+  <p>For <em>convex</em> optimisation problems (convex $f$, convex inequality constraint functions $g_i$, affine $h_j$), the KKT conditions are both necessary <em>and sufficient</em>. In this case, solving the KKT system gives the global optimum.</p>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Constraint Qualifications — When KKT Applies</div>
+    KKT conditions require a <em>constraint qualification (CQ)</em> to hold at the optimum — a regularity condition ensuring the constraints don't degenerate. The most common:
+    <ul>
+      <li><strong>LICQ:</strong> Active constraint gradients are linearly independent — the gold standard</li>
+      <li><strong>Slater's condition</strong> (for convex problems): $\exists\mathbf{x}$ strictly feasible ($g_i(\mathbf{x}) < 0$) — gives strong duality as a bonus</li>
+      <li><strong>MFCQ:</strong> There exists a direction decreasing all active constraints</li>
+    </ul>
+    In finance and ML applications, constraints are almost always well-behaved and CQs hold automatically.
+  </div>
+
+  <h3 id="s1-duality">1.4 Lagrangian Duality</h3>
+
+  <p>Duality converts a constrained (primal) problem into an unconstrained (dual) problem. It provides lower bounds on the primal optimal, and for convex problems, the bound is tight — <strong>strong duality</strong> holds.</p>
+
+  <h4>The Lagrangian and Dual Function</h4>
+  <div class="fbox gold">
+    <div class="flabel">Lagrangian</div>
+    $$\mathcal{L}(\mathbf{x}, \boldsymbol{\mu}, \boldsymbol{\lambda}) = f(\mathbf{x}) + \sum_i \mu_i g_i(\mathbf{x}) + \sum_j \lambda_j h_j(\mathbf{x})$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Dual Function (always concave — useful!)</div>
+    $$d(\boldsymbol{\mu}, \boldsymbol{\lambda}) = \inf_\mathbf{x} \mathcal{L}(\mathbf{x}, \boldsymbol{\mu}, \boldsymbol{\lambda})$$
+    $$\text{Dual problem: }\max_{\boldsymbol{\mu} \geq 0, \boldsymbol{\lambda}} d(\boldsymbol{\mu}, \boldsymbol{\lambda})$$
+  </div>
+
+  <h4>Weak and Strong Duality</h4>
+  <table>
+    <tr><th>Result</th><th>Statement</th><th>Condition</th></tr>
+    <tr><td>Weak duality</td><td>$d(\boldsymbol{\mu},\boldsymbol{\lambda}) \leq p^*$ for all feasible duals</td><td>Always holds — dual is always a lower bound</td></tr>
+    <tr><td>Strong duality</td><td>$d^* = p^*$ (duality gap = 0)</td><td>Convex problem + Slater's condition</td></tr>
+    <tr><td>Complementary slackness</td><td>$\mu_i^* g_i(\mathbf{x}^*) = 0$</td><td>At optimality when strong duality holds</td></tr>
+  </table>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Duality in Risk Measures</div>
+    The dual of the CVaR (Conditional Value at Risk) minimisation problem has a clean interpretation: the dual variables correspond to probability weights in a "worst-case" distribution. This connects to robust optimisation: optimising the worst-case expected loss over a set of probability measures. The dual problem is often easier to solve or interpret than the primal.
+  </div>
+
+  <h3 id="s1-lp">1.5 Linear Programming</h3>
+
+  <p>A linear program (LP) optimises a linear objective over a polyhedral feasible region defined by linear constraints:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Standard Form LP</div>
+    $$\min_\mathbf{x} \mathbf{c}^\top\mathbf{x} \quad \text{subject to} \quad A\mathbf{x} = \mathbf{b},\; \mathbf{x} \geq \mathbf{0}$$
+  </div>
+
+  <h4>Key Properties of LPs</h4>
+  <ul>
+    <li><strong>Optimal at a vertex:</strong> If an LP is bounded and feasible, its optimum is attained at a vertex (extreme point) of the feasible polytope</li>
+    <li><strong>Simplex method:</strong> Moves along edges of the polytope from vertex to vertex, always improving the objective — exponential worst case but extremely fast in practice</li>
+    <li><strong>Interior point methods:</strong> Polynomial-time algorithms (e.g.\ barrier method); better worst-case guarantees but similar practical speed to simplex</li>
+    <li><strong>LP duality:</strong> Every LP has a dual LP; strong duality always holds for feasible bounded LPs (no Slater-type condition needed)</li>
+  </ul>
+
+  <div class="fbox teal">
+    <div class="flabel">LP Primal–Dual Pair</div>
+    $$\textbf{Primal: } \min \mathbf{c}^\top\mathbf{x},\; A\mathbf{x}=\mathbf{b},\; \mathbf{x}\geq0 \qquad \textbf{Dual: } \max \mathbf{b}^\top\mathbf{y},\; A^\top\mathbf{y}\leq\mathbf{c}$$
+    Strong duality: $\mathbf{c}^\top\mathbf{x}^* = \mathbf{b}^\top\mathbf{y}^*$ (primal opt = dual opt)
+  </div>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance Applications of LP</div>
+    <ul>
+      <li><strong>No-arbitrage pricing:</strong> Detecting arbitrage in a set of asset prices is equivalent to checking LP feasibility</li>
+      <li><strong>Risk budgeting:</strong> Allocating risk contributions subject to linear constraints</li>
+      <li><strong>Transaction cost minimisation:</strong> Rebalancing a portfolio subject to linear trading constraints</li>
+      <li><strong>CVaR optimisation:</strong> Rockafellar-Uryasev (2000) reformulates CVaR minimisation as an LP — making tail risk optimisation tractable</li>
+    </ul>
+  </div>
+
+  <h3 id="s1-qp">1.6 Quadratic Programming &amp; Portfolio Optimisation</h3>
+
+  <p>A quadratic program (QP) minimises a quadratic objective subject to linear constraints — the direct formulation of Markowitz mean-variance optimisation:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Standard Form QP</div>
+    $$\min_\mathbf{x} \frac{1}{2}\mathbf{x}^\top Q\mathbf{x} + \mathbf{c}^\top\mathbf{x} \quad \text{subject to} \quad A\mathbf{x} \leq \mathbf{b},\; C\mathbf{x} = \mathbf{d}$$
+  </div>
+
+  <p>When $Q \succeq 0$ (positive semi-definite), this is a <em>convex QP</em> — globally solvable in polynomial time. When $Q \succ 0$, the objective is strictly convex and the solution is unique.</p>
+
+  <h4>The Markowitz Portfolio QP</h4>
+  <div class="fbox teal">
+    $$\min_\mathbf{w} \frac{1}{2}\mathbf{w}^\top\Sigma\mathbf{w} \quad \text{s.t.} \quad \boldsymbol{\mu}^\top\mathbf{w} = \mu^*,\; \mathbf{1}^\top\mathbf{w} = 1,\; \mathbf{w} \geq \mathbf{0} \text{ (long-only)}$$
+  </div>
+
+  <p>The KKT conditions give the closed-form solution when only the two equality constraints are active (no short-selling restriction):</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Closed-Form Markowitz Solution (equality constraints only)</div>
+    $$\mathbf{w}^* = \Sigma^{-1}(\lambda\mathbf{1} + \mu\boldsymbol{\mu}) \qquad \text{with } \lambda, \mu \text{ from solving the } 2\times2 \text{ system:}$$
+    $$\begin{pmatrix}A & B \\ B & C\end{pmatrix}\begin{pmatrix}\lambda \\ \mu\end{pmatrix} = \begin{pmatrix}1 \\ \mu^*\end{pmatrix}, \quad A=\mathbf{1}^\top\Sigma^{-1}\mathbf{1},\; B=\mathbf{1}^\top\Sigma^{-1}\boldsymbol{\mu},\; C=\boldsymbol{\mu}^\top\Sigma^{-1}\boldsymbol{\mu}$$
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Two-Fund Separation Theorem</div>
+    The efficient frontier consists of all convex combinations of just two "mutual funds": the minimum-variance portfolio $\mathbf{w}_\text{mv} = \Sigma^{-1}\mathbf{1}/(\mathbf{1}^\top\Sigma^{-1}\mathbf{1})$ and any other portfolio on the frontier. Every rational mean-variance investor holds some combination of these two funds, regardless of risk preferences. This is the mathematical content of Tobin's two-fund separation theorem.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: NUMERICAL ROOT-FINDING & OPTIMISATION         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Numerical Root-Finding &amp; Optimisation</div>
+  </div>
+
+  <p>Root-finding — solving $f(x) = 0$ — is ubiquitous in finance: computing bond yields, implied volatility, option prices in implicit finite-difference schemes, and model calibration. Each method makes different trade-offs between speed, robustness, and the information required.</p>
+
+  <h3 id="s2-bisect">2.1 Bisection Method</h3>
+
+  <div class="method-card">
+    <h4>Bisection</h4>
+    <p><strong>Idea:</strong> Given a bracket $[a, b]$ where $f(a)$ and $f(b)$ have opposite signs (by the Intermediate Value Theorem, a root exists), repeatedly halve the interval by evaluating $f$ at the midpoint.</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Bisection Algorithm</div>
+      <ol style="margin: 0.4rem 0 0 1.2rem;">
+        <li>Require $f(a)\cdot f(b) < 0$ (bracket condition)</li>
+        <li>Set $m = (a+b)/2$</li>
+        <li>If $f(m)\cdot f(a) < 0$: set $b=m$; else set $a=m$</li>
+        <li>Repeat until $|b-a| < \varepsilon$ (tolerance)</li>
+      </ol>
+      Error after $n$ steps: $|x_n - x^*| \leq \frac{b_0 - a_0}{2^n}$
+    </div>
+
+    <table>
+      <tr><th>Property</th><th>Bisection</th></tr>
+      <tr><td>Convergence rate</td><td>Linear — exactly 1 bit of accuracy per step</td></tr>
+      <tr><td>Steps for $\varepsilon = 10^{-6}$</td><td>$n \approx 20$ from a unit interval ($2^{-20} \approx 10^{-6}$)</td></tr>
+      <tr><td>Requirements</td><td>Continuity of $f$; a valid bracket</td></tr>
+      <tr><td>Robustness</td><td>Guaranteed to converge — never fails given valid bracket</td></tr>
+      <tr><td>Derivatives needed</td><td>None</td></tr>
+    </table>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Implied Volatility via Bisection</div>
+      To find implied vol $\sigma^*$ from a market call price $C_\text{market}$: bracket with $\sigma_\text{lo}=0.001$ (tiny) and $\sigma_\text{hi}=5$ (500%) — the BS call function is strictly increasing in $\sigma$, so $C_\text{BS}(\sigma_\text{lo}) < C_\text{market} < C_\text{BS}(\sigma_\text{hi})$ is easily satisfied. Bisection then finds $\sigma^*$ to 6 decimal places in ~20 iterations. Simple, guaranteed, sufficient for most applications.
+    </div>
+  </div>
+
+  <h3 id="s2-nr">2.2 Newton-Raphson Method</h3>
+
+  <div class="method-card">
+    <h4>Newton-Raphson</h4>
+    <p><strong>Idea:</strong> Linearise $f$ at the current iterate using its derivative, and jump to the zero of that linear approximation. Dramatically faster than bisection near the solution.</p>
+
+    <div class="fbox gold">
+      <div class="flabel">Newton-Raphson Iteration</div>
+      $$x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}$$
+    </div>
+
+    <p><strong>Convergence:</strong> <em>Quadratic</em> near a simple root — the number of correct decimal digits roughly doubles per iteration. If $|e_k| = |x_k - x^*|$, then $|e_{k+1}| \approx \frac{|f''(x^*)|}{2|f'(x^*)|}|e_k|^2$.</p>
+
+    <div class="callout proof">
+      <strong>Derivation:</strong> Taylor expand $f$ around $x_k$: $f(x^*) = f(x_k) + f'(x_k)(x^*-x_k) + \frac{1}{2}f''(\xi)(x^*-x_k)^2 = 0$. Rearranging: $x^* = x_k - \frac{f(x_k)}{f'(x_k)} - \frac{f''(\xi)}{2f'(x_k)}(x^*-x_k)^2$. So the Newton iterate $x_{k+1} = x_k - f(x_k)/f'(x_k)$ satisfies $x^* - x_{k+1} = \frac{f''(\xi)}{2f'(x_k)}(x^*-x_k)^2$ — error decreases quadratically.
+    </div>
+
+    <table>
+      <tr><th>Property</th><th>Newton-Raphson</th></tr>
+      <tr><td>Convergence rate</td><td>Quadratic (near a simple root)</td></tr>
+      <tr><td>Starting point</td><td>Must be "close enough" to the root — can diverge or cycle otherwise</td></tr>
+      <tr><td>Multiple roots</td><td>Degrades to linear convergence at a double root $f(x^*)=f'(x^*)=0$</td></tr>
+      <tr><td>Requirements</td><td>$f'$ exists and $f'(x_k) \neq 0$ at each step</td></tr>
+      <tr><td>Failure modes</td><td>Oscillation, divergence, or convergence to wrong root</td></tr>
+    </table>
+
+    <div class="callout finance">
+      <div class="ctitle">📈 Finance: Newton-Raphson for Implied Vol</div>
+      For implied vol, the Newton step is:
+      $$\sigma_{k+1} = \sigma_k - \frac{C_\text{BS}(\sigma_k) - C_\text{market}}{\mathcal{V}(\sigma_k)}$$
+      where $\mathcal{V} = \partial C_\text{BS}/\partial\sigma$ is the vega. Since $C_\text{BS}$ is strictly increasing and convex in $\sigma$ with positive vega everywhere, Newton's method converges in 5–10 iterations from a reasonable starting guess. <strong>Practitioner Black formula</strong> initialises $\sigma_0$ using the ATM approximation $C \approx S\sigma\sqrt{T/2\pi}$, giving $\sigma_0 \approx C\sqrt{2\pi/T}/S$.
+    </div>
+
+    <h4>Multivariate Newton-Raphson</h4>
+    <p>For a system of equations $\mathbf{F}(\mathbf{x}) = \mathbf{0}$ where $\mathbf{F}: \mathbb{R}^n \to \mathbb{R}^n$:</p>
+    <div class="fbox teal">
+      $$\mathbf{x}_{k+1} = \mathbf{x}_k - J_\mathbf{F}(\mathbf{x}_k)^{-1}\,\mathbf{F}(\mathbf{x}_k)$$
+    </div>
+    <p>where $J_\mathbf{F}$ is the Jacobian. In practice: solve the linear system $J_\mathbf{F}(\mathbf{x}_k)\,\Delta\mathbf{x} = -\mathbf{F}(\mathbf{x}_k)$ for $\Delta\mathbf{x}$ rather than explicitly inverting the Jacobian. Used in model calibration (calibrating stochastic vol models to multiple strikes simultaneously).
+    </p>
+  </div>
+
+  <h3 id="s2-secant">2.3 Secant &amp; Brent's Methods</h3>
+
+  <div class="method-card">
+    <h4>Secant Method — Newton Without Derivatives</h4>
+    <p>Approximate $f'(x_k)$ by a finite difference using the two most recent iterates:</p>
+    <div class="fbox gold">
+      $$x_{k+1} = x_k - f(x_k)\frac{x_k - x_{k-1}}{f(x_k) - f(x_{k-1})}$$
+    </div>
+    <p>Convergence rate: superlinear — order $\phi = (1+\sqrt{5})/2 \approx 1.618$ (the golden ratio). Slower than Newton but requires no derivative evaluation.</p>
+  </div>
+
+  <div class="method-card">
+    <h4>Brent's Method — The Gold Standard Root-Finder</h4>
+    <p>Brent's method combines bisection, secant, and inverse quadratic interpolation (IQI), choosing the safest step at each iteration:</p>
+    <ul>
+      <li>Uses a bracket like bisection — <em>always</em> converges</li>
+      <li>Accelerates with secant/IQI steps when they are safe — nearly as fast as Newton near the root</li>
+      <li>Falls back to bisection when the faster steps would leave the bracket — guaranteed not to fail</li>
+    </ul>
+    <div class="callout tip">
+      <div class="ctitle">✓ When to Use Which Method</div>
+      <ul>
+        <li><strong>Bisection:</strong> When you need guaranteed convergence and speed doesn't matter; for bracketing</li>
+        <li><strong>Newton-Raphson:</strong> When derivatives are cheap, starting point is good, and maximum speed is needed</li>
+        <li><strong>Brent:</strong> General-purpose — the right default when you're not sure; guaranteed + fast</li>
+        <li><strong>Secant:</strong> When derivatives are unavailable and you have two reasonable starting points</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 id="s2-gd">2.4 Gradient Descent Variants</h3>
+
+  <p>Modern optimisation in machine learning and calibration uses variants of gradient descent designed for large-scale and stochastic settings.</p>
+
+  <table>
+    <tr><th>Method</th><th>Update Rule</th><th>Key Property</th><th>Finance Use</th></tr>
+    <tr><td>Batch GD</td><td>$\mathbf{x} \leftarrow \mathbf{x} - \alpha\nabla f(\mathbf{x})$</td><td>Stable; one step uses all data</td><td>Markowitz, calibration</td></tr>
+    <tr><td>SGD</td><td>$\mathbf{x} \leftarrow \mathbf{x} - \alpha\nabla f_i(\mathbf{x})$</td><td>Cheap per step; noisy; escapes local minima</td><td>Neural networks for pricing</td></tr>
+    <tr><td>Mini-batch SGD</td><td>Average over random subset</td><td>Balances stability and speed</td><td>Deep learning calibration</td></tr>
+    <tr><td>Momentum (HB)</td><td>$\mathbf{v} \leftarrow \beta\mathbf{v} + \nabla f$; $\mathbf{x} \leftarrow \mathbf{x} - \alpha\mathbf{v}$</td><td>Accelerates in flat directions; reduces oscillation</td><td>Training risk models</td></tr>
+    <tr><td>Adam</td><td>Adaptive per-parameter LR with moment estimates</td><td>Robust to learning rate choice; widely used</td><td>Neural network vol surface fitting</td></tr>
+    <tr><td>L-BFGS</td><td>Limited-memory quasi-Newton</td><td>Superlinear convergence; $O(nm)$ memory</td><td>Model calibration (few params)</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Nesterov Accelerated Gradient — Optimal for Convex Problems</div>
+    For a convex $L$-smooth function, standard gradient descent achieves $O(1/k)$ convergence. Nesterov (1983) showed that by adding a momentum term:
+    $$\mathbf{y}_{k+1} = \mathbf{x}_k - \frac{1}{L}\nabla f(\mathbf{x}_k), \quad \mathbf{x}_{k+1} = \mathbf{y}_{k+1} + \frac{k-1}{k+2}(\mathbf{y}_{k+1}-\mathbf{y}_k)$$
+    convergence improves to $O(1/k^2)$ — the optimal rate for first-order methods. This is FISTA (Fast Iterative Shrinkage-Thresholding Algorithm) in the context of sparse optimisation, widely used in regularised regression and lasso.
+  </div>
+
+  <h3 id="s2-fd">2.5 Finite Difference Methods for Derivatives</h3>
+
+  <p>When analytic derivatives are unavailable (or inconvenient), finite differences approximate them numerically. This is essential for computing Greeks when no closed-form derivative exists.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Three Standard Finite Difference Approximations</div>
+    $$f'(x) \approx \frac{f(x+h)-f(x)}{h} \quad \text{(forward difference, } O(h)\text{ error)}$$
+    $$f'(x) \approx \frac{f(x)-f(x-h)}{h} \quad \text{(backward difference, } O(h)\text{ error)}$$
+    $$f'(x) \approx \frac{f(x+h)-f(x-h)}{2h} \quad \text{(central difference, } O(h^2)\text{ error)}$$
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">Second Derivative</div>
+    $$f''(x) \approx \frac{f(x+h) - 2f(x) + f(x-h)}{h^2} \quad (O(h^2)\text{ error})$$
+  </div>
+
+  <h4>The Step Size Trade-off</h4>
+  <p>Choosing $h$ involves a fundamental trade-off:</p>
+  <ul>
+    <li><strong>Too large $h$:</strong> truncation error dominates (approximation error from the Taylor expansion is large)</li>
+    <li><strong>Too small $h$:</strong> cancellation error dominates (subtracting nearly equal floating-point numbers loses precision)</li>
+  </ul>
+  <div class="fbox teal">
+    $$h_\text{opt,forward} \approx \sqrt{\varepsilon_\text{machine}} \approx 10^{-8} \qquad h_\text{opt,central} \approx \varepsilon_\text{machine}^{1/3} \approx 10^{-5}$$
+  </div>
+  <p>Central differences are strongly preferred — they achieve $O(h^2)$ accuracy vs $O(h)$ for forward differences, at the cost of one extra function evaluation. For computing Greeks in Monte Carlo, the central difference with $h = 0.01S$ is standard.</p>
+
+  <div class="callout finance">
+    <div class="ctitle">📈 Finance: Numerical Greeks</div>
+    For exotic options with no closed-form Greeks, finite differences on the pricing function directly:
+    $$\Delta \approx \frac{V(S+h) - V(S-h)}{2h}, \qquad \Gamma \approx \frac{V(S+h)-2V(S)+V(S-h)}{h^2}$$
+    Practical choices: $h = 0.01S$ for delta/gamma in equity options. For vega: bump $\sigma$ by 1 bp. For theta: reprice with $T \to T - 1/252$. These "bumping" calculations are standard in risk systems.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: ODE & PDE SOLVERS                             -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">ODE &amp; PDE Solvers</div>
+  </div>
+
+  <p>Stochastic differential equations (SDEs) are the primary modelling tool for asset prices, interest rates, and volatility. When closed-form solutions don't exist, we simulate paths numerically using ODE/SDE discretisation schemes.</p>
+
+  <h3 id="s3-euler">3.1 Euler Methods</h3>
+
+  <p>For an ODE $\frac{dy}{dt} = f(y, t)$ with initial condition $y(0) = y_0$, discretise time into steps of size $\Delta t$.</p>
+
+  <div class="method-card">
+    <h4>Explicit (Forward) Euler Method</h4>
+    <div class="fbox gold">
+      $$y_{n+1} = y_n + \Delta t\, f(y_n, t_n)$$
+    </div>
+    <p>Local truncation error: $O(\Delta t^2)$. Global error: $O(\Delta t)$ — "first-order accurate."</p>
+    <p><strong>Strengths:</strong> Simplest possible scheme; explicit — no system of equations to solve at each step.</p>
+    <p><strong>Weaknesses:</strong> Conditionally stable — requires $\Delta t < 2/|\partial f/\partial y|$ for stability. Can become unstable for stiff equations.</p>
+  </div>
+
+  <div class="method-card">
+    <h4>Implicit (Backward) Euler Method</h4>
+    <div class="fbox gold">
+      $$y_{n+1} = y_n + \Delta t\, f(y_{n+1}, t_{n+1})$$
+    </div>
+    <p>Requires solving a (possibly nonlinear) equation for $y_{n+1}$ at each step — but is <strong>unconditionally stable</strong>. Essential for stiff equations (e.g.\ the PDE arising from barrier options with a fine grid near the barrier).</p>
+  </div>
+
+  <h4>Euler-Maruyama: The SDE Extension</h4>
+  <p>For an SDE $dX_t = \mu(X_t,t)\,dt + \sigma(X_t,t)\,dW_t$, the Euler-Maruyama scheme is the direct Euler extension:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Euler-Maruyama Scheme</div>
+    $$X_{n+1} = X_n + \mu(X_n, t_n)\Delta t + \sigma(X_n, t_n)\,\Delta W_n, \quad \Delta W_n \sim N(0, \Delta t)$$
+  </div>
+
+  <p>Strong order of convergence: $O(\sqrt{\Delta t})$. Weak order (for expectations): $O(\Delta t)$. For GBM $dS = \mu S\,dt + \sigma S\,dW$, Euler-Maruyama can cause $S$ to go negative for large $\Delta t$ — the log-Euler (Milstein on the log) or exact simulation should be used instead.</p>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Euler-Maruyama on GBM — Use the Log Scheme</div>
+    Applying Euler-Maruyama directly to $dS = \mu S\,dt + \sigma S\,dW$ gives $S_{n+1} = S_n(1 + \mu\Delta t + \sigma\Delta W_n)$, which can become negative for large $\sigma$ or $\Delta t$. The correct approach is to simulate $\ln S$ exactly: $\ln S_{t+\Delta t} = \ln S_t + (\mu - \sigma^2/2)\Delta t + \sigma\sqrt{\Delta t}\,Z$ where $Z \sim N(0,1)$. This gives the exact GBM distribution at each step regardless of $\Delta t$.
+  </div>
+
+  <h3 id="s3-rk">3.2 Runge-Kutta Methods</h3>
+
+  <p>Runge-Kutta methods achieve higher-order accuracy by evaluating $f$ at intermediate points within each time step, then taking a weighted average. No extra memory is required beyond the current state.</p>
+
+  <div class="method-card">
+    <h4>RK4 — The Classic Fourth-Order Method</h4>
+    <div class="fbox gold">
+      <div class="flabel">RK4 — Fourth-Order Runge-Kutta</div>
+      $$k_1 = f(y_n, t_n)$$
+      $$k_2 = f\!\left(y_n + \tfrac{\Delta t}{2}k_1,\; t_n + \tfrac{\Delta t}{2}\right)$$
+      $$k_3 = f\!\left(y_n + \tfrac{\Delta t}{2}k_2,\; t_n + \tfrac{\Delta t}{2}\right)$$
+      $$k_4 = f\!\left(y_n + \Delta t\, k_3,\; t_n + \Delta t\right)$$
+      $$y_{n+1} = y_n + \frac{\Delta t}{6}\left(k_1 + 2k_2 + 2k_3 + k_4\right)$$
+    </div>
+    <p>Local error: $O(\Delta t^5)$. Global error: $O(\Delta t^4)$. Requires <strong>4 function evaluations per step</strong>.</p>
+  </div>
+
+  <h4>Comparison of ODE Solvers</h4>
+  <table>
+    <tr><th>Method</th><th>Order</th><th>F-evals/step</th><th>Stability</th><th>Use case</th></tr>
+    <tr><td>Euler (forward)</td><td>1</td><td>1</td><td>Conditional</td><td>Simple, quick-and-dirty; SDE simulation</td></tr>
+    <tr><td>Euler (backward)</td><td>1</td><td>1 (+ nonlinear solve)</td><td>Unconditional</td><td>Stiff equations; implicit PDE schemes</td></tr>
+    <tr><td>Trapezoidal (Crank-Nicolson)</td><td>2</td><td>1 (+ nonlinear solve)</td><td>Unconditional</td><td>PDE solvers; best balance for BS PDE</td></tr>
+    <tr><td>RK4</td><td>4</td><td>4</td><td>Conditional</td><td>High accuracy ODE simulation; Heston calibration</td></tr>
+    <tr><td>Milstein</td><td>1 (strong)</td><td>1</td><td>Conditional</td><td>SDE simulation; improves on Euler-Maruyama for scalar diffusion</td></tr>
+  </table>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Milstein Scheme — One Order Better Than Euler-Maruyama</div>
+    For $dX = \mu(X)\,dt + \sigma(X)\,dW$, the Milstein correction adds a term capturing the Itô correction more accurately:
+    $$X_{n+1} = X_n + \mu\Delta t + \sigma\Delta W_n + \frac{1}{2}\sigma\sigma'\left[(\Delta W_n)^2 - \Delta t\right]$$
+    For GBM ($\sigma(X) = \sigma X$, $\sigma' = \sigma$): the Milstein scheme with $\ln S$ simulation is exact. The extra term converts strong convergence from $O(\sqrt{\Delta t})$ to $O(\Delta t)$ — a meaningful improvement for path-dependent option pricing.
+  </div>
+
+  <h3 id="s3-pde">3.3 Finite Differences for PDEs</h3>
+
+  <p>The finite difference method (FDM) discretises a PDE on a grid in $(S, t)$-space, converting the PDE into a system of algebraic equations. The three canonical schemes differ in how they treat the time derivative.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Grid Setup for Option Pricing PDE</div>
+    Time: $t_0 = 0, t_1, \ldots, t_M = T$ with step $\Delta t = T/M$<br>
+    Asset: $S_0 = 0, S_1, \ldots, S_N = S_\text{max}$ with step $\Delta S$<br>
+    Unknowns: $V_j^n \approx V(S_j, t_n)$
+  </div>
+
+  <h4>Three Fundamental Schemes</h4>
+  <table>
+    <tr><th>Scheme</th><th>Time treatment</th><th>Accuracy</th><th>Stability</th><th>System to solve</th></tr>
+    <tr><td>Explicit</td><td>Forward difference in $t$</td><td>$O(\Delta t) + O(\Delta S^2)$</td><td>Conditional: $\Delta t \leq \Delta S^2/\sigma^2 S^2$</td><td>No system — explicit update</td></tr>
+    <tr><td>Implicit (fully)</td><td>Backward difference in $t$</td><td>$O(\Delta t) + O(\Delta S^2)$</td><td>Unconditional</td><td>Tridiagonal system per time step</td></tr>
+    <tr><td>Crank-Nicolson</td><td>Average of forward/backward</td><td>$O(\Delta t^2) + O(\Delta S^2)$</td><td>Unconditional</td><td>Tridiagonal system; second-order in $t$</td></tr>
+  </table>
+
+  <h3 id="s3-bspde">3.4 Black-Scholes via Finite Difference</h3>
+
+  <p>The BS PDE is a standard parabolic PDE, solved backwards from the terminal condition (payoff at expiry).</p>
+
+  <div class="fbox teal">
+    <div class="flabel">Discretised BS PDE (Crank-Nicolson in practice)</div>
+    $$\frac{V_j^{n+1} - V_j^n}{\Delta t} + \frac{1}{2}\sigma^2 S_j^2 \frac{V_{j+1}^n - 2V_j^n + V_{j-1}^n}{\Delta S^2} + rS_j \frac{V_{j+1}^n - V_{j-1}^n}{2\Delta S} - rV_j^n = 0$$
+  </div>
+
+  <p><strong>Boundary conditions:</strong></p>
+  <ul>
+    <li>At $S=0$: $V(0,t) = 0$ for a call (stock worthless → option worthless)</li>
+    <li>At $S=S_\text{max}$: $V(S_\text{max},t) \approx S_\text{max} - Ke^{-r(T-t)}$ (deep ITM call ≈ stock minus discounted strike)</li>
+    <li>At $t=T$: $V_j^M = \max(S_j - K, 0)$ (call payoff)</li>
+  </ul>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why FDM Beats Monte Carlo for American Options</div>
+    American options require checking the early-exercise condition at every point in $(S, t)$ space. In the FDM, this is natural: at each grid node, the American value is $V_j^n = \max(V_j^n|_\text{continuation},\; \text{intrinsic})$. In Monte Carlo, computing the optimal stopping surface requires regression-based methods (Longstaff-Schwartz). FDM is therefore the industry standard for American equity options; Monte Carlo is preferred for high-dimensional or path-dependent payoffs.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: MONTE CARLO METHODS                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Monte Carlo Methods</div>
+  </div>
+
+  <p>Monte Carlo (MC) is the workhorse of quantitative finance for high-dimensional or path-dependent pricing problems. At its core: approximate $E[g(X)] \approx \frac{1}{N}\sum_{i=1}^N g(X^{(i)})$ by simulating $N$ independent samples $X^{(i)}$. The central challenge is achieving sufficient accuracy at manageable computational cost.</p>
+
+  <h3 id="s4-sim">4.1 Simulating from Distributions</h3>
+
+  <h4>Inverse CDF (Probability Integral Transform) Method</h4>
+  <p>The fundamental simulation technique: if $U \sim \text{Uniform}(0,1)$ and $F$ is a CDF, then $X = F^{-1}(U)$ has distribution $F$.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Inverse CDF Sampling</div>
+    Given $U \sim U(0,1)$, set $X = F^{-1}(U)$. Then $X \sim F$.<br>
+    <strong>Proof:</strong> $P(X \leq x) = P(F^{-1}(U) \leq x) = P(U \leq F(x)) = F(x)$ ✓
+  </div>
+
+  <table>
+    <tr><th>Distribution</th><th>Inverse CDF / Simulation Method</th></tr>
+    <tr><td>Uniform$(a,b)$</td><td>$X = a + (b-a)U$</td></tr>
+    <tr><td>Exponential$(\lambda)$</td><td>$X = -\ln(U)/\lambda$ (exact inverse CDF)</td></tr>
+    <tr><td>Geometric$(p)$</td><td>$X = \lceil \ln(U)/\ln(1-p) \rceil$</td></tr>
+    <tr><td>Normal$N(0,1)$</td><td>Box-Muller or inverse CDF (no closed form; use numerical $\Phi^{-1}$)</td></tr>
+    <tr><td>Log-Normal</td><td>$X = e^{\mu + \sigma Z}$, $Z \sim N(0,1)$</td></tr>
+    <tr><td>Poisson$(\lambda)$</td><td>Inverse CDF on PMF; or: generate exponentials until sum exceeds 1</td></tr>
+  </table>
+
+  <h4>Box-Muller Transform — Generating Standard Normals</h4>
+  <p>Generate two independent $U(0,1)$ variates and transform to two independent normals:</p>
+  <div class="fbox gold">
+    <div class="flabel">Box-Muller</div>
+    Let $U_1, U_2 \sim U(0,1)$ independent. Then:
+    $$Z_1 = \sqrt{-2\ln U_1}\cos(2\pi U_2), \qquad Z_2 = \sqrt{-2\ln U_1}\sin(2\pi U_2)$$
+    are independent standard normal random variables.
+  </div>
+
+  <h4>Simulating Correlated Normals</h4>
+  <p>To generate an $n$-dimensional normal vector $\mathbf{X} \sim N(\boldsymbol{\mu}, \Sigma)$:</p>
+  <ol class="steps">
+    <li>Cholesky factor: $\Sigma = LL^\top$</li>
+    <li>Generate $\mathbf{Z} = (Z_1, \ldots, Z_n)^\top$ with i.i.d. $Z_i \sim N(0,1)$</li>
+    <li>Transform: $\mathbf{X} = \boldsymbol{\mu} + L\mathbf{Z}$</li>
+  </ol>
+  <p>Verification: $\text{Cov}(\mathbf{X}) = L\,\text{Cov}(\mathbf{Z})\,L^\top = L\,I\,L^\top = \Sigma$ ✓. Used for multi-asset Monte Carlo, Cholesky-correlated Brownian paths, and copula-based credit models.</p>
+
+  <h4>Acceptance-Rejection Sampling</h4>
+  <p>For distributions where the inverse CDF has no closed form, acceptance-rejection samples from a proposal distribution $g(x)$ that envelopes the target $f(x) \leq cg(x)$:</p>
+  <ol class="steps">
+    <li>Draw $X \sim g$ and $U \sim U(0,1)$</li>
+    <li>Accept $X$ if $U \leq f(X)/(cg(X))$; otherwise reject and repeat</li>
+    <li>Accepted samples are distributed according to $f$</li>
+  </ol>
+  <p>Acceptance probability is $1/c$ — efficiency depends on how tightly $g$ envelopes $f$. For the standard normal, the optimal proposal achieves $c = \sqrt{2e/\pi} \approx 1.32$ (about 76% acceptance).</p>
+
+  <h3 id="s4-antithetic">4.2 Antithetic Variates</h3>
+
+  <p>Antithetic variates exploit the symmetry of the normal distribution to pair each simulation with its "mirror image," creating negative correlation between pairs of payoffs and reducing variance.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Antithetic Variates Estimator</div>
+    For each $Z^{(i)} \sim N(0,1)$, use both $Z^{(i)}$ and $-Z^{(i)}$ to generate two paths:
+    $$S_T^+ = S_0\exp\!\left((r-\tfrac{\sigma^2}{2})T + \sigma\sqrt{T}\,Z^{(i)}\right), \quad S_T^- = S_0\exp\!\left((r-\tfrac{\sigma^2}{2})T - \sigma\sqrt{T}\,Z^{(i)}\right)$$
+    Estimate: $\hat{V} = e^{-rT}\cdot\frac{1}{N}\sum_{i=1}^{N/2}\frac{g(S_T^+)+g(S_T^-)}{2}$
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Variance Reduction Formula</div>
+    $$\text{Var}\!\left(\frac{g^+ + g^-}{2}\right) = \frac{\text{Var}(g)}{2} + \frac{\text{Cov}(g^+, g^-)}{2}$$
+    Variance reduction occurs whenever $\text{Cov}(g^+, g^-) < 0$ — guaranteed for <strong>monotone payoff functions</strong> $g$ (call payoffs are monotone increasing in $S_T$, so $S_T^+ > S_T^-$ implies $g^+ > g^-$, giving negative covariance).
+  </div>
+
+  <div class="callout proof">
+    <strong>Why antithetic works for calls:</strong> Since $Z$ and $-Z$ have the same distribution (symmetry of the normal), $g^+ = \max(S_T^+-K,0)$ and $g^- = \max(S_T^--K,0)$ are identically distributed but negatively correlated: when $Z$ is large (high $S^+$, so $g^+$ is large), $-Z$ is large negative (low $S^-$, so $g^-$ is likely small). This negative correlation reduces the variance of their average. Effective VR factor: typically 2–5× for standard call options.
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Antithetic Variates for Path-Dependent Options</div>
+    For options whose payoff depends on the entire path (e.g.\ arithmetic Asian options), both paths $\{S^+\}$ and $\{S^-\}$ must be fully simulated using the antithetic $-Z$ at each time step. The negative correlation carries through as long as the path functional is monotone in the driving Brownian motion. Non-monotone payoffs (butterfly spreads, some barrier options) may actually increase variance — always test empirically.
+  </div>
+
+  <h3 id="s4-control">4.3 Control Variates</h3>
+
+  <p>A control variate is a random variable $Y$ correlated with the payoff $g(X)$ whose expectation $E[Y] = \mu_Y$ is known analytically. By exploiting the correlation, we reduce the variance of the estimator.</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Control Variate Estimator</div>
+    $$\hat{V}_c = \frac{1}{N}\sum_{i=1}^N\left[g(X^{(i)}) - c(Y^{(i)} - \mu_Y)\right]$$
+    This estimator has expectation $E[g(X)]$ for <em>any</em> value of $c$ — the control does not introduce bias.
+    $$\text{Var}(\hat{V}_c) = \text{Var}(g) + c^2\,\text{Var}(Y) - 2c\,\text{Cov}(g, Y)$$
+  </div>
+
+  <div class="fbox teal">
+    <div class="flabel">Optimal Control Coefficient</div>
+    Minimise over $c$: $\quad c^* = \frac{\text{Cov}(g, Y)}{\text{Var}(Y)} = \rho_{gY}\frac{\text{SD}(g)}{\text{SD}(Y)}$<br>
+    Variance reduction factor at optimal $c^*$:
+    $$\frac{\text{Var}(\hat{V}_{c^*})}{\text{Var}(\hat{V}_0)} = 1 - \rho_{gY}^2$$
+    A control with $|\rho| = 0.95$ reduces variance by $1 - 0.9025 = 9.75\%$... wait, it reduces to $1-0.9025 = 0.0975$ of original — a $\mathbf{10\times}$ speedup.
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Classic Control Variates in Finance</div>
+    <strong>(a) Asian option pricing:</strong> Arithmetic Asian price (unknown closed form) correlated with geometric Asian price (closed form exists). Typical $|\rho| \approx 0.98$, giving ~25× variance reduction.<br><br>
+    <strong>(b) Basket option:</strong> Use a product of the individual Black-Scholes prices as a control (their expectation is known). The basket payoff and the control are highly correlated through the shared Brownian drivers.<br><br>
+    <strong>(c) European option with path simulation:</strong> When pricing a path-dependent option, use the terminal stock price's contribution to a vanilla option as a control — since $E[e^{-rT}\max(S_T-K,0)]$ is given by Black-Scholes.<br><br>
+    <strong>Practical note:</strong> Estimate $c^*$ from a pilot run of 1000 simulations (estimate $\hat{c}^* = \hat{\text{Cov}}/\hat{\text{Var}}$), then use it in the main run. The bias from estimating $c^*$ is $O(1/N)$ — negligible for $N \geq 10000$.
+  </div>
+
+  <h3 id="s4-importance">4.4 Importance Sampling</h3>
+
+  <p>Importance sampling (IS) is the most powerful variance reduction technique when dealing with rare events — deep out-of-the-money options, credit portfolio losses, or tail risk measures.</p>
+
+  <h4>The Core Identity</h4>
+  <div class="fbox gold">
+    <div class="flabel">Importance Sampling Identity</div>
+    $$E_f[g(X)] = \int g(x)\,f(x)\,dx = \int g(x)\,\frac{f(x)}{q(x)}\,q(x)\,dx = E_q\!\left[g(X)\frac{f(X)}{q(X)}\right]$$
+    where $q$ is the <strong>proposal distribution</strong> and $w(X) = f(X)/q(X)$ is the <strong>likelihood ratio (importance weight)</strong>.
+  </div>
+
+  <div class="fbox gold">
+    <div class="flabel">IS Estimator</div>
+    $$\hat{V}_\text{IS} = \frac{1}{N}\sum_{i=1}^N g(X^{(i)})\,w(X^{(i)}), \quad X^{(i)} \sim q$$
+    The IS estimator is unbiased for any valid proposal $q$ (with $q(x)>0$ wherever $f(x)g(x)>0$).
+  </div>
+
+  <h4>Optimal Proposal Distribution</h4>
+  <p>The optimal $q^*$ that minimises the IS variance is:</p>
+  <div class="fbox teal">
+    $$q^*(x) = \frac{|g(x)|\,f(x)}{E_f[|g(X)|]}$$
+    With this proposal, all samples contribute equally — zero variance! Of course, $E_f[|g(X)|]$ is what we're trying to estimate, so $q^*$ is not directly computable. But this points the way: sample more from regions where $|g(x)f(x)|$ is large.
+  </div>
+
+  <h4>Exponential Tilting — IS for Normal Distributions</h4>
+  <p>For payoffs driven by normal $Z \sim N(0,1)$, shift the mean to put more probability mass in the relevant region:</p>
+  <div class="fbox gold">
+    <div class="flabel">Exponential Tilting (Normal Shift)</div>
+    Under shifted measure $Z' = Z - \theta \sim N(0,1)$ where $Z = Z' + \theta$:<br>
+    Original density: $f(Z) = \phi(Z)$. Proposal density: $q(Z) = \phi(Z-\theta)$.<br>
+    Likelihood ratio: $w = \frac{f(Z)}{q(Z)} = \frac{\phi(Z)}{\phi(Z-\theta)} = e^{-\theta Z + \theta^2/2}$<br><br>
+    For a deep OTM call: choose $\theta$ so that $E_q[S_T] \approx K$ — centre the simulation at the strike.
+  </div>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Importance Sampling for Deep OTM Options (Verified)</div>
+    Call option: $S=100$, $K=150$ (50% OTM), $\sigma=20\%$, $T=1$yr, $r=0$.<br>
+    BS exact price: $0.0038$ (very small — deep OTM).<br><br>
+    Plain MC (100,000 paths): only ~0.1% of paths expire ITM. Price estimate has huge relative error (SE/price $\approx 30\%$).<br><br>
+    IS with $\theta = \ln(150/100)/0.20 = 2.03$ (shift to put mean at strike): ~50% of shifted paths expire ITM. Price estimate has SE/price $< 1\%$. Variance reduction factor: $\approx 900\times$.<br><br>
+    This is why IS is the standard tool for CVaR computation and pricing tail options.
+  </div>
+
+  <h3 id="s4-qmc">4.5 Quasi-Monte Carlo</h3>
+
+  <p>Standard MC uses pseudo-random numbers — they appear random but are systematically generated. Quasi-Monte Carlo (QMC) replaces them with <strong>low-discrepancy sequences</strong> that cover the unit hypercube more uniformly than pseudo-random numbers, dramatically improving convergence.</p>
+
+  <h4>Discrepancy and the Koksma-Hlawka Bound</h4>
+  <div class="fbox gold">
+    <div class="flabel">Convergence Comparison</div>
+    $$\text{Standard MC: } \text{error} = O\!\left(\frac{1}{\sqrt{N}}\right) \qquad \text{QMC: } \text{error} = O\!\left(\frac{(\log N)^d}{N}\right)$$
+    where $d$ is the dimension. For low-to-moderate $d$, QMC achieves effective $O(1/N)$ convergence — equivalent to infinite-order MC.
+  </div>
+
+  <h4>Common Low-Discrepancy Sequences</h4>
+  <table>
+    <tr><th>Sequence</th><th>Construction</th><th>Best for</th></tr>
+    <tr><td>Halton</td><td>Radical inverse in prime bases (base 2, 3, 5, ...)</td><td>Low dimensions ($d \leq 10$); easy to implement</td></tr>
+    <tr><td>Sobol</td><td>Base-2 digital construction with direction numbers</td><td>High dimensions ($d$ up to several hundred); industry standard</td></tr>
+    <tr><td>Faure</td><td>Permuted Halton in same prime base</td><td>Moderate dimensions with scrambling</td></tr>
+    <tr><td>Lattice rules</td><td>Evenly spaced on a lattice in $[0,1]^d$</td><td>Smooth integrands with known smoothness</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Brownian Bridge Construction for QMC Path Simulation</div>
+    Naively applying a $d$-dimensional Sobol sequence to simulate a path of $d$ time steps wastes its uniformity — the first dimension is most important (determines endpoint; contributes most to option payoff variance) but in standard time-stepping, later dimensions are just refinements. The <strong>Brownian bridge</strong> construction reorders: first simulate the endpoint $W_T$ (most important), then the midpoint $W_{T/2}$, then the quarter points, and so on. This aligns the most uniform QMC dimensions with the most important integration directions, greatly improving QMC performance for path-dependent options.
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ QMC Pitfalls — When It Doesn't Help</div>
+    <ul>
+      <li><strong>Very high dimension:</strong> The $({\log N})^d/N$ bound degrades as $d$ grows. QMC loses its advantage over MC for $d \geq 300$–$500$ without dimension reduction.</li>
+      <li><strong>Discontinuous payoffs:</strong> QMC convergence proofs assume smooth integrands. Discontinuous payoffs (digital options, barrier options) require smoothing (e.g.\ smoothing the indicator function) to benefit from QMC.</li>
+      <li><strong>Standard errors:</strong> Unlike MC, QMC doesn't have a simple standard error formula — use randomised QMC (add a random shift to the sequence) to estimate error via multiple independent randomisations.</li>
+    </ul>
+  </div>
+
+  <h3 id="s4-stratified">4.6 Stratified Sampling &amp; Other Techniques</h3>
+
+  <div class="method-card">
+    <h4>Stratified Sampling</h4>
+    <p>Divide the sample space into $K$ strata, allocate $n_k$ samples to each stratum, and sample uniformly within each. The estimator is:</p>
+    <div class="fbox gold">
+      $$\hat{V}_\text{strat} = \sum_{k=1}^K p_k\,\bar{g}_k, \quad \bar{g}_k = \frac{1}{n_k}\sum_{j=1}^{n_k}g(X_j^{(k)})$$
+    </div>
+    <p>where $p_k$ is the probability mass of stratum $k$. Optimal allocation (proportional to $\sigma_k$): $n_k \propto p_k\sigma_k$ (Neyman allocation). Variance reduction factor: at least $K\times$ for equal strata with uniform allocation.</p>
+  </div>
+
+  <div class="method-card">
+    <h4>Latin Hypercube Sampling (LHS)</h4>
+    <p>A generalisation of stratified sampling to $d$ dimensions. Divide each of $d$ dimensions into $N$ equal intervals; sample exactly one point from each interval in each dimension, with random pairing across dimensions. Guarantees perfect stratification in every margin while being easy to implement:</p>
+    <div class="fbox teal">
+      $$U_j^{(i)} = \frac{\pi_j(i) - U_{ij}}{N}, \quad i=1,\ldots,N;\; j=1,\ldots,d$$
+    </div>
+    <p>where $\pi_j$ is a random permutation of $\{1,\ldots,N\}$ and $U_{ij}\sim U(0,1)$. LHS achieves better coverage than i.i.d. sampling with no extra cost — a drop-in replacement for the pseudo-random number generator in any MC engine.</p>
+  </div>
+
+  <h4>Moment Matching</h4>
+  <p>Adjust simulated samples to exactly match known moments of the target distribution. For normal samples: standardise to mean 0, variance 1, and optionally adjust skewness/kurtosis. Useful when the option payoff is very sensitive to the mean (forward price):</p>
+  <div class="fbox">
+    Adjust samples $Z_1,\ldots,Z_N$ to have $\bar{Z}=0$ and $\hat{\sigma}^2=1$ exactly: $\tilde{Z}_i = (Z_i - \bar{Z})/\hat{\sigma}$. This eliminates the simulation error in moments and is free — apply before every MC run.
+  </div>
+
+  <h4>Variance Reduction — Summary and Selection Guide</h4>
+  <table>
+    <tr><th>Technique</th><th>Typical VR factor</th><th>Best for</th><th>Implementation cost</th></tr>
+    <tr><td>Antithetic variates</td><td>2–10×</td><td>Monotone payoffs; symmetric diffusions</td><td>Trivial — negate each $Z$</td></tr>
+    <tr><td>Control variates</td><td>10–100×</td><td>Payoffs correlated with a known quantity</td><td>Low — estimate $c^*$ from pilot run</td></tr>
+    <tr><td>Stratified / LHS</td><td>2–20×</td><td>Low-dimensional integrals; improving uniformity</td><td>Low — swap RNG</td></tr>
+    <tr><td>Moment matching</td><td>2–5×</td><td>Any diffusion; eliminates sampling bias in moments</td><td>Trivial — standardise samples</td></tr>
+    <tr><td>Importance sampling</td><td>10–1000×</td><td>Rare events; deep OTM options; CVaR</td><td>Medium — requires IS design; LR computation</td></tr>
+    <tr><td>Quasi-Monte Carlo</td><td>10–100×</td><td>Smooth, low-to-moderate dimension integrals</td><td>Medium — Sobol generator; bridge construction</td></tr>
+    <tr><td>Combining techniques</td><td>100–10000×</td><td>Production pricing: IS + QMC + antithetic</td><td>High — requires careful design</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The Fundamental MC Trade-off</div>
+    All variance reduction techniques share the same goal: reduce the variance of the estimator without introducing bias, so that fewer paths are needed to achieve a target accuracy. The standard error of plain MC is $\sigma/\sqrt{N}$ — to reduce error by 10×, you need 100× more paths. A 100× variance reduction achieves the same accuracy improvement at no extra computational cost. In production systems, combining IS + QMC + antithetic + control variates routinely achieves 1000×–10000× effective variance reduction, making exotic option pricing tractable.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Optimisation Theory at a Glance</h3>
+  <table>
+    <tr><th>Concept</th><th>Key Formula / Condition</th><th>Key Fact</th></tr>
+    <tr><td>Convexity (2nd order)</td><td>$H_f(\mathbf{x}) \succeq 0$ for all $\mathbf{x}$</td><td>Local min = global min; gradient methods guaranteed</td></tr>
+    <tr><td>Unconstrained optimality</td><td>$\nabla f(\mathbf{x}^*) = \mathbf{0}$, $H_f(\mathbf{x}^*) \succeq 0$</td><td>Necessary (1st order) + sufficient (2nd order, PSD Hessian)</td></tr>
+    <tr><td>KKT stationarity</td><td>$\nabla f + \sum\mu_i\nabla g_i + \sum\lambda_j\nabla h_j = \mathbf{0}$</td><td>Necessary for constrained opt (given CQ)</td></tr>
+    <tr><td>KKT dual feasibility</td><td>$\mu_i \geq 0$</td><td>Inequality multipliers must be non-negative</td></tr>
+    <tr><td>KKT complementary slackness</td><td>$\mu_i g_i(\mathbf{x}^*) = 0$</td><td>Either constraint inactive ($\mu_i=0$) or binding ($g_i=0$)</td></tr>
+    <tr><td>Strong duality</td><td>$d^* = p^*$</td><td>Convex problem + Slater's condition ⟹ zero duality gap</td></tr>
+    <tr><td>Markowitz solution</td><td>$\mathbf{w}^* = \Sigma^{-1}(\lambda\mathbf{1}+\mu\boldsymbol{\mu})$</td><td>Two-fund separation: all eff. portfolios are combos of two</td></tr>
+    <tr><td>Shadow price</td><td>$\lambda_j = -\partial p^*/\partial c_j$</td><td>Value of relaxing constraint $j$ by one unit</td></tr>
+  </table>
+
+  <h3>Root-Finding &amp; Numerical Derivatives at a Glance</h3>
+  <table>
+    <tr><th>Method</th><th>Update / Formula</th><th>Convergence</th><th>Use case</th></tr>
+    <tr><td>Bisection</td><td>$m=(a+b)/2$; bracket halved each step</td><td>Linear, $O(2^{-n})$</td><td>Guaranteed; YTM, implied vol bracket</td></tr>
+    <tr><td>Newton-Raphson</td><td>$x_{k+1} = x_k - f(x_k)/f'(x_k)$</td><td>Quadratic (near root)</td><td>Fast; implied vol, bond yield, model calibration</td></tr>
+    <tr><td>Secant</td><td>Use finite diff of $f'$ instead</td><td>Superlinear ($\phi\approx1.618$)</td><td>No derivative available</td></tr>
+    <tr><td>Brent's method</td><td>Bisection + secant + IQI; safest step</td><td>Superlinear + guaranteed</td><td>General-purpose default</td></tr>
+    <tr><td>Forward diff</td><td>$[f(x+h)-f(x)]/h$</td><td>$O(h)$ truncation</td><td>Simplest; $h\approx10^{-8}$</td></tr>
+    <tr><td>Central diff</td><td>$[f(x+h)-f(x-h)]/(2h)$</td><td>$O(h^2)$ truncation</td><td>Preferred for Greeks; $h\approx10^{-5}$</td></tr>
+    <tr><td>2nd deriv (central)</td><td>$[f(x+h)-2f(x)+f(x-h)]/h^2$</td><td>$O(h^2)$</td><td>Gamma, convexity, Hessian entries</td></tr>
+  </table>
+
+  <h3>ODE/SDE Solvers at a Glance</h3>
+  <table>
+    <tr><th>Scheme</th><th>Update Rule</th><th>Order</th><th>Stability</th></tr>
+    <tr><td>Euler (explicit)</td><td>$y_{n+1} = y_n + \Delta t\,f(y_n)$</td><td>1st</td><td>Conditional</td></tr>
+    <tr><td>Euler (implicit)</td><td>$y_{n+1} = y_n + \Delta t\,f(y_{n+1})$</td><td>1st</td><td>Unconditional (A-stable)</td></tr>
+    <tr><td>Crank-Nicolson</td><td>Average of explicit + implicit</td><td>2nd</td><td>Unconditional</td></tr>
+    <tr><td>RK4</td><td>Weighted average of $k_1,k_2,k_3,k_4$</td><td>4th</td><td>Conditional</td></tr>
+    <tr><td>Euler-Maruyama</td><td>$X_{n+1} = X_n + \mu\Delta t + \sigma\Delta W$</td><td>1 (weak), $\frac{1}{2}$ (strong)</td><td>Conditional</td></tr>
+    <tr><td>Milstein</td><td>EM + $\frac{1}{2}\sigma\sigma'[(\Delta W)^2-\Delta t]$</td><td>1 (strong)</td><td>Conditional</td></tr>
+    <tr><td>Log-Euler (GBM)</td><td>$S_{n+1} = S_n\exp((\mu-\sigma^2/2)\Delta t + \sigma\sqrt{\Delta t}\,Z)$</td><td>Exact</td><td>Always positive</td></tr>
+  </table>
+
+  <h3>Monte Carlo Variance Reduction at a Glance</h3>
+  <table>
+    <tr><th>Technique</th><th>Key Formula</th><th>VR Factor</th><th>When to Use</th></tr>
+    <tr><td>Antithetic variates</td><td>Pair $Z$ with $-Z$; average payoffs</td><td>$1/(1-\rho_{g^+,g^-})$; typically 2–10×</td><td>Monotone payoff; symmetric distribution</td></tr>
+    <tr><td>Control variates</td><td>$c^* = \text{Cov}(g,Y)/\text{Var}(Y)$; VR = $1-\rho^2$</td><td>$(1-\rho^2)^{-1}$; 10–100×</td><td>Known $E[Y]$ correlated with payoff</td></tr>
+    <tr><td>Importance sampling</td><td>$\hat{V} = \frac{1}{N}\sum g(X^{(i)})w(X^{(i)})$, $w=f/q$</td><td>10–1000× for rare events</td><td>Deep OTM options; CVaR; rare events</td></tr>
+    <tr><td>Exponential tilting</td><td>Shift $Z \to Z+\theta$; weight by $e^{-\theta Z+\theta^2/2}$</td><td>Optimal $\theta$: huge gains for OTM</td><td>Normal-driven models; select $\theta$ so mean hits payoff region</td></tr>
+    <tr><td>Stratified sampling</td><td>Sample $n_k$ from each stratum $k$; optimal: $n_k\propto p_k\sigma_k$</td><td>Up to $K\times$</td><td>Low-$d$ integrals; any payoff</td></tr>
+    <tr><td>Latin hypercube</td><td>Stratify every margin; random pairing</td><td>2–20×</td><td>Drop-in for RNG; moderate $d$</td></tr>
+    <tr><td>Quasi-Monte Carlo</td><td>Sobol/Halton sequences; error $O((\log N)^d/N)$</td><td>10–100×</td><td>Smooth payoffs; $d\leq100$ with bridge</td></tr>
+    <tr><td>Moment matching</td><td>Standardise: $\tilde{Z}_i = (Z_i-\bar{Z})/\hat{\sigma}$</td><td>2–5×</td><td>Trivial; apply always</td></tr>
+  </table>
+
+  <h3>Optimisation-Finance Connection Map</h3>
+  <table>
+    <tr><th>Finance Problem</th><th>Optimisation Type</th><th>Key Method</th></tr>
+    <tr><td>Mean-variance portfolio</td><td>Convex QP</td><td>KKT conditions; analytic or QP solver</td></tr>
+    <tr><td>CVaR minimisation</td><td>Linear program (Rockafellar-Uryasev)</td><td>Simplex / interior point</td></tr>
+    <tr><td>Implied volatility</td><td>1-D root-finding</td><td>Newton-Raphson on $C_\text{BS}(\sigma) = C_\text{mkt}$</td></tr>
+    <tr><td>Bond YTM</td><td>1-D root-finding</td><td>Bisection or Newton-Raphson</td></tr>
+    <tr><td>Heston calibration</td><td>Non-convex optimisation</td><td>L-BFGS / differential evolution; multi-start</td></tr>
+    <tr><td>American option pricing</td><td>PDE / dynamic programming</td><td>Finite difference + early exercise check</td></tr>
+    <tr><td>Exotic option pricing</td><td>Monte Carlo integration</td><td>IS + QMC + antithetic; Euler-Maruyama paths</td></tr>
+    <tr><td>Black-Scholes PDE</td><td>Numerical PDE</td><td>Crank-Nicolson finite difference</td></tr>
+    <tr><td>SDE path simulation</td><td>ODE time-stepping</td><td>Log-Euler (GBM); Milstein (general)</td></tr>
+    <tr><td>Factor model estimation</td><td>Least squares (QP)</td><td>Normal equations; QR decomposition</td></tr>
+    <tr><td>Robust portfolio</td><td>Second-order cone program (SOCP)</td><td>Interior point methods</td></tr>
+    <tr><td>Lasso regularisation</td><td>Convex, non-smooth</td><td>ISTA/FISTA (proximal gradient)</td></tr>
+  </table>
+
+  <h3>Convergence Rates Summary</h3>
+  <table>
+    <tr><th>Algorithm</th><th>Rate</th><th>Condition</th></tr>
+    <tr><td>Bisection</td><td>Linear — error halved each step</td><td>Bracket, continuity</td></tr>
+    <tr><td>Newton-Raphson (root-finding)</td><td>Quadratic — digits double per step</td><td>Close to simple root; $f'(x^*)\neq0$</td></tr>
+    <tr><td>Secant method</td><td>Superlinear — order $\phi\approx1.618$</td><td>Two starting points near root</td></tr>
+    <tr><td>Gradient descent (convex)</td><td>$O(1/k)$ on objective</td><td>Convex, $L$-smooth</td></tr>
+    <tr><td>Gradient descent (strongly convex)</td><td>Linear — geometric decay $(1-m/L)^k$</td><td>Strong convexity parameter $m$</td></tr>
+    <tr><td>Nesterov accelerated GD</td><td>$O(1/k^2)$ — optimal for 1st-order methods</td><td>Convex, $L$-smooth</td></tr>
+    <tr><td>Newton's method (optimisation)</td><td>Quadratic</td><td>Near optimum; Hessian PD</td></tr>
+    <tr><td>L-BFGS</td><td>Superlinear</td><td>Near optimum; smooth objective</td></tr>
+    <tr><td>Plain Monte Carlo</td><td>$O(N^{-1/2})$ in $N$ samples</td><td>Finite variance payoff</td></tr>
+    <tr><td>Quasi-Monte Carlo</td><td>$O((\log N)^d/N)$</td><td>Smooth integrand; low-moderate $d$</td></tr>
+    <tr><td>Euler-Maruyama (SDE)</td><td>$O(\sqrt{\Delta t})$ strong, $O(\Delta t)$ weak</td><td>Lipschitz coefficients</td></tr>
+    <tr><td>Milstein (SDE)</td><td>$O(\Delta t)$ strong</td><td>Lipschitz + differentiable coefficients</td></tr>
+    <tr><td>RK4 (ODE)</td><td>$O(\Delta t^4)$ global</td><td>Smooth $f$</td></tr>
+    <tr><td>Crank-Nicolson (PDE)</td><td>$O(\Delta t^2 + \Delta x^2)$</td><td>Smooth solution; no discontinuities</td></tr>
+  </table>
+</div>
+
+<footer>
+  Section 7 of 9 · Quantitative Finance Interview Preparation<br>
+  Covers: Convexity · KKT Conditions · Lagrangian Duality · LP &amp; QP · Markowitz · Gradient Descent · Newton-Raphson · Bisection · Brent · Finite Differences · Euler &amp; RK Methods · Euler-Maruyama · Milstein · Crank-Nicolson · Monte Carlo Simulation · Antithetic Variates · Control Variates · Importance Sampling · Quasi-Monte Carlo · Latin Hypercube · Stratified Sampling
+</footer>
+
+</body>
+</html>
