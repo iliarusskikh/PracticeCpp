@@ -13,7 +13,6 @@ struct Counter {
 
 class Processor {
 public:
-    // Same idea as your TraceCallback
     using TraceCallback = std::function<void(std::string_view label, const Counter& state)>;
 
     // trace = {} means "no tracing" (optional)
@@ -36,12 +35,12 @@ public:
 private:
     static void trace_step(const TraceCallback& trace, std::string_view label, const Counter& state) {
         if (trace) {          // only call if a callback was provided
-            trace(label, state);
+            trace(label, state); // print_trace
         }
     }
 };
 
-// Free function callback (like your trace_state in main.cpp)
+// Free function callback
 void print_trace(std::string_view label, const Counter& state) {
     state.print(label);
 }
@@ -58,9 +57,7 @@ int main() {
 
     // 3) Pass a lambda (inline custom behavior)
     std::cout << "\nWith trace (lambda):\n";
-    proc.run(3, [](std::string_view label, const Counter& state) {
-        std::cout << ">> " << label << " => " << state.value << '\n';
-    });
+    proc.run(3, [](std::string_view label, const Counter& state) { std::cout << ">> " << label << " => " << state.value << '\n';});
 
     return 0;
 }
