@@ -54,7 +54,7 @@ public:
 struct Point{
     int x;
     int y;
-}
+};
 
 struct MyHash{
     size_t operator()(const Point& p)const{

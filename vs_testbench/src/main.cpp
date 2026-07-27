@@ -17,20 +17,9 @@
 
 #include "header1.hpp"
 #include "timer.hpp"
+#include "heapalloc.hpp"
 
 using namespace std::chrono_literals;
-
-
-static uint32_t s_AllocCount=0;
-
-void* operator new(size_t size){
-    
-    s_AllocCount++;
-    std::cout << "Allocating "<<size<<" bytes \n";
-    return malloc(size);
-}
-
-
 
 int main() {
 
