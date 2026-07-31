@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heartbeat &amp; Reconnect — Project Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theory.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc">
+    <a class="back" href="index.html">← Theory index</a>
+    <span class="toc-label">Contents</span>
+    <ol id="toc-list">
+      <li><a href="#why-heartbeat"><span class="num">01</span>Why app heartbeat</a></li>
+      <li><a href="#server-client"><span class="num">02</span>Server send / client last_rx</a></li>
+      <li><a href="#timeout"><span class="num">03</span>Timeout → reconnect</a></li>
+      <li><a href="#backoff"><span class="num">04</span>Exponential backoff</a></li>
+      <li><a href="#states"><span class="num">05</span>Connection states</a></li>
+      <li><a href="#decision"><span class="num">06</span>Project decision</a></li>
+      <li><a href="#pitfalls"><span class="num">07</span>Pitfalls</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
+      <h1 class="title">Heartbeat <span class="brace">{</span> &amp; client reconnect <span class="brace">}</span></h1>
+      <p class="subtitle">Phase 5: detect dead peers with an application <code class="inline">HEARTBEAT</code>, then reconnect with backoff. Market-data feed only — no order flow.</p>
+    </header>
+
+    <section id="why-heartbeat">
+      <div class="section-head"><span class="idx">01</span><h2>Why app heartbeat</h2></div>
+      <p>TCP can leave a <strong>half-open</strong> connection: one side thinks the socket is fine while the peer has crashed, the cable is gone, or a NAT silently dropped state. Reads may block forever (or sit quiet under nonblocking <code class="inline">poll</code>) until the OS eventually notices.</p>
+      <p><code class="inline">SO_KEEPALIVE</code> exists, but defaults are often on the order of <strong>hours</strong> and are OS-tunable — too slow for a feed client that should notice a dead server in seconds. An <strong>application heartbeat</strong> gives a prompt, protocol-level liveness signal we control.</p>
+      <div class="card">
+        <span class="card-label">Talking point</span>
+        <p>"Keepalive is a safety net; our <code class="inline">HEARTBEAT</code> is the contract. We want dead-peer detection on our timeout, not the kernel's."</p>
+      </div>
+    </section>
+
+    <section id="server-client">
+      <div class="section-head"><span class="idx">02</span><h2>Server send / client last_rx</h2></div>
+      <p>Server periodically emits a fixed-size <code class="inline">HEARTBEAT</code> (same binary framing as ticks — see protocol note). Idle clients still see traffic even when no price updates fire.</p>
+      <p>Client maintains <code class="inline">last_rx</code> (or equivalent). <strong>Any</strong> successfully parsed message — <code class="inline">TICK</code> or <code class="inline">HEARTBEAT</code> — refreshes it. Busy markets don't need spare heartbeats to prove liveness; quiet markets do.</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span>client sketch</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><code class="language-cpp">// after a complete message decode:
+last_rx = steady_clock::now();   // tick *or* heartbeat
+
+// in the poll loop:
+if (now - last_rx &gt; heartbeat_timeout) {
+    // treat peer as dead
+}</code></pre>
+      </div>
+    </section>
+
+    <section id="timeout">
+      <div class="section-head"><span class="idx">03</span><h2>Timeout → reconnect</h2></div>
+      <p>When <code class="inline">now - last_rx</code> exceeds the timeout (a small multiple of the server heartbeat interval is typical):</p>
+      <ol class="plain">
+        <li>Close the socket (RAII <code class="inline">SocketGuard</code> or explicit <code class="inline">close</code>).</li>
+        <li>Enter reconnect — do not spin forever on a dead fd.</li>
+        <li>On success, reset <code class="inline">last_rx</code> and resume reading.</li>
+      </ol>
+      <p class="dim">Same path applies on hard errors (<code class="inline">recv</code> returns 0 / fatal errno): close and reconnect; the heartbeat timer covers the silent-death case TCP doesn't surface quickly.</p>
+    </section>
+
+    <section id="backoff">
+      <div class="section-head"><span class="idx">04</span><h2>Exponential backoff</h2></div>
+      <p>After a failed connect (or repeated deaths), wait before retrying: e.g. <strong>100 ms → 200 → 400 → …</strong>, capped (say 5–10 s), with a <strong>max retry</strong> count then exit or pause. Prevents reconnect storms when the server is down or restarting.</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span>backoff sketch</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><code class="language-cpp">int delay_ms = 100;
+const int cap_ms = 5000;
+const int max_retries = 20;
+
+for (int attempt = 0; attempt &lt; max_retries; ++attempt) {
+    if (try_connect()) break;
+    sleep_ms(delay_ms);
+    delay_ms = std::min(delay_ms * 2, cap_ms);
+}</code></pre>
+      </div>
+    </section>
+
+    <section id="states">
+      <div class="section-head"><span class="idx">05</span><h2>Connection states</h2></div>
+      <p>Keep a small explicit state machine on the client (Phase 5.4):</p>
+      <table>
+        <tr><th>State</th><th>Meaning</th></tr>
+        <tr><td><code class="inline">disconnected</code></td><td>No live socket; may be backing off between attempts.</td></tr>
+        <tr><td><code class="inline">connecting</code></td><td><code class="inline">connect()</code> in progress (or nonblocking connect pending).</td></tr>
+        <tr><td><code class="inline">connected</code></td><td>Reading ticks/heartbeats; updating <code class="inline">last_rx</code>.</td></tr>
+      </table>
+      <p class="dim">Transitions: timeout/error → <code class="inline">disconnected</code> → (after backoff) <code class="inline">connecting</code> → success → <code class="inline">connected</code>. Logging the state makes reconnect behavior interview-visible.</p>
+    </section>
+
+    <section id="decision">
+      <div class="section-head"><span class="idx">06</span><h2>Project decision</h2></div>
+      <div class="card">
+        <span class="card-label">Locked for this repo</span>
+        <p><strong>Market-data only.</strong> Protocol message types are <code class="inline">TICK</code> and <code class="inline">HEARTBEAT</code> — heartbeat is a first-class binary message, not a side-channel or TCP option. No ORDER/ACK, no session login. Server pushes heartbeats; client owns timeout + reconnect + backoff.</p>
+      </div>
+    </section>
+
+    <section id="pitfalls">
+      <div class="section-head"><span class="idx">07</span><h2>Pitfalls</h2></div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Only HEARTBEAT counts as alive</h4>
+          <p>If ticks don't refresh <code class="inline">last_rx</code>, a healthy busy feed can look "dead" between heartbeat slots — or you fire redundant heartbeats. Refresh on <em>any</em> message.</p>
+        </div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Reconnect storms (no backoff)</h4>
+          <p>Tight <code class="inline">connect</code> loops hammer a restarting server and your own CPU. Cap delay and retries.</p>
+        </div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Relying on TCP keepalive alone</h4>
+          <p>OS defaults are too slow for feed UX. Keepalive can stay on as a backup; app heartbeat is the primary detector.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="index.html">← Theory index</a>
+    </footer>
+  </main>
+</div>
+<script src="theory.js"></script>
+</body>
+</html>

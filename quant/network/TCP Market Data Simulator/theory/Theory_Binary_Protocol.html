@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Protocol — Project Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theory.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <a class="back" href="index.html">← Theory index</a>
+    <span class="toc-label">Contents</span>
+    <ol id="toc-list">
+      <li><a href="#why-binary"><span class="num">01</span>Why binary</a></li>
+      <li><a href="#framing"><span class="num">02</span>Fixed-size framing</a></li>
+      <li><a href="#packing"><span class="num">03</span>Packing / alignment</a></li>
+      <li><a href="#endianness"><span class="num">04</span>Endianness</a></li>
+      <li><a href="#partial-reads"><span class="num">05</span>Partial reads</a></li>
+      <li><a href="#structs"><span class="num">06</span>Message structs</a></li>
+      <li><a href="#decision"><span class="num">07</span>Project decision</a></li>
+      <li><a href="#pitfalls"><span class="num">08</span>Pitfalls</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
+      <h1 class="title">Binary Protocol <span class="brace">{</span> TICK + HEARTBEAT <span class="brace">}</span></h1>
+      <p class="subtitle">Phase 1: replace the text echo with fixed-size packed messages. Scope is <code class="inline">MsgType::TICK</code> and <code class="inline">MsgType::HEARTBEAT</code> only — no ORDER.</p>
+    </header>
+
+    <!-- 01 -->
+    <section id="why-binary">
+      <div class="section-head"><span class="idx">01</span><h2>Why binary over text echo</h2></div>
+      <p>The baseline server/client echo lines of text. That is fine for proving sockets work; it is a poor wire format for market data.</p>
+      <ul>
+        <li><strong>Parsing cost</strong> — scanning for <code class="inline">\n</code>, splitting tokens, <code class="inline">atoi</code>/<code class="inline">stod</code> on every tick. Binary copies bytes into a struct (after endian fixups).</li>
+        <li><strong>Structure</strong> — fields have fixed offsets and types. No ambiguity about separators, floats-as-strings, or trailing whitespace.</li>
+        <li><strong>Interview story</strong> — “We moved from line-oriented echo to a binary feed so size and layout are known at compile time; the hard part is framing on a TCP stream and endianness, not string parsing.”</li>
+      </ul>
+    </section>
+
+    <!-- 02 -->
+    <section id="framing">
+      <div class="section-head"><span class="idx">02</span><h2>Fixed-size vs length-prefixed</h2></div>
+      <table>
+        <tr><th>Scheme</th><th>Idea</th><th>Trade-off</th></tr>
+        <tr>
+          <td>Fixed-size</td>
+          <td>Every message of a type is exactly <code class="inline">sizeof(T)</code> bytes</td>
+          <td>Simple read loop; no variable payload; size changes only when you change the struct</td>
+        </tr>
+        <tr>
+          <td>Length-prefixed</td>
+          <td>Header with length (or type+length), then <code class="inline">N</code> payload bytes</td>
+          <td>Needed for strings / variable books; more framing states</td>
+        </tr>
+      </table>
+      <p>We choose <strong>fixed-size</strong> for both TICK and HEARTBEAT. Discriminate with a leading <code class="inline">uint8_t msg_type</code>, then read the remaining bytes for that type (or always read the larger type after peeking the first byte — implementation detail).</p>
+    </section>
+
+    <!-- 03 -->
+    <section id="packing">
+      <div class="section-head"><span class="idx">03</span><h2><code class="inline">#pragma pack</code> / alignment</h2></div>
+      <p>Compilers insert padding so members land on natural alignments (e.g. <code class="inline">uint32_t</code> on a 4-byte boundary). Padding makes <code class="inline">sizeof</code> larger and layout compiler-dependent — bad on the wire.</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span>protocol.hpp</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">#pragma pack(push, 1)   // no padding between members
+struct TickMsg { /* ... */ };
+struct HeartbeatMsg { /* ... */ };
+#pragma pack(pop)       // restore previous packing</code></pre>
+      </div>
+      <p class="dim">Packed structs are for serialization. Prefer converting field-by-field with <code class="inline">hton*</code>/<code class="inline">ntoh*</code> rather than <code class="inline">memcpy</code>ing a host-endian struct straight to the socket without conversion.</p>
+    </section>
+
+    <!-- 04 -->
+    <section id="endianness">
+      <div class="section-head"><span class="idx">04</span><h2>Endianness</h2></div>
+      <p><strong>Network byte order is big-endian.</strong> Apple Silicon and x86 hosts are little-endian — multi-byte integers must be converted on send and again on receive.</p>
+      <table>
+        <tr><th>Width</th><th>Host → network</th><th>Network → host</th></tr>
+        <tr><td>16-bit</td><td><code class="inline">htons</code></td><td><code class="inline">ntohs</code></td></tr>
+        <tr><td>32-bit</td><td><code class="inline">htonl</code></td><td><code class="inline">ntohl</code></td></tr>
+        <tr><td>64-bit</td><td>custom / <code class="inline">htobe64</code> where available</td><td>matching <code class="inline">be64toh</code> / helper</td></tr>
+      </table>
+      <p><code class="inline">uint8_t msg_type</code> needs no swap. Convert <code class="inline">symbol_id</code>, <code class="inline">price</code>, <code class="inline">timestamp_ns</code>, <code class="inline">volume</code> (and heartbeat timestamp) explicitly.</p>
+      <div class="card warn">
+        <span class="card-label">Gotcha</span>
+        <p>Skipping <code class="inline">ntoh*</code> on receive “works” only if both ends are the same endianness and you never test otherwise. Write the conversions anyway — that is the interview-correct habit.</p>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section id="partial-reads">
+      <div class="section-head"><span class="idx">05</span><h2>Partial reads — TCP is a stream</h2></div>
+      <p>TCP delivers a byte stream, not messages. One <code class="inline">send</code> of 25 bytes can arrive as two <code class="inline">recv</code>s of 10 and 15 — or one <code class="inline">recv</code> that contains two full messages plus a fragment.</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span>recv_exact.cpp</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">bool recv_exact(int fd, void* buf, size_t n) {
+    auto* p = static_cast&lt;char*&gt;(buf);
+    size_t got = 0;
+    while (got &lt; n) {
+        ssize_t r = recv(fd, p + got, n - got, 0);
+        if (r == 0) return false;          // peer closed
+        if (r &lt; 0) {
+            if (errno == EINTR) continue;
+            return false;                  // or handle EAGAIN when non-blocking
+        }
+        got += static_cast&lt;size_t&gt;(r);
+    }
+    return true;
+}
+// usage: TickMsg m; recv_exact(fd, &amp;m, sizeof(m));</code></pre>
+      </div>
+      <p class="dim">Always accumulate until you have <code class="inline">sizeof(msg)</code> (or the fixed size for the type you are reading). Never assume one <code class="inline">recv</code> equals one message.</p>
+    </section>
+
+    <!-- 06 -->
+    <section id="structs">
+      <div class="section-head"><span class="idx">06</span><h2>Message structs (PLAN.md)</h2></div>
+      <div class="code-wrap">
+        <div class="code-bar"><span>protocol.hpp (sketch)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">enum class MsgType : uint8_t { TICK = 1, HEARTBEAT = 2 };
+
+#pragma pack(push, 1)
+struct TickMsg {
+    uint8_t  msg_type;      // MsgType::TICK
+    uint32_t symbol_id;
+    int64_t  price;         // scaled integer (e.g. micros)
+    uint64_t timestamp_ns;  // or steady-clock ticks
+    uint32_t volume;
+};
+struct HeartbeatMsg {
+    uint8_t  msg_type;      // MsgType::HEARTBEAT
+    uint64_t timestamp_ns;
+};
+#pragma pack(pop)
+
+// sizeof(TickMsg) == 1+4+8+8+4 = 25
+// sizeof(HeartbeatMsg) == 1+8 = 9</code></pre>
+      </div>
+      <p>Serialize helpers: set fields in host order → apply <code class="inline">hton*</code> → <code class="inline">send</code> exactly <code class="inline">sizeof</code> bytes. Deserialize: <code class="inline">recv_exact</code> → <code class="inline">ntoh*</code> → use.</p>
+    </section>
+
+    <!-- 07 -->
+    <section id="decision">
+      <div class="section-head"><span class="idx">07</span><h2>Project decision</h2></div>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>Fixed-size packed binary</strong> with two message types only: <code class="inline">TICK</code> and <code class="inline">HEARTBEAT</code>. No ORDER/ACK, no length-prefixed blobs, no JSON. Prices are scaled integers on the wire. All multi-byte fields use network byte order; receivers loop until a full message is buffered.</p>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section id="pitfalls">
+      <div class="section-head"><span class="idx">08</span><h2>Common pitfalls</h2></div>
+
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Forgetting <code class="inline">ntoh*</code> on receive</h4>
+          <p>Prices, IDs, and timestamps look “almost right” on little-endian hosts talking to themselves — then break on a different machine or when you actually inspect byte order.</p>
+        </div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Assuming one <code class="inline">recv</code> = one message</h4>
+          <p>TCP is a stream. Partial and coalesced reads are normal; without a read-until-full loop (or an explicit buffer), you desync the stream and every later message is garbage.</p>
+        </div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div>
+          <h4>Sending without packing</h4>
+          <p>Default alignment padding means <code class="inline">sizeof</code> and field offsets disagree between compilers/ABIs. Use <code class="inline">#pragma pack(push, 1)</code> (or serialize field-by-field into a byte buffer).</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="index.html">← Theory index</a> · Phase 1 · see PLAN.md § Binary Protocol
+    </footer>
+  </main>
+</div>
+
+<script src="theory.js"></script>
+</body>
+</html>

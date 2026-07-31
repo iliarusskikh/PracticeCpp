@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Data Ticks — Project Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theory.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <a class="back" href="index.html">← Theory index</a>
+    <span class="toc-label">Contents</span>
+    <ol id="toc-list">
+      <li><a href="#what-is-a-tick"><span class="num">01</span>What a tick is</a></li>
+      <li><a href="#scaled-prices"><span class="num">02</span>Scaled integer prices</a></li>
+      <li><a href="#random-walk"><span class="num">03</span>Random-walk model</a></li>
+      <li><a href="#config"><span class="num">04</span>Symbols &amp; tick rate</a></li>
+      <li><a href="#broadcast"><span class="num">05</span>Generate &amp; broadcast</a></li>
+      <li><a href="#honest-scope"><span class="num">06</span>Honest scope</a></li>
+      <li><a href="#decision"><span class="num">07</span>Project decision</a></li>
+      <li><a href="#vs-book"><span class="num">08</span>vs order book</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
+      <h1 class="title">Market Data Ticks <span class="brace">{</span> Phase 4 synthetic generator <span class="brace">}</span></h1>
+      <p class="subtitle">Not a real exchange. The server invents fixed-size binary ticks so you can practice protocol, <code class="inline">poll()</code>, and client consumption — not market microstructure.</p>
+    </header>
+
+    <section id="what-is-a-tick">
+      <div class="section-head"><span class="idx">01</span><h2>What a tick is here</h2></div>
+      <p>In this project a <strong>tick</strong> is one last-trade-style update: enough fields to exercise the wire format and fan-out, nothing more.</p>
+      <table>
+        <tr><th>Field</th><th>Type (sketch)</th><th>Role</th></tr>
+        <tr><td><code class="inline">symbol_id</code></td><td><code class="inline">uint32_t</code></td><td>Which instrument (numeric id, not a string on the wire)</td></tr>
+        <tr><td><code class="inline">price</code></td><td><code class="inline">int64_t</code></td><td>Scaled integer (e.g. micros) — see below</td></tr>
+        <tr><td><code class="inline">volume</code></td><td><code class="inline">uint32_t</code></td><td>Synthetic size for the update</td></tr>
+        <tr><td><code class="inline">timestamp_ns</code></td><td><code class="inline">uint64_t</code></td><td>Server stamp (steady-clock ticks or wall ns)</td></tr>
+      </table>
+      <p class="dim">Plus a <code class="inline">msg_type</code> byte so the stream can carry <code class="inline">TICK</code> and later <code class="inline">HEARTBEAT</code>. Layout lives in the binary-protocol note / PLAN.md.</p>
+    </section>
+
+    <section id="scaled-prices">
+      <div class="section-head"><span class="idx">02</span><h2>Why integer / scaled prices</h2></div>
+      <p>Put <code class="inline">int64_t</code> on the wire (price × 10<sup>n</sup>), not <code class="inline">double</code>.</p>
+      <ul>
+        <li><strong>Determinism</strong> — same seed → same integer path. Float rounding differs by platform/math lib.</li>
+        <li><strong>Endianness is boring</strong> — <code class="inline">htonl</code>/<code class="inline">htobe64</code>-style swaps on integers are well-defined. IEEE floats have their own byte layout; shipping them invites subtle “it worked on my Mac” bugs.</li>
+        <li><strong>Interview line</strong> — “Money and prices are fixed-point in production systems; floating point is for analytics, not the wire or the ledger.”</li>
+      </ul>
+      <div class="card">
+        <span class="card-label">Talking point</span>
+        <p>Scaled ints keep the protocol simple, exact, and portable. Display as decimal only at the edge (log / UI).</p>
+      </div>
+    </section>
+
+    <section id="random-walk">
+      <div class="section-head"><span class="idx">03</span><h2>Random-walk model</h2></div>
+      <p>Per symbol, keep a current mid. Each tick:</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span>generator sketch</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">// price is already scaled (e.g. micros)
+price += rng_delta();          // small signed step, e.g. [-k, +k]
+if (price &lt; floor) price = floor;
+if (price &gt; ceiling) price = ceiling;
+// or: start from a seeded mid and clamp to a band</code></pre>
+      </div>
+      <p class="dim">Volume can be a small random int. Timestamp = now. This is a toy path — no drift calibration, no vol surface, no order-flow imbalance.</p>
+    </section>
+
+    <section id="config">
+      <div class="section-head"><span class="idx">04</span><h2>Symbols &amp; tick rate (planned)</h2></div>
+      <p>Phase 1.2 / 4.1: a simple <code class="inline">key=value</code> file drives host, port, symbol list, and tick rate. Sane defaults if keys are missing.</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span>config.example</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-ini">host=127.0.0.1
+port=9000
+symbols=1,2,3
+tick_rate_hz=100</code></pre>
+      </div>
+      <p class="dim">Not implemented yet — planned so you can demo multi-symbol feed without recompiling.</p>
+    </section>
+
+    <section id="broadcast">
+      <div class="section-head"><span class="idx">05</span><h2>Generate &amp; broadcast</h2></div>
+      <p>The <strong>server</strong> owns the generator. On each tick interval it builds a <code class="inline">TickMsg</code>, then the Phase 3 <code class="inline">poll()</code> loop fans it out to every connected client (write when writable; buffer or drop policy as you implement).</p>
+      <ul>
+        <li>One generator → N sockets (broadcast), not one stream per client with different prices.</li>
+        <li>Clients only parse/log; they do not send orders.</li>
+      </ul>
+    </section>
+
+    <section id="honest-scope">
+      <div class="section-head"><span class="idx">06</span><h2>Honest scope</h2></div>
+      <div class="card warn">
+        <span class="card-label">Be clear in interviews</span>
+        <p>This is a <strong>learning infrastructure</strong> simulator: sockets, binary framing, multi-client I/O, heartbeats. It is <em>not</em> market-microstructure research, not a realistic LOB, and not a claim that the prices mean anything economically.</p>
+      </div>
+    </section>
+
+    <section id="decision">
+      <div class="section-head"><span class="idx">07</span><h2>Project decision</h2></div>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>Synthetic last-tick feed only</strong> — fixed fields, scaled ints, random walk, config-driven symbols/rate, server-side generation + <code class="inline">poll</code> broadcast. No ORDER/ACK, no book, no matching engine. Goal: a CV-ready TCP market-<em>data</em> story, not a mini exchange.</p>
+      </div>
+    </section>
+
+    <section id="vs-book">
+      <div class="section-head"><span class="idx">08</span><h2>vs full order book</h2></div>
+      <table>
+        <tr><th></th><th>This project</th><th>Full book (out of scope)</th></tr>
+        <tr><td>Messages</td><td>TICK (+ HEARTBEAT)</td><td>add/cancel/exec, snapshots, depth</td></tr>
+        <tr><td>State</td><td>Per-symbol last price</td><td>Price levels, queues, matching</td></tr>
+        <tr><td>Client role</td><td>Consume / measure</td><td>Often trade + risk</td></tr>
+      </table>
+      <p class="dim">Order book work is a different project. PLAN.md lists it under deliberate cuts.</p>
+    </section>
+
+    <footer>
+      <a href="index.html">← Theory index</a>
+    </footer>
+  </main>
+</div>
+<script src="theory.js"></script>
+</body>
+</html>

@@ -1,15 +1,12 @@
-#pragma once
-
-#include <chrono>
 #include <iostream>
 
 struct Timer
 {
-    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+    std::chrono::time_point<std::chrono::steady_clock> start, end;
     std::chrono::duration<float> duration;
 
     Timer(){
-        start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now(); //operates as steady_clock, high_resolution_clock is a typedef for steady_clock
     }
     
     ~Timer(){
@@ -17,7 +14,7 @@ struct Timer
         duration = end-start;
         float ms = duration.count()*1000.0f;
         
-        std::cout << "Total time: " << ms<< "ms" << std::endl;
+        std::cout << ms<< "ms" << std::endl;
 
     }
 

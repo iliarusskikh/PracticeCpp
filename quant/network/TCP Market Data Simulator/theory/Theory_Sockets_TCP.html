@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sockets &amp; TCP — Project Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theory.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <a class="back" href="index.html">← Theory index</a>
+    <span class="toc-label">Contents</span>
+    <ol id="toc-list">
+      <li><a href="#tcp-vs-udp"><span class="num">01</span>TCP vs UDP</a></li>
+      <li><a href="#lifecycle"><span class="num">02</span>Berkeley Lifecycle</a></li>
+      <li><a href="#byte-stream"><span class="num">03</span>Byte Stream</a></li>
+      <li><a href="#reuseaddr"><span class="num">04</span>SO_REUSEADDR</a></li>
+      <li><a href="#byte-order"><span class="num">05</span>htons / inet_pton</a></li>
+      <li><a href="#decision"><span class="num">06</span>Project Decision</a></li>
+      <li><a href="#reference"><span class="num">07</span>Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
+      <h1 class="title">Sockets <span class="brace">{</span> TCP &amp; Berkeley API <span class="brace">}</span></h1>
+      <p class="subtitle">Baseline for this project: blocking TCP echo today; market-data feed over the same Berkeley sockets tomorrow. Maps the API calls already in <code class="inline">server.cpp</code> / <code class="inline">client.cpp</code>.</p>
+    </header>
+
+    <!-- 01 -->
+    <section id="tcp-vs-udp">
+      <div class="section-head"><span class="idx">01</span><h2>TCP vs UDP</h2></div>
+      <p>Both sit on IP. The difference that matters for this project is delivery semantics:</p>
+      <table>
+        <tr><th></th><th>TCP (<code class="inline">SOCK_STREAM</code>)</th><th>UDP (<code class="inline">SOCK_DGRAM</code>)</th></tr>
+        <tr><td>Connection</td><td>Yes — handshake, then a session</td><td>No — fire datagrams</td></tr>
+        <tr><td>Reliability</td><td>Retransmits; in-order delivery</td><td>Best-effort; can drop / reorder</td></tr>
+        <tr><td>Boundaries</td><td>Byte stream (no message edges)</td><td>Datagram = one message</td></tr>
+        <tr><td>Typical feed use</td><td>Recovery channels, session-oriented feeds</td><td>Multicast market data (A/B feeds)</td></tr>
+      </table>
+      <p>This learning project uses <strong>TCP</strong>: reliable, ordered delivery so we can focus on framing, binary layout, <code class="inline">poll()</code>, and reconnect — without also inventing loss recovery. UDP/multicast market data is a different project.</p>
+    </section>
+
+    <!-- 02 -->
+    <section id="lifecycle">
+      <div class="section-head"><span class="idx">02</span><h2>Berkeley Lifecycle</h2></div>
+      <p>POSIX / Berkeley sockets: a socket is a file descriptor. Server and client take different paths after <code class="inline">socket()</code>.</p>
+
+      <h3>Server — <code class="inline">src/server.cpp</code></h3>
+      <table>
+        <tr><th>Step</th><th>Call</th><th>In this codebase</th></tr>
+        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">server_fd</code></td></tr>
+        <tr><td>Reuse</td><td><code class="inline">setsockopt(SO_REUSEADDR)</code></td><td>before bind</td></tr>
+        <tr><td>Bind</td><td><code class="inline">bind()</code></td><td>port 8080, <code class="inline">INADDR_ANY</code></td></tr>
+        <tr><td>Listen</td><td><code class="inline">listen(server_fd, 3)</code></td><td>backlog 3</td></tr>
+        <tr><td>Accept</td><td><code class="inline">accept()</code></td><td>new <code class="inline">new_socket</code> per client</td></tr>
+        <tr><td>I/O</td><td><code class="inline">read()</code> / <code class="inline">send()</code></td><td>echo reply</td></tr>
+        <tr><td>Close</td><td><code class="inline">close(new_socket)</code> then <code class="inline">close(server_fd)</code></td><td>on signal exit</td></tr>
+      </table>
+
+      <h3>Client — <code class="inline">src/client.cpp</code></h3>
+      <table>
+        <tr><th>Step</th><th>Call</th><th>In this codebase</th></tr>
+        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">sock</code></td></tr>
+        <tr><td>Address</td><td><code class="inline">htons</code> + <code class="inline">inet_pton</code></td><td><code class="inline">127.0.0.1:8080</code></td></tr>
+        <tr><td>Connect</td><td><code class="inline">connect()</code></td><td>3-way handshake (blocking)</td></tr>
+        <tr><td>I/O</td><td><code class="inline">send()</code> / <code class="inline">read()</code></td><td>hello ↔ reply</td></tr>
+        <tr><td>Close</td><td><code class="inline">close(sock)</code></td><td>sends FIN</td></tr>
+      </table>
+
+      <div class="code-wrap">
+        <div class="code-bar"><span>lifecycle (mental model)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">// Server: socket → bind → listen → accept → recv/send → close
+// Client: socket → connect → send/recv → close
+//
+// accept() returns a *new* fd for that peer.
+// The listening fd stays open to accept more clients later.</code></pre>
+      </div>
+      <div class="card">
+        <span class="card-label">Today vs later</span>
+        <p>Both sides are <strong>blocking</strong> now. Phase 3 moves to non-blocking + <code class="inline">poll()</code>; the same lifecycle calls stay — only readiness and ownership change.</p>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section id="byte-stream">
+      <div class="section-head"><span class="idx">03</span><h2>Byte Stream — No Message Boundaries</h2></div>
+      <p>TCP delivers an ordered stream of bytes. One <code class="inline">send()</code> on the peer is <em>not</em> one <code class="inline">recv()</code> on yours. The kernel may coalesce or split writes arbitrarily.</p>
+      <ul>
+        <li>Echo strings “work” by accident: short messages + blocking read often return everything in one go.</li>
+        <li>A binary market-data protocol cannot rely on that. You need <strong>framing</strong> — knowing where a message starts and ends.</li>
+        <li>This project chooses <strong>fixed-size</strong> messages (<code class="inline">TICK</code> / <code class="inline">HEARTBEAT</code>): loop until <code class="inline">sizeof(msg)</code> bytes are read. See <a href="Theory_Binary_Protocol.html">Binary Protocol</a>.</li>
+      </ul>
+      <div class="card warn">
+        <span class="card-label">Interview trap</span>
+        <p>“I sent one struct, so one <code class="inline">recv</code> gets one struct” is false on TCP. Always plan for partial reads (and, in general, partial writes).</p>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section id="reuseaddr">
+      <div class="section-head"><span class="idx">04</span><h2>SO_REUSEADDR and TIME_WAIT</h2></div>
+      <p>After <code class="inline">close()</code>, a TCP endpoint can linger in <strong>TIME_WAIT</strong> so delayed packets from the old connection don’t confuse a new one. That can hold the local <code class="inline">IP:port</code> for tens of seconds — restarting the server then fails with “Address already in use.”</p>
+      <p><code class="inline">SO_REUSEADDR</code> (already set on <code class="inline">server_fd</code> before <code class="inline">bind</code>) lets the listening socket bind again while a prior instance’s sockets are still in TIME_WAIT. Not fatal if <code class="inline">setsockopt</code> fails — but bind will then be flaky on quick restarts.</p>
+      <div class="code-wrap">
+        <div class="code-bar"><span>server.cpp (already present)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">int opt = 1;
+setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &amp;opt, sizeof(opt));
+// then bind(server_fd, ...)</code></pre>
+      </div>
+      <p class="dim">Different problem from <code class="inline">TCP_NODELAY</code> (Nagle / latency) — see <a href="Theory_Socket_Options_Nagle.html">Socket Options &amp; Nagle</a>.</p>
+    </section>
+
+    <!-- 05 -->
+    <section id="byte-order">
+      <div class="section-head"><span class="idx">05</span><h2>htons and inet_pton</h2></div>
+      <p>Network protocols use <strong>big-endian</strong> (“network byte order”). Hosts (Apple Silicon, x86) are usually little-endian — so ports and multi-byte integers need conversion helpers.</p>
+      <ul>
+        <li><code class="inline">htons(PORT)</code> — host to network short; used for <code class="inline">sin_port</code> on both server and client.</li>
+        <li><code class="inline">htonl</code> / <code class="inline">ntohs</code> / <code class="inline">ntohl</code> — same idea for 32-bit and receive path; binary ticks will use these too.</li>
+        <li><code class="inline">inet_pton(AF_INET, "127.0.0.1", &amp;serv_addr.sin_addr)</code> — presentation → network; modern replacement for <code class="inline">inet_addr</code>. Returns ≤ 0 on bad string.</li>
+      </ul>
+      <div class="code-wrap">
+        <div class="code-bar"><span>client.cpp (pattern)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">serv_addr.sin_family = AF_INET;
+serv_addr.sin_port   = htons(PORT);
+if (inet_pton(AF_INET, SERVER_IP, &amp;serv_addr.sin_addr) &lt;= 0) {
+    // invalid address string
+}</code></pre>
+      </div>
+      <p class="dim">Server uses <code class="inline">INADDR_ANY</code> (bind all interfaces) instead of a specific IP string — no <code class="inline">inet_pton</code> needed there.</p>
+    </section>
+
+    <!-- 06 -->
+    <section id="decision">
+      <div class="section-head"><span class="idx">06</span><h2>Project Decision</h2></div>
+      <div class="card">
+        <span class="card-label">Locked for this repo</span>
+        <p><strong>TCP + Berkeley sockets</strong> for a learning market-data feed: reliable ordered stream, fixed-size binary framing next, then non-blocking <code class="inline">poll()</code>. Not UDP/multicast. Not a full exchange stack — <code class="inline">TICK</code> + <code class="inline">HEARTBEAT</code> only. Current code is the blocking echo baseline that already exercises the lifecycle above.</p>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section id="reference">
+      <div class="section-head"><span class="idx">07</span><h2>Quick Reference &amp; Pitfalls</h2></div>
+
+      <table>
+        <tr><th>Call</th><th>Role</th></tr>
+        <tr><td><code class="inline">socket</code></td><td>Create fd (<code class="inline">AF_INET</code> + <code class="inline">SOCK_STREAM</code> = TCP)</td></tr>
+        <tr><td><code class="inline">bind</code></td><td>Server: claim local IP:port</td></tr>
+        <tr><td><code class="inline">listen</code></td><td>Server: mark passive; set backlog</td></tr>
+        <tr><td><code class="inline">accept</code></td><td>Server: new connected fd (blocks until peer)</td></tr>
+        <tr><td><code class="inline">connect</code></td><td>Client: active open / handshake</td></tr>
+        <tr><td><code class="inline">send</code> / <code class="inline">recv</code> / <code class="inline">read</code></td><td>Byte stream I/O</td></tr>
+        <tr><td><code class="inline">close</code></td><td>Release fd; starts TCP teardown</td></tr>
+        <tr><td><code class="inline">setsockopt(SO_REUSEADDR)</code></td><td>Faster rebinds after TIME_WAIT</td></tr>
+      </table>
+
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div><h4>Forgot <code class="inline">close()</code></h4><p>Leaks an fd. On error paths after <code class="inline">socket()</code> / <code class="inline">accept()</code> this is easy to miss — Phase 2 <code class="inline">SocketGuard</code> exists to fix that pattern.</p></div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div><h4>Bind failed — port in use</h4><p>Another process holds 8080, or TIME_WAIT without <code class="inline">SO_REUSEADDR</code>. Check with <code class="inline">lsof -i :8080</code> / change port.</p></div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div><h4>Connect failed</h4><p>Server not running, wrong IP/port, or firewall. Client already prints this case.</p></div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div><h4>Assuming message boundaries</h4><p>One send ≠ one recv. Fixed-size (or length-prefix) framing is required for binary ticks.</p></div>
+      </div>
+      <div class="pitfall">
+        <span class="icon">✕</span>
+        <div><h4>Skipping <code class="inline">htons</code></h4><p>Port bytes swapped on little-endian hosts → connect/bind to the wrong port.</p></div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="index.html">← Theory index</a>
+    </footer>
+  </main>
+</div>
+
+<script src="theory.js"></script>
+</body>
+</html>
