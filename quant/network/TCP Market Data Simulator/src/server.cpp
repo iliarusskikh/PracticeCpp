@@ -1,151 +1,229 @@
-//g++ -o server server.cpp -std=c++11
-//Server: create → bind → listen → accept → receive → send → close
+// Market-data feed server (single thread).
+//
+// Architecture: non-blocking listen + clients under poll(); dual steady_clock
+// deadlines for tick_rate_hz and heartbeat_interval_ms; broadcast identical
+// messages to every ClientSession. Generator runs even with zero clients.
+// Seed 42 keeps the random walk reproducible across demos.
+//
+// If a deadline is missed, next_*_at is snapped forward (catch-up) so we do not
+// burst a backlog of ticks/heartbeats after a stall.
 
-#include <iostream>          // std::cout, std::cerr
-#include <csignal>           // sigaction, SIGINT, SIGTERM
-#include <cstring>           // memset, strlen
-#include <sys/socket.h>      // socket(), bind(), listen(), accept(), send(), read(), setsockopt()
-#include <netinet/in.h>      // sockaddr_in, htons(), INADDR_ANY
-#include <unistd.h>          // close(), read()
+#include <csignal>
+#include <cerrno>
+#include <algorithm>
+#include <cstring>
+#include <chrono>
+#include <string>
+#include <vector>
+#include <poll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-// ────────────────────────────────────────────────
-//                SHUTDOWN FLAG
-// ────────────────────────────────────────────────
+#include "client_session.hpp"
+#include "config.hpp"
+#include "log.hpp"
+#include "protocol.hpp"
+#include "socket_guard.hpp"
+#include "socket_opts.hpp"
+#include "tick_generator.hpp"
+
 volatile sig_atomic_t g_shutdown = 0;
 
 void on_signal(int) { g_shutdown = 1; }
 
+static uint64_t now_ns_steady() {
+    using namespace std::chrono;
+    return static_cast<uint64_t>(
+        duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count());
+}
 
-int main() {
-    // ────────────────────────────────────────────────
-    //                VARIABLES
-    // ────────────────────────────────────────────────
-    int server_fd = -1;                  // Listening socket file descriptor
-    int new_socket = -1;                 // Connected socket (for one client in this simple version)
-    struct sockaddr_in address;          // Structure for our server's address
-    int addrlen = sizeof(address);       // Will be updated by accept()
-    const int PORT = 8080;
-    char buffer[1024] = {0};             // Buffer to store incoming client message
+static void drop_dead(std::vector<ClientSession>& clients) {
+    std::vector<ClientSession> kept;
+    kept.reserve(clients.size());
+    for (auto& c : clients) {
+        if (c.alive) kept.push_back(std::move(c));
+        else         LOG_INFO("Client disconnected");
+    }
+    clients.swap(kept);
+}
 
-    // ────────────────────────────────────────────────
-    // 1. CREATE LISTENING SOCKET
-    // ────────────────────────────────────────────────
-    // AF_INET    → IPv4
-    // SOCK_STREAM → TCP (reliable, connection-oriented)
-    // 0          → default protocol (IPPROTO_TCP)
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0) {
-        std::cerr << "Error: Socket creation failed\n";
+static int ms_until(std::chrono::steady_clock::time_point deadline,
+                    std::chrono::steady_clock::time_point now) {
+    if (now >= deadline) return 0;
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now).count();
+    return static_cast<int>(std::max<long long>(1, ms));
+}
+
+int main(int argc, char** argv) {
+    const std::string cfg_path = config_path_from_args(argc, argv, "../config/default.conf");
+    AppConfig cfg;
+    const std::string cfg_err = load_config(cfg_path, cfg);
+    if (!cfg_err.empty()) {
+        log_error() << "Config error: " << cfg_err;
+        log_error() << "Usage: " << (argc > 0 ? argv[0] : "server") << " [config_path]";
         return 1;
     }
 
-    // ────────────────────────────────────────────────
-    // Optional but VERY IMPORTANT: Allow quick port reuse
-    // ────────────────────────────────────────────────
-    // Prevents "Address already in use" after quick server restart
-    // (due to TIME_WAIT state from previous connections)
+    struct sockaddr_in address;
+    socklen_t addrlen = sizeof(address);
+
+    SocketGuard listen_sock(socket(AF_INET, SOCK_STREAM, 0));
+    if (!listen_sock.valid()) {
+        LOG_ERROR("Socket creation failed");
+        return 1;
+    }
+
     int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-        std::cerr << "Warning: setsockopt(SO_REUSEADDR) failed\n";
-        // Not fatal → we can continue
+    if (setsockopt(listen_sock.get(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        LOG_WARN("setsockopt(SO_REUSEADDR) failed");
     }
 
-    // ────────────────────────────────────────────────
-    // 2. PREPARE SERVER ADDRESS STRUCTURE
-    // ────────────────────────────────────────────────
-    // Good practice: zero out the structure
+    if (!set_nonblocking(listen_sock.get())) {
+        LOG_ERROR("Failed to set listen socket non-blocking");
+        return 1;
+    }
+
     memset(&address, 0, sizeof(address));
+    address.sin_family      = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port        = htons(static_cast<uint16_t>(cfg.port));
 
-    address.sin_family      = AF_INET;              // IPv4
-    address.sin_addr.s_addr = INADDR_ANY;           // 0.0.0.0 → accept connections on ALL interfaces
-    address.sin_port        = htons(PORT);          // Convert port to network byte order
-
-    // ────────────────────────────────────────────────
-    // 3. BIND socket to the address/port
-    // ────────────────────────────────────────────────
-    // Associates the socket with a concrete IP:port
-    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
-        std::cerr << "Error: Bind failed (port in use? permissions?)\n";
-        close(server_fd);
+    if (bind(listen_sock.get(), reinterpret_cast<struct sockaddr*>(&address), sizeof(address)) < 0) {
+        LOG_ERROR("Bind failed (port in use? permissions?)");
         return 1;
     }
 
-    // ────────────────────────────────────────────────
-    // 4. LISTEN for incoming connections
-    // ────────────────────────────────────────────────
-    // backlog = 3 → queue up to 3 pending connections before refusing new ones
-    // Modern systems often ignore exact value and use larger internal queue
-    if (listen(server_fd, 3) < 0) {
-        std::cerr << "Error: Listen failed\n";
-        close(server_fd);
+    if (listen(listen_sock.get(), 64) < 0) {
+        LOG_ERROR("Listen failed");
         return 1;
     }
 
-    std::cout << "Server listening on port " << PORT << " (all interfaces)... (Ctrl+C to stop)\n";
+    log_info() << "Server listening on port " << cfg.port
+               << " (poll, non-blocking; config: " << cfg_path << ")";
+    log_info() << "symbols_count=" << cfg.symbol_ids.size()
+               << " tick_rate_hz=" << cfg.tick_rate_hz
+               << " heartbeat_interval_ms=" << cfg.heartbeat_interval_ms;
 
     struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
     sa.sa_handler = on_signal;
-    sigemptyset(&sa.sa_mask); //Clears the signal mask. sa_mask is the set of signals blocked while the handler runs. Empty means no extra signals are blocked during handling.
-    sigaction(SIGINT, &sa, nullptr); //Signal number 2. Sent when the user presses Ctrl+C in the terminal.
-    sigaction(SIGTERM, &sa, nullptr); //Signal number 15. Sent by kill <pid> or kill -15 <pid>.
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
+
+    std::vector<ClientSession> clients;
+    TickGenerator generator(cfg, /*seed=*/42);
+    size_t tick_index = 0;
+    using clock = std::chrono::steady_clock;
+    auto next_tick_at = clock::now();
+    auto next_hb_at   = clock::now() + std::chrono::milliseconds(cfg.heartbeat_interval_ms);
+    const auto tick_period = std::chrono::microseconds(
+        1000000 / std::max(1, cfg.tick_rate_hz));
+    const auto hb_period = std::chrono::milliseconds(cfg.heartbeat_interval_ms);
 
     while (!g_shutdown) {
-        // ────────────────────────────────────────────────
-        // 5. ACCEPT a client connection (blocking call)
-        // ────────────────────────────────────────────────
-        // Blocks until a client connects
-        // Creates a NEW socket (new_socket) for THIS client
-        // server_fd remains listening for more clients
-        new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-        if (new_socket < 0) {
-            if (g_shutdown) break;
-            std::cerr << "Error: Accept failed\n";
-            close(server_fd);
+        std::vector<pollfd> pfds;
+        pfds.reserve(1 + clients.size());
+
+        pollfd listen_pfd{};
+        listen_pfd.fd = listen_sock.get();
+        listen_pfd.events = POLLIN;
+        pfds.push_back(listen_pfd);
+
+        for (auto& c : clients) {
+            pollfd p{};
+            p.fd = c.fd();
+            p.events = POLLIN;
+            if (c.has_pending()) p.events = static_cast<short>(p.events | POLLOUT);
+            pfds.push_back(p);
+        }
+
+        // Wake for I/O or whichever deadline is sooner (tick vs heartbeat).
+        const auto now = clock::now();
+        const int timeout_ms = std::min(ms_until(next_tick_at, now), ms_until(next_hb_at, now));
+
+        const int ready = ::poll(pfds.data(), static_cast<nfds_t>(pfds.size()), timeout_ms);
+        if (ready < 0) {
+            if (errno == EINTR) continue;
+            LOG_ERROR("poll() failed");
             return 1;
         }
-        if (g_shutdown) {
-            close(new_socket);
-            break;
+
+        if (pfds[0].revents & (POLLIN | POLLERR | POLLHUP)) {
+            for (;;) {
+                addrlen = sizeof(address);
+                const int cfd = accept(
+                    listen_sock.get(),
+                    reinterpret_cast<struct sockaddr*>(&address),
+                    &addrlen);
+                if (cfd < 0) {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) break;
+                    LOG_WARN("accept() failed");
+                    break;
+                }
+                SocketGuard csock(cfd);
+                set_tcp_nodelay(csock.get());
+                set_nonblocking(csock.get());
+                clients.emplace_back(std::move(csock));
+                log_info() << "Client connected (clients=" << clients.size() << ")";
+            }
         }
 
-        std::cout << "Client connected\n";
+        for (size_t i = 0; i < clients.size(); ++i) {
+            const short rev = pfds[i + 1].revents;
+            if (rev & (POLLERR | POLLHUP | POLLNVAL)) {
+                clients[i].alive = false;
+                continue;
+            }
+            if (rev & POLLIN) {
+                if (!clients[i].on_readable()) continue;
+            }
+            if (rev & POLLOUT) {
+                clients[i].flush();
+            }
+        }
+        drop_dead(clients);
 
-        // ────────────────────────────────────────────────
-        // 6. READ data from the connected client
-        // ────────────────────────────────────────────────
-        // read() blocks until data arrives or connection closes
-        int valread = read(new_socket, buffer, sizeof(buffer) - 1);
-        if (valread < 0) {
-            std::cerr << "Error: Read failed\n";
-        } else if (valread == 0) {
-            std::cout << "Client closed connection\n";
-        } else {
-            buffer[valread] = '\0';                     // Null-terminate for safe printing
-            std::cout << "Message from client: \"" << buffer << "\" (" << valread << " bytes)\n";
+        if (clock::now() >= next_tick_at) {
+            const TickMsg tick = generator.next();
+            ++tick_index;
+            for (auto& c : clients) {
+                c.enqueue_tick(tick);
+                if (!c.flush()) { /* marked dead */ }
+            }
+            drop_dead(clients);
+
+            next_tick_at += tick_period;
+            // Avoid bursting a backlog after a long stall.
+            if (next_tick_at < clock::now()) {
+                next_tick_at = clock::now() + tick_period;
+            }
+
+            if (tick_index == 1 || tick_index % static_cast<size_t>(cfg.tick_rate_hz) == 0) {
+                log_info() << "Broadcast tick#" << tick_index
+                           << " symbol_id=" << tick.symbol_id
+                           << " price=" << tick.price
+                           << " clients=" << clients.size();
+            }
         }
 
-        // ────────────────────────────────────────────────
-        // 7. SEND reply back to client (echo / greeting)
-        // ────────────────────────────────────────────────
-        const char* reply = "Hello from server!";
-        ssize_t bytes_sent = send(new_socket, reply, strlen(reply), 0);
-        if (bytes_sent < 0) {
-            std::cerr << "Warning: Send failed\n";
-        } else {
-            std::cout << "Replied: \"" << reply << "\"\n";
-        }
+        if (clock::now() >= next_hb_at) {
+            HeartbeatMsg hb{};
+            hb.msg_type     = static_cast<uint8_t>(MsgType::HEARTBEAT);
+            hb.timestamp_ns = now_ns_steady();
+            for (auto& c : clients) {
+                c.enqueue_heartbeat(hb);
+                if (!c.flush()) { /* marked dead */ }
+            }
+            drop_dead(clients);
 
-        // ────────────────────────────────────────────────
-        // 8. CLEAN UP
-        // ────────────────────────────────────────────────
-        // Close the client connection first
-        close(new_socket);
+            next_hb_at += hb_period;
+            if (next_hb_at < clock::now()) {
+                next_hb_at = clock::now() + hb_period;
+            }
+        }
     }
 
-    // Then close the listening socket
-    close(server_fd);
-
-    std::cout << "Server shutting down.\n";
-
+    LOG_INFO("Server shutting down.");
     return 0;
 }

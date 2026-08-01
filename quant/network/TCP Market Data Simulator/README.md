@@ -1,99 +1,108 @@
 # TCP Market Data Simulator (C++)
 
-Educational C++ project: evolve a blocking TCP echo into a **market data feed simulator** — binary protocol, multi-client `poll()` server, synthetic ticks, heartbeats, and client reconnect/latency stats.
+Educational C++ project: a **TCP market data feed simulator** with a binary protocol, single-threaded multi-client `poll()` server, synthetic random-walk ticks, application heartbeats, client reconnect, and inter-arrival latency percentiles.
 
-Built for portfolio / interview depth in quant infrastructure and systems programming — not a real exchange feed.
+Built for portfolio / interview depth in quant infrastructure and systems programming — not a real exchange feed. **No third-party libraries** beyond POSIX sockets and the C++ standard library (CMake to build).
 
-**Scope (locked):** `TICK` + `HEARTBEAT` only. Single-threaded `poll()` + non-blocking sockets. No order flow.
+**Scope (v1):** `TICK` + `HEARTBEAT` only. Single-threaded `poll()` + non-blocking sockets. No order flow.
 
-Concept look-up notes: [`theory/index.html`](theory/index.html) · Full roadmap: [`PLAN.md`](PLAN.md)
-
----
-
-## Current Features (Baseline)
-
-- Blocking TCP server (accept loop; handles one connection at a time per accept)
-- Blocking TCP client (connect → send → receive → close)
-- Text echo over TCP
-- `SO_REUSEADDR`; Ctrl+C / SIGTERM shutdown on the server
-
-## Roadmap (In Scope)
-
-| Phase | Focus |
-|-------|--------|
-| 1 | Binary protocol + `key=value` config |
-| 2 | `SocketGuard` RAII, `TCP_NODELAY`, minimal logging |
-| 3 | Non-blocking sockets + `poll()` multi-client broadcast |
-| 4 | Synthetic tick generator (random walk, scaled prices) |
-| 5 | Heartbeat + client reconnect with exponential backoff |
-| 6 | Client latency percentiles; modular layout; README polish |
-
-**Out of scope:** ORDER/ACK, lock-free queues, epoll/kqueue, TLS/FIX, thread pools — see PLAN.
+| Doc | Purpose |
+|-----|---------|
+| [`PLAN.md`](PLAN.md) | What shipped, deliberate cuts, future ideas |
+| [`docs/protocol.md`](docs/protocol.md) | Wire layouts |
+| [`theory/index.html`](theory/index.html) | Concept / decision look-up notes |
+| [`LICENSE`](LICENSE) | MIT |
 
 ---
+
+## Features
+
+- Single-threaded **`poll()`** server: non-blocking listen + many concurrent clients
+- Fixed-size **binary** protocol with endian-safe helpers (`recv_feed`)
+- **Random-walk** tick generator (scaled integer prices, round-robin symbols)
+- Periodic server **`HEARTBEAT`**; client last-message timeout + **reconnect** (exponential backoff)
+- Client **tick inter-arrival** stats: p50 / p99 / p99.9 on exit
+- `SocketGuard` RAII, `TCP_NODELAY`, `key=value` config, timestamped logging
+- Shared headers are mostly **header-only** helpers under `include/`
+
+## Architecture
+
+```text
+                    ┌─────────────────────────────────────┐
+                    │  Server (one thread)                │
+  config ──────────►│  TickGenerator (random walk)        │
+                    │  deadlines: tick_rate + heartbeat   │
+                    │  poll(listen + clients)              │
+                    │  broadcast TICK / HEARTBEAT         │
+                    └──────────────┬──────────────────────┘
+                                   │ TCP (binary msgs)
+                    ┌──────────────▼──────────────────────┐
+                    │  Client(s)                          │
+                    │  recv_feed → TICK | HEARTBEAT       │
+                    │  last_rx timeout → reconnect        │
+                    │  inter-arrival LatencyStats         │
+                    └─────────────────────────────────────┘
+```
 
 ## Project Structure
 
 ```
 ├── CMakeLists.txt
+├── LICENSE
 ├── PLAN.md
 ├── README.md
-├── src/
-│   ├── server.cpp    # TCP server (port 8080)
-│   └── client.cpp    # TCP client (127.0.0.1:8080)
-├── include/          # Shared headers (protocol, RAII, …)
-└── theory/           # Concept look-up notes (HTML)
+├── config/default.conf
+├── docs/protocol.md
+├── src/server.cpp
+├── src/client.cpp
+├── include/          # protocol, config, sockets, tick gen, latency, log
+└── theory/           # HTML look-up notes
 ```
 
 ## Requirements
 
-- C++11 or later
-- POSIX (Linux, macOS, WSL, …)
-- g++ / clang++, CMake 3.10+
+- C++11+, POSIX (Linux / macOS / WSL), CMake 3.10+, g++/clang++
 
 ## Build
 
 ```bash
 mkdir -p build && cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..   # -O3 (default if type omitted)
 cmake --build .
 ```
 
-Produces `server` and `client` in `build/`.
-
-## Run (Current Echo Baseline)
-
-**Terminal 1** — server:
+Debug:
 
 ```bash
-cd build
-./server
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake --build .
 ```
 
-Expected: `Server listening on port 8080 (all interfaces)... (Ctrl+C to stop)`
+## Run
 
-**Terminal 2** — client:
+From `build/`:
 
 ```bash
-cd build
-./client
+./server ../config/default.conf
+
+# Stop after 50 ticks (prints inter-arrival percentiles on exit):
+./client ../config/default.conf 50
+
+# Run until Ctrl+C (omit max_ticks, or pass 0):
+./client ../config/default.conf
+./client ../config/default.conf 0
 ```
 
-Expected (approx.):
+Reconnect demo: run the client without a tick limit, stop/restart the server — the client backs off and reconnects (until `reconnect_max_retries`).
 
-```
-Successfully connected to 127.0.0.1:8080
-Sent: "Hello from client!" (18 bytes)
-Received: "Hello from server!" (18 bytes)
-Connection closed. Client exiting.
-```
+## Design Decisions
 
-The server stays up across clients until Ctrl+C (each accept currently does one request/reply then closes that client).
-
-## Design Decisions (Target)
-
-- **TCP** — reliable ordered byte stream; fine for a learning market-data feed (UDP/multicast is a different project)
-- **Fixed-size binary messages** — no text parsing on the hot path; explicit endianness
-- **`poll()`** — portable multi-client I/O without Linux-only `epoll`
-- **`TCP_NODELAY`** — disable Nagle for small, latency-sensitive messages
-- **App-level heartbeat** — detect dead peers beyond what TCP alone surfaces promptly
+| Choice | Why |
+|--------|-----|
+| TCP | Reliable ordered stream; focus on framing/protocol, not loss recovery |
+| Fixed-size binary | No text parsing; known `sizeof`; explicit endianness |
+| Scaled `int64` prices | Deterministic, portable; avoid float on the wire |
+| `poll()` + `O_NONBLOCK` | Portable multi-client I/O (no epoll/kqueue requirement) |
+| `TCP_NODELAY` | Small messages should not wait on Nagle coalescing |
+| App heartbeat | Faster dead-peer detection than relying on TCP alone |
+| Inter-arrival latency | Honest local metric; one-way needs synced clocks (out of scope) |

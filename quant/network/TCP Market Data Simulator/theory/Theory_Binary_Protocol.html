@@ -22,8 +22,9 @@
       <li><a href="#endianness"><span class="num">04</span>Endianness</a></li>
       <li><a href="#partial-reads"><span class="num">05</span>Partial reads</a></li>
       <li><a href="#structs"><span class="num">06</span>Message structs</a></li>
-      <li><a href="#decision"><span class="num">07</span>Project decision</a></li>
-      <li><a href="#pitfalls"><span class="num">08</span>Pitfalls</a></li>
+      <li><a href="#runtime"><span class="num">07</span>Runtime paths</a></li>
+      <li><a href="#decision"><span class="num">08</span>Project decision</a></li>
+      <li><a href="#pitfalls"><span class="num">09</span>Pitfalls</a></li>
     </ol>
   </nav>
 
@@ -31,18 +32,22 @@
     <header class="hero">
       <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
       <h1 class="title">Binary Protocol <span class="brace">{</span> TICK + HEARTBEAT <span class="brace">}</span></h1>
-      <p class="subtitle">Phase 1: replace the text echo with fixed-size packed messages. Scope is <code class="inline">MsgType::TICK</code> and <code class="inline">MsgType::HEARTBEAT</code> only — no ORDER.</p>
+      <p class="subtitle">Fixed-size packed messages on a TCP byte stream. All wire layout lives in <code class="inline">protocol.hpp</code>; the client consumes the feed via <code class="inline">recv_feed</code>, the server enqueues via <code class="inline">ClientSession::enqueue_*</code>.</p>
     </header>
 
     <!-- 01 -->
     <section id="why-binary">
-      <div class="section-head"><span class="idx">01</span><h2>Why binary over text echo</h2></div>
-      <p>The baseline server/client echo lines of text. That is fine for proving sockets work; it is a poor wire format for market data.</p>
+      <div class="section-head"><span class="idx">01</span><h2>Why binary</h2></div>
+      <p>Market-data feeds on the wire are binary: fixed offsets, known sizes, no parsing overhead.</p>
       <ul>
-        <li><strong>Parsing cost</strong> — scanning for <code class="inline">\n</code>, splitting tokens, <code class="inline">atoi</code>/<code class="inline">stod</code> on every tick. Binary copies bytes into a struct (after endian fixups).</li>
-        <li><strong>Structure</strong> — fields have fixed offsets and types. No ambiguity about separators, floats-as-strings, or trailing whitespace.</li>
-        <li><strong>Interview story</strong> — “We moved from line-oriented echo to a binary feed so size and layout are known at compile time; the hard part is framing on a TCP stream and endianness, not string parsing.”</li>
+        <li><strong>Parsing cost</strong> — binary copies bytes into a struct after endian fixups; no token scanning or string-to-float conversion per tick.</li>
+        <li><strong>Structure</strong> — fields have fixed offsets and types. Size is known at compile time (<code class="inline">static_assert</code> in <code class="inline">protocol.hpp</code>).</li>
+        <li><strong>Framing on TCP</strong> — the hard part is not the struct layout but accumulating full messages on a byte stream (partial reads).</li>
       </ul>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>Binary over text</strong> — two fixed message types only (<code class="inline">TICK</code>, <code class="inline">HEARTBEAT</code>). Rejected: line-delimited text, JSON, or length-prefixed variable payloads (unnecessary for this scope).</p>
+      </div>
     </section>
 
     <!-- 02 -->
@@ -61,7 +66,10 @@
           <td>Needed for strings / variable books; more framing states</td>
         </tr>
       </table>
-      <p>We choose <strong>fixed-size</strong> for both TICK and HEARTBEAT. Discriminate with a leading <code class="inline">uint8_t msg_type</code>, then read the remaining bytes for that type (or always read the larger type after peeking the first byte — implementation detail).</p>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>Fixed-size</strong> for both TICK (25 bytes) and HEARTBEAT (9 bytes). Discriminate with a leading <code class="inline">uint8_t msg_type</code>. Rejected: length-prefixed framing — no variable payloads in this protocol.</p>
+      </div>
     </section>
 
     <!-- 03 -->
@@ -73,25 +81,28 @@
         <pre><code class="language-cpp">#pragma pack(push, 1)   // no padding between members
 struct TickMsg { /* ... */ };
 struct HeartbeatMsg { /* ... */ };
-#pragma pack(pop)       // restore previous packing</code></pre>
+#pragma pack(pop)       // restore previous packing
+
+static_assert(sizeof(TickMsg) == 25, "TickMsg must be packed to 25 bytes");
+static_assert(sizeof(HeartbeatMsg) == 9, "HeartbeatMsg must be packed to 9 bytes");</code></pre>
       </div>
-      <p class="dim">Packed structs are for serialization. Prefer converting field-by-field with <code class="inline">hton*</code>/<code class="inline">ntoh*</code> rather than <code class="inline">memcpy</code>ing a host-endian struct straight to the socket without conversion.</p>
+      <p class="dim">Packed structs are for serialization. Convert field-by-field with <code class="inline">hton*</code>/<code class="inline">ntoh*</code> via <code class="inline">tick_to_wire</code> / <code class="inline">tick_from_wire</code> — never <code class="inline">memcpy</code> a host-endian struct straight to the socket.</p>
     </section>
 
     <!-- 04 -->
     <section id="endianness">
       <div class="section-head"><span class="idx">04</span><h2>Endianness</h2></div>
-      <p><strong>Network byte order is big-endian.</strong> Apple Silicon and x86 hosts are little-endian — multi-byte integers must be converted on send and again on receive.</p>
+      <p><strong>Network byte order is big-endian.</strong> Apple Silicon and x86 hosts are little-endian — multi-byte integers must be converted on send and receive.</p>
       <table>
         <tr><th>Width</th><th>Host → network</th><th>Network → host</th></tr>
         <tr><td>16-bit</td><td><code class="inline">htons</code></td><td><code class="inline">ntohs</code></td></tr>
         <tr><td>32-bit</td><td><code class="inline">htonl</code></td><td><code class="inline">ntohl</code></td></tr>
-        <tr><td>64-bit</td><td>custom / <code class="inline">htobe64</code> where available</td><td>matching <code class="inline">be64toh</code> / helper</td></tr>
+        <tr><td>64-bit</td><td><code class="inline">host_to_net64</code></td><td><code class="inline">net_to_host64</code></td></tr>
       </table>
-      <p><code class="inline">uint8_t msg_type</code> needs no swap. Convert <code class="inline">symbol_id</code>, <code class="inline">price</code>, <code class="inline">timestamp_ns</code>, <code class="inline">volume</code> (and heartbeat timestamp) explicitly.</p>
+      <p><code class="inline">uint8_t msg_type</code> needs no swap. <code class="inline">protocol.hpp</code> provides custom 64-bit helpers (portable; avoids relying on <code class="inline">htobe64</code> availability).</p>
       <div class="card warn">
-        <span class="card-label">Gotcha</span>
-        <p>Skipping <code class="inline">ntoh*</code> on receive “works” only if both ends are the same endianness and you never test otherwise. Write the conversions anyway — that is the interview-correct habit.</p>
+        <span class="card-label">Pitfall</span>
+        <p>Skipping <code class="inline">ntoh*</code> on receive “works” only if both ends are the same endianness. The wire helpers always convert — that is the correct habit.</p>
       </div>
     </section>
 
@@ -100,39 +111,30 @@ struct HeartbeatMsg { /* ... */ };
       <div class="section-head"><span class="idx">05</span><h2>Partial reads — TCP is a stream</h2></div>
       <p>TCP delivers a byte stream, not messages. One <code class="inline">send</code> of 25 bytes can arrive as two <code class="inline">recv</code>s of 10 and 15 — or one <code class="inline">recv</code> that contains two full messages plus a fragment.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span>recv_exact.cpp</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-        <pre><code class="language-cpp">bool recv_exact(int fd, void* buf, size_t n) {
-    auto* p = static_cast&lt;char*&gt;(buf);
-    size_t got = 0;
-    while (got &lt; n) {
-        ssize_t r = recv(fd, p + got, n - got, 0);
-        if (r == 0) return false;          // peer closed
-        if (r &lt; 0) {
-            if (errno == EINTR) continue;
-            return false;                  // or handle EAGAIN when non-blocking
-        }
-        got += static_cast&lt;size_t&gt;(r);
-    }
-    return true;
-}
-// usage: TickMsg m; recv_exact(fd, &amp;m, sizeof(m));</code></pre>
+        <div class="code-bar"><span>protocol.hpp — recv_exact</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><code class="language-cpp">// Loops until n bytes or error/close.
+// Handles EINTR; caller handles EAGAIN when non-blocking.
+IoStatus recv_exact(int fd, void* buf, size_t n);
+
+// recv_feed: read msg_type byte, then remainder for that type
+IoStatus recv_feed(int fd, FeedEvent& ev);</code></pre>
       </div>
-      <p class="dim">Always accumulate until you have <code class="inline">sizeof(msg)</code> (or the fixed size for the type you are reading). Never assume one <code class="inline">recv</code> equals one message.</p>
+      <p class="dim">Always accumulate until you have a full message. Never assume one <code class="inline">recv</code> equals one message.</p>
     </section>
 
     <!-- 06 -->
     <section id="structs">
-      <div class="section-head"><span class="idx">06</span><h2>Message structs (PLAN.md)</h2></div>
+      <div class="section-head"><span class="idx">06</span><h2>Message structs</h2></div>
       <div class="code-wrap">
-        <div class="code-bar"><span>protocol.hpp (sketch)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-bar"><span>protocol.hpp</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
         <pre><code class="language-cpp">enum class MsgType : uint8_t { TICK = 1, HEARTBEAT = 2 };
 
 #pragma pack(push, 1)
 struct TickMsg {
     uint8_t  msg_type;      // MsgType::TICK
     uint32_t symbol_id;
-    int64_t  price;         // scaled integer (e.g. micros)
-    uint64_t timestamp_ns;  // or steady-clock ticks
+    int64_t  price;         // scaled integer (micros: 1e6 == 1.0)
+    uint64_t timestamp_ns;
     uint32_t volume;
 };
 struct HeartbeatMsg {
@@ -141,50 +143,74 @@ struct HeartbeatMsg {
 };
 #pragma pack(pop)
 
-// sizeof(TickMsg) == 1+4+8+8+4 = 25
-// sizeof(HeartbeatMsg) == 1+8 = 9</code></pre>
+// sizeof(TickMsg) == 25
+// sizeof(HeartbeatMsg) == 9</code></pre>
       </div>
-      <p>Serialize helpers: set fields in host order → apply <code class="inline">hton*</code> → <code class="inline">send</code> exactly <code class="inline">sizeof</code> bytes. Deserialize: <code class="inline">recv_exact</code> → <code class="inline">ntoh*</code> → use.</p>
+      <p>Serialize: host-order struct → <code class="inline">tick_to_wire</code> / <code class="inline">heartbeat_to_wire</code> → <code class="inline">send_exact</code>. Deserialize: <code class="inline">recv_feed</code> → <code class="inline">tick_from_wire</code> / <code class="inline">heartbeat_from_wire</code>.</p>
     </section>
 
     <!-- 07 -->
-    <section id="decision">
-      <div class="section-head"><span class="idx">07</span><h2>Project decision</h2></div>
-      <div class="card">
-        <span class="card-label">Decision</span>
-        <p><strong>Fixed-size packed binary</strong> with two message types only: <code class="inline">TICK</code> and <code class="inline">HEARTBEAT</code>. No ORDER/ACK, no length-prefixed blobs, no JSON. Prices are scaled integers on the wire. All multi-byte fields use network byte order; receivers loop until a full message is buffered.</p>
-      </div>
+    <section id="runtime">
+      <div class="section-head"><span class="idx">07</span><h2>Runtime paths</h2></div>
+      <table>
+        <tr><th>Path</th><th>Where</th><th>Role</th></tr>
+        <tr>
+          <td><code class="inline">recv_feed</code></td>
+          <td><code class="inline">src/client.cpp</code></td>
+          <td>Read one framed message; populate <code class="inline">FeedEvent</code> (tick or heartbeat)</td>
+        </tr>
+        <tr>
+          <td><code class="inline">ClientSession::enqueue_tick</code> / <code class="inline">enqueue_heartbeat</code></td>
+          <td><code class="inline">client_session.hpp</code></td>
+          <td>Convert to wire bytes, append to outbound queue</td>
+        </tr>
+        <tr>
+          <td><code class="inline">send_tick</code> / <code class="inline">recv_tick</code></td>
+          <td><code class="inline">protocol.hpp</code></td>
+          <td>Typed helpers for tests / simple blocking demos — not the main server/client loop</td>
+        </tr>
+      </table>
+      <p class="dim"><code class="inline">recv_feed</code> reads the first byte to discriminate type, then reads the remaining <code class="inline">sizeof(msg) - 1</code> bytes — so partial reads never desync the stream.</p>
     </section>
 
     <!-- 08 -->
+    <section id="decision">
+      <div class="section-head"><span class="idx">08</span><h2>Project decision</h2></div>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>Fixed-size packed binary</strong> with two message types only: <code class="inline">TICK</code> and <code class="inline">HEARTBEAT</code>. Prices are scaled integers on the wire. All multi-byte fields use network byte order; receivers loop until a full message is buffered. Rejected: ORDER/ACK, length-prefixed blobs, JSON.</p>
+      </div>
+    </section>
+
+    <!-- 09 -->
     <section id="pitfalls">
-      <div class="section-head"><span class="idx">08</span><h2>Common pitfalls</h2></div>
+      <div class="section-head"><span class="idx">09</span><h2>Common pitfalls</h2></div>
 
       <div class="pitfall">
         <span class="icon">✕</span>
         <div>
           <h4>Forgetting <code class="inline">ntoh*</code> on receive</h4>
-          <p>Prices, IDs, and timestamps look “almost right” on little-endian hosts talking to themselves — then break on a different machine or when you actually inspect byte order.</p>
+          <p>Prices, IDs, and timestamps look “almost right” on little-endian hosts talking to themselves — then break on a different machine.</p>
         </div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
         <div>
           <h4>Assuming one <code class="inline">recv</code> = one message</h4>
-          <p>TCP is a stream. Partial and coalesced reads are normal; without a read-until-full loop (or an explicit buffer), you desync the stream and every later message is garbage.</p>
+          <p>TCP is a stream. Partial and coalesced reads are normal; without <code class="inline">recv_exact</code> / <code class="inline">recv_feed</code>, you desync and every later message is garbage.</p>
         </div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
         <div>
           <h4>Sending without packing</h4>
-          <p>Default alignment padding means <code class="inline">sizeof</code> and field offsets disagree between compilers/ABIs. Use <code class="inline">#pragma pack(push, 1)</code> (or serialize field-by-field into a byte buffer).</p>
+          <p>Default alignment padding means <code class="inline">sizeof</code> and field offsets disagree between compilers. Use <code class="inline">#pragma pack(push, 1)</code> and verify with <code class="inline">static_assert</code>.</p>
         </div>
       </div>
     </section>
 
     <footer>
-      <a href="index.html">← Theory index</a> · Phase 1 · see PLAN.md § Binary Protocol
+      <a href="index.html">← Theory index</a> · <a href="../PLAN.md">PLAN.md</a>
     </footer>
   </main>
 </div>

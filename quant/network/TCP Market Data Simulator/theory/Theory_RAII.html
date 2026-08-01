@@ -16,10 +16,10 @@
     <span class="toc-label">Contents</span>
     <ol id="toc-list">
       <li><a href="#core-idea"><span class="num">01</span>Core idea</a></li>
-      <li><a href="#current-code"><span class="num">02</span>Current code</a></li>
-      <li><a href="#socket-guard"><span class="num">03</span>SocketGuard sketch</a></li>
+      <li><a href="#socket-guard"><span class="num">02</span>SocketGuard</a></li>
+      <li><a href="#usage"><span class="num">03</span>Where it is used</a></li>
       <li><a href="#rule-of"><span class="num">04</span>Rule of Zero / Five</a></li>
-      <li><a href="#project-plan"><span class="num">05</span>Project plan</a></li>
+      <li><a href="#decision"><span class="num">05</span>Project decision</a></li>
       <li><a href="#pitfalls"><span class="num">06</span>Pitfalls</a></li>
       <li><a href="#reference"><span class="num">07</span>Quick reference</a></li>
     </ol>
@@ -29,80 +29,73 @@
     <header class="hero">
       <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
       <h1 class="title">RAII <span class="brace">{</span> Socket fd ownership <span class="brace">}</span></h1>
-      <p class="subtitle">How file descriptors should be owned in this project — acquire in a constructor, <code class="inline">close()</code> in a destructor — and what still uses manual cleanup today.</p>
+      <p class="subtitle">Every listen, accept, and connect fd is owned by <code class="inline">SocketGuard</code> in <code class="inline">socket_guard.hpp</code>. Higher-level types like <code class="inline">ClientSession</code> compose it with Rule of Zero — no hand-written destructors.</p>
     </header>
 
     <section id="core-idea">
       <div class="section-head"><span class="idx">01</span><h2>Core idea</h2></div>
-      <p>RAII ties a resource's lifetime to an object's lifetime. For sockets that means: construct → own an <code class="inline">int</code> fd; destroy → call <code class="inline">close()</code>. C++ runs destructors on scope exit (including early <code class="inline">return</code>), so cleanup is not a separate checklist at every exit path.</p>
-      <p class="dim">A small RAII example already in the tree: <code class="inline">Timer</code> in <code class="inline">include/timer.hpp</code> — start in the constructor, print elapsed time in the destructor. Same pattern; different resource (wall time vs an OS handle).</p>
+      <p>RAII ties a resource's lifetime to an object's lifetime. For sockets: construct → own an <code class="inline">int</code> fd; destroy → call <code class="inline">close()</code>. C++ runs destructors on scope exit (including early <code class="inline">return</code>), so cleanup is not a separate checklist at every exit path.</p>
       <div class="card">
         <span class="card-label">Scope for this project</span>
-        <p>TICK + HEARTBEAT over TCP. One thread, <code class="inline">poll()</code> + nonblocking sockets. The RAII story here is <strong>fd ownership</strong>, not mutex locking.</p>
+        <p>TICK + HEARTBEAT over TCP. One thread, <code class="inline">poll()</code> + non-blocking sockets. The RAII story here is <strong>fd ownership</strong>, not mutex locking.</p>
       </div>
-    </section>
-
-    <section id="current-code">
-      <div class="section-head"><span class="idx">02</span><h2>Current code</h2></div>
-      <p><code class="inline">server.cpp</code> and <code class="inline">client.cpp</code> still use bare <code class="inline">int</code> fds and call <code class="inline">close()</code> by hand on every error path and on normal exit.</p>
-      <div class="code-wrap">
-        <div class="code-bar">
-          <span>client.cpp (today)</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
-        </div>
-        <pre><code class="language-cpp">int sock = socket(AF_INET, SOCK_STREAM, 0);
-if (sock &lt; 0) return 1;
-
-if (inet_pton(...) &lt;= 0) {
-    close(sock);   // must remember on this path
-    return 1;
-}
-if (connect(sock, ...) &lt; 0) {
-    close(sock);   // and this one
-    return 1;
-}
-// ... send / recv ...
-close(sock);       // and the happy path</code></pre>
-      </div>
-      <p class="dim">Same pattern on the server: <code class="inline">close(server_fd)</code> / <code class="inline">close(new_socket)</code> after bind/listen/accept failures and when a client session ends. Easy to miss one branch as the code grows.</p>
     </section>
 
     <section id="socket-guard">
-      <div class="section-head"><span class="idx">03</span><h2>SocketGuard sketch</h2></div>
-      <div class="card warn">
-        <span class="card-label">Not implemented yet</span>
-        <p><code class="inline">SocketGuard</code> is <strong>planned for Phase 2</strong> (see PLAN.md). The sketch below is the target design, not code that exists in the repo today.</p>
-      </div>
+      <div class="section-head"><span class="idx">02</span><h2>SocketGuard</h2></div>
+      <p><code class="inline">SocketGuard</code> in <code class="inline">include/socket_guard.hpp</code> is a move-only owner of a POSIX socket fd.</p>
       <div class="code-wrap">
         <div class="code-bar">
-          <span>planned — socket_guard.hpp</span>
+          <span>include/socket_guard.hpp</span>
           <button class="copy-btn" onclick="copyCode(this)">copy</button>
         </div>
         <pre><code class="language-cpp">class SocketGuard {
 public:
     explicit SocketGuard(int fd) noexcept : fd_(fd) {}
-    ~SocketGuard() { if (fd_ &gt;= 0) ::close(fd_); }
+    ~SocketGuard() { reset(); }
 
     int get() const noexcept { return fd_; }
-    int release() noexcept { int t = fd_; fd_ = -1; return t; }
+    bool valid() const noexcept { return fd_ &gt;= 0; }
+    void reset(int fd = -1) noexcept;  // close old, adopt new (or -1)
+    int release() noexcept;            // relinquish without closing
 
     SocketGuard(const SocketGuard&)            = delete;
     SocketGuard&amp; operator=(const SocketGuard&) = delete;
-
-    SocketGuard(SocketGuard&amp;&amp; o) noexcept : fd_(o.fd_) { o.fd_ = -1; }
-    SocketGuard&amp; operator=(SocketGuard&amp;&amp; o) noexcept {
-        if (this != &amp;o) {
-            if (fd_ &gt;= 0) ::close(fd_);
-            fd_ = o.fd_;
-            o.fd_ = -1;
-        }
-        return *this;
-    }
+    SocketGuard(SocketGuard&amp;&amp;) noexcept;
+    SocketGuard&amp; operator=(SocketGuard&amp;&amp;) noexcept;
 private:
     int fd_{-1};
 };</code></pre>
       </div>
       <p><strong>Move-only:</strong> copy is deleted so two guards cannot own the same fd. Move steals the fd and sets the source to <code class="inline">-1</code> so the moved-from destructor is a no-op.</p>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>RAII for every fd.</strong> Rejected: bare <code class="inline">int</code> + manual <code class="inline">close()</code> on every error path — too easy to leak or double-close as session management grows.</p>
+      </div>
+    </section>
+
+    <section id="usage">
+      <div class="section-head"><span class="idx">03</span><h2>Where it is used</h2></div>
+      <table>
+        <tr><th>Location</th><th>SocketGuard role</th></tr>
+        <tr><td><code class="inline">src/server.cpp</code></td><td><code class="inline">listen_sock</code> — lives for the whole server run</td></tr>
+        <tr><td><code class="inline">src/server.cpp</code></td><td>Accepted fd moved into <code class="inline">ClientSession</code> via <code class="inline">std::move(csock)</code></td></tr>
+        <tr><td><code class="inline">src/client.cpp</code></td><td><code class="inline">sock</code> — reset on timeout/error, recreated on reconnect</td></tr>
+        <tr><td><code class="inline">client_session.hpp</code></td><td><code class="inline">ClientSession::sock</code> — owns the per-client fd</td></tr>
+      </table>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span>src/client.cpp (pattern)</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><code class="language-cpp">SocketGuard sock;
+// ... connect_to_server(cfg, sock) fills sock ...
+
+// on timeout or error:
+sock.reset();   // closes fd; sock.valid() == false
+
+// reconnect creates a new socket in the same guard</code></pre>
+      </div>
     </section>
 
     <section id="rule-of">
@@ -113,24 +106,26 @@ private:
       </ul>
       <div class="code-wrap">
         <div class="code-bar">
-          <span>connection.hpp (Rule of Zero)</span>
+          <span>client_session.hpp (Rule of Zero)</span>
           <button class="copy-btn" onclick="copyCode(this)">copy</button>
         </div>
-        <pre><code class="language-cpp">struct ClientConn {
+        <pre><code class="language-cpp">struct ClientSession {
     SocketGuard sock;           // owns the fd
-    std::vector&lt;char&gt; rx;       // owns the buffer
+    std::vector&lt;char&gt; out;      // pending wire bytes
+    size_t out_off = 0;
+    bool alive = true;
     // no hand-written dtor / copy / move
 };</code></pre>
       </div>
+      <p class="dim">When a dead session is dropped from the server's <code class="inline">clients</code> vector, <code class="inline">ClientSession</code>'s destructor runs → <code class="inline">SocketGuard</code> closes the fd automatically.</p>
     </section>
 
-    <section id="project-plan">
-      <div class="section-head"><span class="idx">05</span><h2>Project plan</h2></div>
-      <p>Phase 2 (PLAN.md) introduces <code class="inline">SocketGuard</code> for the listen socket, accepted client sockets, and the client's connect socket — then <code class="inline">TCP_NODELAY</code> and light logging alongside it.</p>
-      <ul>
-        <li>Later phases add many concurrent clients under a <strong>single-threaded</strong> <code class="inline">poll()</code> loop. Each client fd still needs exactly-one owner; RAII keeps that true when a peer drops mid-parse or a session is removed from the poll set.</li>
-        <li>No multi-threaded shared order book here — do not center the story on <code class="inline">std::lock_guard</code>. That tool exists for mutexes; this simulator's resource of interest is the socket fd.</li>
-      </ul>
+    <section id="decision">
+      <div class="section-head"><span class="idx">05</span><h2>Project decision</h2></div>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>SocketGuard everywhere; Rule of Zero for session types.</strong> The single-threaded <code class="inline">poll()</code> loop adds and removes clients dynamically — RAII guarantees exactly-one close when a peer drops mid-parse or a session is erased from the vector. Rejected: raw fd + scattered <code class="inline">close()</code> calls.</p>
+      </div>
     </section>
 
     <section id="pitfalls">
@@ -153,7 +148,7 @@ private:
         <span class="icon">✕</span>
         <div>
           <h4>Manual close + guard</h4>
-          <p>Once wrapped, do not also <code class="inline">close(guard.get())</code> on error paths. Either own via RAII or own via hand-written closes — not both.</p>
+          <p>Once wrapped, do not also <code class="inline">close(guard.get())</code> on error paths. Use <code class="inline">guard.reset()</code> or let scope exit handle it — not both.</p>
         </div>
       </div>
     </section>
@@ -161,19 +156,17 @@ private:
     <section id="reference">
       <div class="section-head"><span class="idx">07</span><h2>Quick reference</h2></div>
       <table>
-        <tr><th>Item</th><th>Status in this project</th></tr>
-        <tr><td>Bare <code class="inline">int</code> + <code class="inline">close()</code></td><td>Current <code class="inline">server.cpp</code> / <code class="inline">client.cpp</code></td></tr>
-        <tr><td><code class="inline">Timer</code></td><td>Exists — <code class="inline">include/timer.hpp</code> (RAII for timing)</td></tr>
-        <tr><td><code class="inline">SocketGuard</code></td><td>Planned Phase 2 — not in tree yet</td></tr>
-        <tr><td>Copy ctor / assign</td><td>Delete on fd wrappers</td></tr>
+        <tr><th>Item</th><th>In this project</th></tr>
+        <tr><td><code class="inline">SocketGuard</code></td><td><code class="inline">include/socket_guard.hpp</code> — listen, accept, connect fds</td></tr>
+        <tr><td><code class="inline">ClientSession</code></td><td>Composes <code class="inline">SocketGuard</code> + outbound queue (Rule of Zero)</td></tr>
+        <tr><td>Copy ctor / assign</td><td>Deleted on fd wrappers</td></tr>
         <tr><td>Move ctor / assign</td><td>Transfer ownership; null source to <code class="inline">-1</code></td></tr>
-        <tr><td>Higher-level types</td><td>Rule of Zero — compose with <code class="inline">SocketGuard</code></td></tr>
-        <tr><td>Concurrency model</td><td>Single-threaded <code class="inline">poll()</code>; not a lock_guard design</td></tr>
+        <tr><td>Concurrency model</td><td>Single-threaded <code class="inline">poll()</code>; fd ownership, not mutex RAII</td></tr>
       </table>
     </section>
 
     <footer>
-      <a href="index.html">← Back to theory index</a>
+      <a href="index.html">← Theory index</a> · <a href="../PLAN.md">PLAN.md</a>
     </footer>
   </main>
 </div>

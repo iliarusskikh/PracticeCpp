@@ -1,121 +1,215 @@
-//Client: create → connect → send → receive → close
+// Market-data feed client.
+//
+// Usage: ./client [config_path] [max_ticks]
+//   max_ticks omitted or 0 → run until Ctrl+C / give-up on reconnect
+//
+// Liveness: any successfully parsed message (TICK or HEARTBEAT) refreshes
+// last_rx. Silence >= heartbeat_timeout_ms → treat as dead and reconnect with
+// exponential backoff. Inter-arrival samples reset when a new connection opens.
 
-#include <iostream>          // For std::cout, std::cerr
-#include <cstring>           // For strlen()
-#include <sys/socket.h>      // socket(), connect(), send(), close();
-#include <netinet/in.h>      // sockaddr_in, htons()
-#include <arpa/inet.h>       // inet_pton() — modern way to convert IP string → binary
-#include <unistd.h>          // close(), read()  (on POSIX systems)
+#include <csignal>
+#include <cerrno>
+#include <cstring>
+#include <algorithm>
+#include <chrono>
+#include <cstdlib>
+#include <string>
+#include <thread>
+#include <poll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
-#include "timer.hpp"
+#include "config.hpp"
+#include "latency.hpp"
+#include "log.hpp"
+#include "protocol.hpp"
+#include "socket_guard.hpp"
+#include "socket_opts.hpp"
 
-int main() {
-    Timer timer; //creating object - starting the timer
+volatile sig_atomic_t g_shutdown = 0;
 
-    /* for reference
-    struct sockaddr_in {
-        sa_family_t    sin_family;   // Address family (AF_INET)
-        in_port_t      sin_port;     // Port number (network byte order)
-        struct in_addr sin_addr;     // IPv4 address (32-bit)
-        char           sin_zero[8];  // Padding to match sockaddr size
-    };  
-    
-    */
-    // ────────────────────────────────────────────────
-    //                VARIABLES
-    // ────────────────────────────────────────────────
-    int sock = -1;                      // Socket file descriptor (will be set by socket())
-    struct sockaddr_in serv_addr;       // Structure that holds server's IP + port
-    const char* message = "Hello from client!";   // Data we will send
-    char buffer[1024] = {0};            // Buffer to receive server's reply (zero-initialized)
-    const char* SERVER_IP = "127.0.0.1"; // localhost (loopback address)
-    const int PORT = 8080;              // Port the server is listening on
+void on_signal(int) { g_shutdown = 1; }
 
+enum class ConnState { Disconnected, Connecting, Connected };
 
-    // ────────────────────────────────────────────────
-    // 1. CREATE SOCKET
-    // ────────────────────────────────────────────────
-    // AF_INET    → IPv4; AF_INET6 (IPv6), AF_UNIX (local)
-    // SOCK_STREAM → TCP (reliable, connection-oriented, byte stream)
-    // SOCK_STREAM = TCP: reliable, ordered, connection‑oriented byte stream
-    // SOCK_DGRAM = UDP: unreliable, connectionless datagrams
-    // SOCK_RAW = raw IP (low‑level, usually privileged)
-    // 0          → use default protocol (IPPROTO_TCP)
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        std::cerr << "Error: Failed to create socket\n";
-        return 1;
+static const char* state_name(ConnState s) {
+    switch (s) {
+        case ConnState::Disconnected: return "disconnected";
+        case ConnState::Connecting:   return "connecting";
+        case ConnState::Connected:    return "connected";
     }
-    // At this point we have a socket file descriptor (like a handle)
-    std::cout << "Socket created: "<< sock << "\n";
+    return "?";
+}
 
-    // ────────────────────────────────────────────────
-    // 2. PREPARE SERVER ADDRESS STRUCTURE
-    // ────────────────────────────────────────────────
-    // Clear structure
-    memset(&serv_addr, 0, sizeof(serv_addr));
-
-    serv_addr.sin_family = AF_INET;           // Must match socket family (IPv4)
-    serv_addr.sin_port   = htons(PORT);       // Convert port to network byte order (big-endian)
-
-    // Convert IP string ("127.0.0.1") → 32-bit binary format
-    // inet_pton = "presentation to network"
-    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
-        std::cerr << "Error: Invalid IP address\n";
-        close(sock);
-        return 1;
+static bool connect_to_server(const AppConfig& cfg, SocketGuard& sock) {
+    sock.reset(socket(AF_INET, SOCK_STREAM, 0));
+    if (!sock.valid()) {
+        LOG_ERROR("Failed to create socket");
+        return false;
     }
 
-    // ────────────────────────────────────────────────
-    // 3. CONNECT TO THE SERVER
-    // ────────────────────────────────────────────────
-    // Initiates TCP 3-way handshake
-    // Blocks until connection succeeds or fails
-    //int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-
-    if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        std::cerr << "Error: Connection failed (server down? wrong port?)\n";
-        close(sock);
-        return 1;
+    sockaddr_in serv_addr{};
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port   = htons(static_cast<uint16_t>(cfg.port));
+    if (inet_pton(AF_INET, cfg.host.c_str(), &serv_addr.sin_addr) <= 0) {
+        log_error() << "Invalid IP address: " << cfg.host;
+        sock.reset();
+        return false;
     }
 
-    std::cout << "Successfully connected to " << SERVER_IP << ":" << PORT << "\n";
+    if (connect(sock.get(), reinterpret_cast<sockaddr*>(&serv_addr), sizeof(serv_addr)) < 0) {
+        sock.reset();
+        return false;
+    }
 
-    // ────────────────────────────────────────────────
-    // 4. SEND DATA over TCP connection
-    // ────────────────────────────────────────────────
-    // send() may not send everything in one call in general,
-    // but here message is tiny → almost always succeeds in one go
-    ssize_t bytes_sent = send(sock, message, strlen(message), 0);
-    if (bytes_sent < 0) {
-        std::cerr << "Error: Send failed\n";
-        close(sock);
+    set_tcp_nodelay(sock.get());
+    return true;
+}
+
+int main(int argc, char** argv) {
+    const std::string cfg_path = config_path_from_args(argc, argv, "../config/default.conf");
+    AppConfig cfg;
+    const std::string cfg_err = load_config(cfg_path, cfg);
+    if (!cfg_err.empty()) {
+        log_error() << "Config error: " << cfg_err;
+        log_error() << "Usage: " << (argc > 0 ? argv[0] : "client")
+                    << " [config_path] [max_ticks]";
         return 1;
     }
 
-    std::cout << "Sent: \"" << message << "\" (" << bytes_sent << " bytes)\n";
-
-    // ────────────────────────────────────────────────
-    // 5. RECEIVE RESPONSE (simple blocking read)
-    // ────────────────────────────────────────────────
-    // read() blocks until data arrives or connection closes
-    ssize_t bytes_received = read(sock, buffer, sizeof(buffer) - 1); //buffer is 1024 bytes. We read at most 1023 so we can always add a null terminator
-    if (bytes_received < 0) {
-        std::cerr << "Error: Read failed\n";
-    } else if (bytes_received == 0) {
-        std::cout << "Server closed connection\n";
-    } else {
-        buffer[bytes_received] = '\0';           // Null-terminate for safe printing
-        std::cout << "Received: \"" << buffer << "\" (" << bytes_received << " bytes)\n";
+    int max_ticks = 0;
+    if (argc >= 3) {
+        max_ticks = std::atoi(argv[2]);
+        if (max_ticks < 0) max_ticks = 0;
     }
 
-    // ────────────────────────────────────────────────
-    // 6. CLEAN UP
-    // ────────────────────────────────────────────────
-    // Closing socket sends FIN → starts graceful TCP shutdown
-    close(sock);
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = on_signal;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
 
-    std::cout << "Connection closed. Client exiting.\n";
+    using clock = std::chrono::steady_clock;
+    ConnState state = ConnState::Disconnected;
+    SocketGuard sock;
+    int got_ticks = 0;
+    int attempt = 0;
+    int backoff_ms = cfg.reconnect_initial_ms;
+    auto last_rx = clock::now();
+    auto last_tick_at = clock::time_point{}; // unset until first tick
+    LatencyStats interarrival;
 
+    log_info() << "Client starting → " << cfg.host << ":" << cfg.port
+               << " timeout_ms=" << cfg.heartbeat_timeout_ms
+               << " max_retries=" << cfg.reconnect_max_retries;
+
+    while (!g_shutdown) {
+        if (state != ConnState::Connected) {
+            if (attempt > cfg.reconnect_max_retries) {
+                LOG_ERROR("Gave up reconnecting");
+                return 1;
+            }
+
+            state = ConnState::Connecting;
+            log_info() << "state=" << state_name(state)
+                       << " attempt=" << (attempt + 1)
+                       << "/" << (cfg.reconnect_max_retries + 1);
+
+            if (!connect_to_server(cfg, sock)) {
+                state = ConnState::Disconnected;
+                log_warn() << "Connect failed; backing off " << backoff_ms << "ms"
+                           << " state=" << state_name(state);
+                std::this_thread::sleep_for(std::chrono::milliseconds(backoff_ms));
+                backoff_ms = std::min(backoff_ms * 2, 5000);
+                ++attempt;
+                continue;
+            }
+
+            state = ConnState::Connected;
+            attempt = 0;
+            backoff_ms = cfg.reconnect_initial_ms;
+            last_rx = clock::now();
+            last_tick_at = clock::time_point{}; // reset inter-arrival across reconnects
+            log_info() << "state=" << state_name(state)
+                       << " (Ctrl+C to stop"
+                       << (max_ticks > 0 ? ", max_ticks=" + std::to_string(max_ticks) : "")
+                       << ")";
+        }
+
+        // Wait for data or heartbeat timeout
+        const auto now = clock::now();
+        const auto silent = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_rx);
+        int wait_ms = cfg.heartbeat_timeout_ms - static_cast<int>(silent.count());
+        if (wait_ms < 0) wait_ms = 0;
+
+        pollfd pfd{};
+        pfd.fd = sock.get();
+        pfd.events = POLLIN;
+        const int pr = ::poll(&pfd, 1, wait_ms);
+        if (pr < 0) {
+            if (errno == EINTR) continue;
+            LOG_ERROR("poll() failed");
+            return 1;
+        }
+
+        if (pr == 0 || (clock::now() - last_rx) >=
+                std::chrono::milliseconds(cfg.heartbeat_timeout_ms)) {
+            LOG_WARN("Heartbeat timeout — connection treated as dead");
+            sock.reset();
+            state = ConnState::Disconnected;
+            ++attempt;
+            continue;
+        }
+
+        if (!(pfd.revents & POLLIN)) continue;
+
+        FeedEvent ev{};
+        const IoStatus rx = recv_feed(sock.get(), ev);
+        if (rx == IoStatus::Closed) {
+            LOG_WARN("Server closed connection");
+            sock.reset();
+            state = ConnState::Disconnected;
+            ++attempt;
+            continue;
+        }
+        if (rx != IoStatus::Ok) {
+            if (g_shutdown) break;
+            LOG_ERROR("Failed to receive feed message");
+            sock.reset();
+            state = ConnState::Disconnected;
+            ++attempt;
+            continue;
+        }
+
+        last_rx = clock::now(); // tick or heartbeat both count as liveness
+
+        if (ev.kind == FeedKind::Heartbeat) {
+            log_info() << "HEARTBEAT timestamp_ns=" << ev.hb.timestamp_ns;
+            continue;
+        }
+
+        ++got_ticks;
+        const auto tick_at = clock::now();
+        if (last_tick_at.time_since_epoch().count() != 0) {
+            const auto delta = tick_at - last_tick_at;
+            interarrival.add_ns(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(delta).count());
+        }
+        last_tick_at = tick_at;
+
+        log_info() << "TICK #" << got_ticks
+                   << " symbol_id=" << ev.tick.symbol_id
+                   << " price=" << ev.tick.price
+                   << " volume=" << ev.tick.volume;
+
+        if (max_ticks > 0 && got_ticks >= max_ticks) break;
+    }
+
+    log_info() << "Client exiting after " << got_ticks << " tick(s)."
+               << " final_state=" << state_name(state);
+    // Inter-arrival of ticks on this host (not one-way wire latency).
+    interarrival.report("tick inter-arrival");
     return 0;
 }

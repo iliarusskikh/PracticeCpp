@@ -30,7 +30,7 @@
     <header class="hero">
       <span class="eyebrow">TCP Market Data Simulator · Look-up notes</span>
       <h1 class="title">Sockets <span class="brace">{</span> TCP &amp; Berkeley API <span class="brace">}</span></h1>
-      <p class="subtitle">Baseline for this project: blocking TCP echo today; market-data feed over the same Berkeley sockets tomorrow. Maps the API calls already in <code class="inline">server.cpp</code> / <code class="inline">client.cpp</code>.</p>
+      <p class="subtitle">TCP is the transport for this market-data feed. The Berkeley socket API in <code class="inline">src/server.cpp</code> and <code class="inline">src/client.cpp</code> owns connection lifecycle — listen, accept, connect, send, close — with <code class="inline">SocketGuard</code> wrapping every fd.</p>
     </header>
 
     <!-- 01 -->
@@ -44,7 +44,10 @@
         <tr><td>Boundaries</td><td>Byte stream (no message edges)</td><td>Datagram = one message</td></tr>
         <tr><td>Typical feed use</td><td>Recovery channels, session-oriented feeds</td><td>Multicast market data (A/B feeds)</td></tr>
       </table>
-      <p>This learning project uses <strong>TCP</strong>: reliable, ordered delivery so we can focus on framing, binary layout, <code class="inline">poll()</code>, and reconnect — without also inventing loss recovery. UDP/multicast market data is a different project.</p>
+      <div class="card">
+        <span class="card-label">Decision</span>
+        <p><strong>TCP</strong> for this simulator — reliable, ordered delivery so the project focuses on framing, binary layout, <code class="inline">poll()</code>, and reconnect without also inventing loss recovery. UDP/multicast is a different project.</p>
+      </div>
     </section>
 
     <!-- 02 -->
@@ -55,36 +58,34 @@
       <h3>Server — <code class="inline">src/server.cpp</code></h3>
       <table>
         <tr><th>Step</th><th>Call</th><th>In this codebase</th></tr>
-        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">server_fd</code></td></tr>
+        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">SocketGuard listen_sock</code></td></tr>
         <tr><td>Reuse</td><td><code class="inline">setsockopt(SO_REUSEADDR)</code></td><td>before bind</td></tr>
-        <tr><td>Bind</td><td><code class="inline">bind()</code></td><td>port 8080, <code class="inline">INADDR_ANY</code></td></tr>
-        <tr><td>Listen</td><td><code class="inline">listen(server_fd, 3)</code></td><td>backlog 3</td></tr>
-        <tr><td>Accept</td><td><code class="inline">accept()</code></td><td>new <code class="inline">new_socket</code> per client</td></tr>
-        <tr><td>I/O</td><td><code class="inline">read()</code> / <code class="inline">send()</code></td><td>echo reply</td></tr>
-        <tr><td>Close</td><td><code class="inline">close(new_socket)</code> then <code class="inline">close(server_fd)</code></td><td>on signal exit</td></tr>
+        <tr><td>Non-blocking</td><td><code class="inline">fcntl(O_NONBLOCK)</code></td><td>listen fd + each accepted client</td></tr>
+        <tr><td>Bind</td><td><code class="inline">bind()</code></td><td>config port, <code class="inline">INADDR_ANY</code></td></tr>
+        <tr><td>Listen</td><td><code class="inline">listen(backlog)</code></td><td>backlog 64</td></tr>
+        <tr><td>Accept</td><td><code class="inline">accept()</code> in a loop until <code class="inline">EAGAIN</code></td><td>new <code class="inline">ClientSession</code> per client</td></tr>
+        <tr><td>I/O</td><td><code class="inline">send()</code> / <code class="inline">recv()</code></td><td>broadcast ticks via <code class="inline">ClientSession::enqueue_*</code></td></tr>
+        <tr><td>Close</td><td><code class="inline">SocketGuard</code> destructor</td><td>on signal exit or dead session</td></tr>
       </table>
 
       <h3>Client — <code class="inline">src/client.cpp</code></h3>
       <table>
         <tr><th>Step</th><th>Call</th><th>In this codebase</th></tr>
-        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">sock</code></td></tr>
-        <tr><td>Address</td><td><code class="inline">htons</code> + <code class="inline">inet_pton</code></td><td><code class="inline">127.0.0.1:8080</code></td></tr>
-        <tr><td>Connect</td><td><code class="inline">connect()</code></td><td>3-way handshake (blocking)</td></tr>
-        <tr><td>I/O</td><td><code class="inline">send()</code> / <code class="inline">read()</code></td><td>hello ↔ reply</td></tr>
-        <tr><td>Close</td><td><code class="inline">close(sock)</code></td><td>sends FIN</td></tr>
+        <tr><td>Create</td><td><code class="inline">socket(AF_INET, SOCK_STREAM, 0)</code></td><td><code class="inline">SocketGuard sock</code></td></tr>
+        <tr><td>Address</td><td><code class="inline">htons</code> + <code class="inline">inet_pton</code></td><td>host/port from config</td></tr>
+        <tr><td>Connect</td><td><code class="inline">connect()</code></td><td>blocking; retried with backoff on failure</td></tr>
+        <tr><td>Options</td><td><code class="inline">set_tcp_nodelay</code></td><td>after successful connect</td></tr>
+        <tr><td>I/O</td><td><code class="inline">poll()</code> + <code class="inline">recv_feed</code></td><td>parse <code class="inline">TICK</code> / <code class="inline">HEARTBEAT</code></td></tr>
+        <tr><td>Close</td><td><code class="inline">sock.reset()</code></td><td>on timeout, error, or shutdown</td></tr>
       </table>
 
       <div class="code-wrap">
         <div class="code-bar"><span>lifecycle (mental model)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-        <pre><code class="language-cpp">// Server: socket → bind → listen → accept → recv/send → close
-// Client: socket → connect → send/recv → close
+        <pre><code class="language-cpp">// Server: socket → bind → listen → accept → send/recv → close
+// Client: socket → connect → poll/recv → close
 //
 // accept() returns a *new* fd for that peer.
 // The listening fd stays open to accept more clients later.</code></pre>
-      </div>
-      <div class="card">
-        <span class="card-label">Today vs later</span>
-        <p>Both sides are <strong>blocking</strong> now. Phase 3 moves to non-blocking + <code class="inline">poll()</code>; the same lifecycle calls stay — only readiness and ownership change.</p>
       </div>
     </section>
 
@@ -93,26 +94,25 @@
       <div class="section-head"><span class="idx">03</span><h2>Byte Stream — No Message Boundaries</h2></div>
       <p>TCP delivers an ordered stream of bytes. One <code class="inline">send()</code> on the peer is <em>not</em> one <code class="inline">recv()</code> on yours. The kernel may coalesce or split writes arbitrarily.</p>
       <ul>
-        <li>Echo strings “work” by accident: short messages + blocking read often return everything in one go.</li>
-        <li>A binary market-data protocol cannot rely on that. You need <strong>framing</strong> — knowing where a message starts and ends.</li>
-        <li>This project chooses <strong>fixed-size</strong> messages (<code class="inline">TICK</code> / <code class="inline">HEARTBEAT</code>): loop until <code class="inline">sizeof(msg)</code> bytes are read. See <a href="Theory_Binary_Protocol.html">Binary Protocol</a>.</li>
+        <li>A binary market-data protocol cannot rely on “one recv per send.” You need <strong>framing</strong> — knowing where a message starts and ends.</li>
+        <li>This project uses <strong>fixed-size</strong> messages (<code class="inline">TICK</code> / <code class="inline">HEARTBEAT</code>): loop until the full struct is read. See <a href="Theory_Binary_Protocol.html">Binary Protocol</a> and <code class="inline">recv_feed</code> in <code class="inline">protocol.hpp</code>.</li>
       </ul>
       <div class="card warn">
-        <span class="card-label">Interview trap</span>
-        <p>“I sent one struct, so one <code class="inline">recv</code> gets one struct” is false on TCP. Always plan for partial reads (and, in general, partial writes).</p>
+        <span class="card-label">Pitfall</span>
+        <p>“I sent one struct, so one <code class="inline">recv</code> gets one struct” is false on TCP. Always plan for partial reads (and partial writes on the send side).</p>
       </div>
     </section>
 
     <!-- 04 -->
     <section id="reuseaddr">
       <div class="section-head"><span class="idx">04</span><h2>SO_REUSEADDR and TIME_WAIT</h2></div>
-      <p>After <code class="inline">close()</code>, a TCP endpoint can linger in <strong>TIME_WAIT</strong> so delayed packets from the old connection don’t confuse a new one. That can hold the local <code class="inline">IP:port</code> for tens of seconds — restarting the server then fails with “Address already in use.”</p>
-      <p><code class="inline">SO_REUSEADDR</code> (already set on <code class="inline">server_fd</code> before <code class="inline">bind</code>) lets the listening socket bind again while a prior instance’s sockets are still in TIME_WAIT. Not fatal if <code class="inline">setsockopt</code> fails — but bind will then be flaky on quick restarts.</p>
+      <p>After <code class="inline">close()</code>, a TCP endpoint can linger in <strong>TIME_WAIT</strong> so delayed packets from the old connection don't confuse a new one. That can hold the local <code class="inline">IP:port</code> for tens of seconds — restarting the server then fails with “Address already in use.”</p>
+      <p><code class="inline">SO_REUSEADDR</code> (set on the listen socket before <code class="inline">bind</code> in <code class="inline">src/server.cpp</code>) lets the listening socket bind again while a prior instance's sockets are still in TIME_WAIT.</p>
       <div class="code-wrap">
-        <div class="code-bar"><span>server.cpp (already present)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-bar"><span>src/server.cpp</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
         <pre><code class="language-cpp">int opt = 1;
-setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &amp;opt, sizeof(opt));
-// then bind(server_fd, ...)</code></pre>
+setsockopt(listen_sock.get(), SOL_SOCKET, SO_REUSEADDR, &amp;opt, sizeof(opt));
+// then bind(listen_sock.get(), ...)</code></pre>
       </div>
       <p class="dim">Different problem from <code class="inline">TCP_NODELAY</code> (Nagle / latency) — see <a href="Theory_Socket_Options_Nagle.html">Socket Options &amp; Nagle</a>.</p>
     </section>
@@ -122,15 +122,15 @@ setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &amp;opt, sizeof(opt));
       <div class="section-head"><span class="idx">05</span><h2>htons and inet_pton</h2></div>
       <p>Network protocols use <strong>big-endian</strong> (“network byte order”). Hosts (Apple Silicon, x86) are usually little-endian — so ports and multi-byte integers need conversion helpers.</p>
       <ul>
-        <li><code class="inline">htons(PORT)</code> — host to network short; used for <code class="inline">sin_port</code> on both server and client.</li>
-        <li><code class="inline">htonl</code> / <code class="inline">ntohs</code> / <code class="inline">ntohl</code> — same idea for 32-bit and receive path; binary ticks will use these too.</li>
-        <li><code class="inline">inet_pton(AF_INET, "127.0.0.1", &amp;serv_addr.sin_addr)</code> — presentation → network; modern replacement for <code class="inline">inet_addr</code>. Returns ≤ 0 on bad string.</li>
+        <li><code class="inline">htons(port)</code> — host to network short; used for <code class="inline">sin_port</code> on both server and client.</li>
+        <li><code class="inline">htonl</code> / <code class="inline">ntohs</code> / <code class="inline">ntohl</code> — same idea for 32-bit fields; wire messages use these via <code class="inline">tick_to_wire</code> / <code class="inline">tick_from_wire</code> in <code class="inline">protocol.hpp</code>.</li>
+        <li><code class="inline">inet_pton(AF_INET, host, &amp;addr.sin_addr)</code> — presentation → network; used in <code class="inline">src/client.cpp</code>. Returns ≤ 0 on bad string.</li>
       </ul>
       <div class="code-wrap">
-        <div class="code-bar"><span>client.cpp (pattern)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-bar"><span>src/client.cpp (pattern)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
         <pre><code class="language-cpp">serv_addr.sin_family = AF_INET;
-serv_addr.sin_port   = htons(PORT);
-if (inet_pton(AF_INET, SERVER_IP, &amp;serv_addr.sin_addr) &lt;= 0) {
+serv_addr.sin_port   = htons(static_cast&lt;uint16_t&gt;(cfg.port));
+if (inet_pton(AF_INET, cfg.host.c_str(), &amp;serv_addr.sin_addr) &lt;= 0) {
     // invalid address string
 }</code></pre>
       </div>
@@ -141,8 +141,8 @@ if (inet_pton(AF_INET, SERVER_IP, &amp;serv_addr.sin_addr) &lt;= 0) {
     <section id="decision">
       <div class="section-head"><span class="idx">06</span><h2>Project Decision</h2></div>
       <div class="card">
-        <span class="card-label">Locked for this repo</span>
-        <p><strong>TCP + Berkeley sockets</strong> for a learning market-data feed: reliable ordered stream, fixed-size binary framing next, then non-blocking <code class="inline">poll()</code>. Not UDP/multicast. Not a full exchange stack — <code class="inline">TICK</code> + <code class="inline">HEARTBEAT</code> only. Current code is the blocking echo baseline that already exercises the lifecycle above.</p>
+        <span class="card-label">Decision</span>
+        <p><strong>TCP + Berkeley sockets</strong> for a session-oriented market-data feed: reliable ordered stream, fixed-size binary framing (<code class="inline">protocol.hpp</code>), non-blocking <code class="inline">poll()</code> on the server. Not UDP/multicast. Message types are <code class="inline">TICK</code> + <code class="inline">HEARTBEAT</code> only — no order flow.</p>
       </div>
     </section>
 
@@ -155,28 +155,28 @@ if (inet_pton(AF_INET, SERVER_IP, &amp;serv_addr.sin_addr) &lt;= 0) {
         <tr><td><code class="inline">socket</code></td><td>Create fd (<code class="inline">AF_INET</code> + <code class="inline">SOCK_STREAM</code> = TCP)</td></tr>
         <tr><td><code class="inline">bind</code></td><td>Server: claim local IP:port</td></tr>
         <tr><td><code class="inline">listen</code></td><td>Server: mark passive; set backlog</td></tr>
-        <tr><td><code class="inline">accept</code></td><td>Server: new connected fd (blocks until peer)</td></tr>
+        <tr><td><code class="inline">accept</code></td><td>Server: new connected fd (non-blocking: loop until <code class="inline">EAGAIN</code>)</td></tr>
         <tr><td><code class="inline">connect</code></td><td>Client: active open / handshake</td></tr>
-        <tr><td><code class="inline">send</code> / <code class="inline">recv</code> / <code class="inline">read</code></td><td>Byte stream I/O</td></tr>
-        <tr><td><code class="inline">close</code></td><td>Release fd; starts TCP teardown</td></tr>
+        <tr><td><code class="inline">send</code> / <code class="inline">recv</code></td><td>Byte stream I/O</td></tr>
+        <tr><td><code class="inline">close</code></td><td>Release fd; starts TCP teardown (<code class="inline">SocketGuard</code> handles this)</td></tr>
         <tr><td><code class="inline">setsockopt(SO_REUSEADDR)</code></td><td>Faster rebinds after TIME_WAIT</td></tr>
       </table>
 
       <div class="pitfall">
         <span class="icon">✕</span>
-        <div><h4>Forgot <code class="inline">close()</code></h4><p>Leaks an fd. On error paths after <code class="inline">socket()</code> / <code class="inline">accept()</code> this is easy to miss — Phase 2 <code class="inline">SocketGuard</code> exists to fix that pattern.</p></div>
+        <div><h4>Forgot <code class="inline">close()</code></h4><p>Leaks an fd. <code class="inline">SocketGuard</code> in <code class="inline">socket_guard.hpp</code> closes on scope exit — use it for listen, accept, and connect fds.</p></div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
-        <div><h4>Bind failed — port in use</h4><p>Another process holds 8080, or TIME_WAIT without <code class="inline">SO_REUSEADDR</code>. Check with <code class="inline">lsof -i :8080</code> / change port.</p></div>
+        <div><h4>Bind failed — port in use</h4><p>Another process holds the port, or TIME_WAIT without <code class="inline">SO_REUSEADDR</code>. Check with <code class="inline">lsof -i :port</code> or change config.</p></div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
-        <div><h4>Connect failed</h4><p>Server not running, wrong IP/port, or firewall. Client already prints this case.</p></div>
+        <div><h4>Connect failed</h4><p>Server not running, wrong host/port, or firewall. Client retries with exponential backoff.</p></div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
-        <div><h4>Assuming message boundaries</h4><p>One send ≠ one recv. Fixed-size (or length-prefix) framing is required for binary ticks.</p></div>
+        <div><h4>Assuming message boundaries</h4><p>One send ≠ one recv. Fixed-size framing via <code class="inline">recv_exact</code> / <code class="inline">recv_feed</code> is required.</p></div>
       </div>
       <div class="pitfall">
         <span class="icon">✕</span>
@@ -185,7 +185,7 @@ if (inet_pton(AF_INET, SERVER_IP, &amp;serv_addr.sin_addr) &lt;= 0) {
     </section>
 
     <footer>
-      <a href="index.html">← Theory index</a>
+      <a href="index.html">← Theory index</a> · <a href="../PLAN.md">PLAN.md</a>
     </footer>
   </main>
 </div>
