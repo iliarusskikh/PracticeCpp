@@ -1,10 +1,16 @@
 # CMake / build
 build/
+out/
+cmake-build-*/
 CMakeFiles/
 cmake_install.cmake
 CMakeCache.txt
+CMakeUserPresets.json
 compile_commands.json
 Makefile
+build.ninja
+.ninja_deps
+.ninja_log
 *.cmake
 !CMakeLists.txt
 
@@ -15,8 +21,16 @@ Makefile
 *.so
 *.dylib
 *.exe
+*.dSYM/
 server
 client
+core
+core.*
+
+# Tooling / language servers
+.cache/
+.ccls-cache/
+.clangd/
 
 # IDE
 .idea/
@@ -24,6 +38,9 @@ client
 *.swp
 *.swo
 *~
+*.xcuserstate
+xcuserdata/
 
 # OS
 .DS_Store
+Thumbs.db
