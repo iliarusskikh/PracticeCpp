@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lambdas — C++ Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c14;
+    --bg2:       #0f121e;
+    --bg3:       #151a2a;
+    --border:    #232a42;
+    --blue:      #5b8af0;
+    --blue2:     #93b4f7;
+    --blue-dim:  #2a3a70;
+    --pink:      #f472b6;
+    --pink-dim:  #7a2e56;
+    --text:      #dde2f0;
+    --text-dim:  #7680a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --green:     #4ade80;
+    --rose:      #fb7185;
+    --sky:       #38bdf8;
+    --teal:      #2dd4bf;
+    --amber:     #fbbf24;
+    --lime:      #a3e635;
+    --violet:    #a78bfa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #5b8af022, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--blue-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--blue2), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--blue2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--blue-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--blue2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--blue); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+  p.dim { color: var(--text-dim); }
+
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  .code-block {
+    background: #080a10;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--pink);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c8d3e8;
+  }
+  .code-block .kw { color: var(--pink); }
+  .code-block .ty { color: var(--sky); }
+  .code-block .fn { color: var(--amber); }
+  .code-block .cm { color: #5a6a7a; font-style: italic; }
+  .code-block .st { color: var(--lime); }
+  .code-block .nm { color: var(--blue2); }
+  .code-block .op { color: var(--pink); }
+  .code-block .ln { color: #3a4560; display:inline-block; width:1.4em; user-select:none; }
+
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.cpp     { background: #150a1c; border-left: 3px solid var(--pink); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.cpp     .ctitle { color: var(--pink); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); border-bottom: 1px solid var(--blue-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--blue-dim); color: var(--blue2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  .concept-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .concept-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--blue2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .cx-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.8rem;
+    text-align: center;
+  }
+  .cx-cell .cx-name  { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--blue2); display: block; margin-bottom: 0.25rem; letter-spacing: 0.04em; }
+  .cx-cell .cx-big   { font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: var(--amber); }
+  .cx-cell .cx-label { font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 0.15rem; }
+
+  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.2rem 0; }
+  .info-grid.two { grid-template-columns:repeat(2,1fr); }
+  .info-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.3rem; }
+  .info-card h4 { font-family:'Cinzel',serif; font-size:0.92rem; color:var(--blue2); margin-bottom:0.5rem; font-style:normal; letter-spacing:0.03em; }
+  .info-card p { font-size:0.9rem; color:var(--text-dim); margin:0; }
+
+  .diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.6rem; margin: 1.3rem 0; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram .cap { margin-top: 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dim); text-align: center; letter-spacing: 0.03em; }
+
+  /* anatomy strip */
+  .anatomy {
+    display: flex; flex-wrap: wrap; gap: 0; margin: 1.4rem 0;
+    border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; background: #080a10;
+  }
+  .anatomy .part { padding: 1rem 1.1rem; border-right: 1px solid var(--border); position: relative; flex: 1 1 auto; }
+  .anatomy .part:last-child { border-right: none; }
+  .anatomy .part .lbl {
+    display: block; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 0.4rem; font-family: 'JetBrains Mono', monospace;
+  }
+  .anatomy .part code { background: none; border: none; padding: 0; color: var(--text); font-size: 0.95rem; }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--blue2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.5rem; }
+    .cx-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-grid, .info-grid.two { grid-template-columns: 1fr; }
+    .anatomy { flex-direction: column; }
+    .anatomy .part { border-right: none; border-bottom: 1px solid var(--border); }
+    .anatomy .part:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Closures · C++ Companion</div>
+  <h1>Lambdas</h1>
+  <div class="subtitle">Anonymous function objects with captured state — capture modes, mutable, and lambda vs. std::function</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Anatomy of a Lambda Expression</a></li>
+    <li><a href="#s2">Capture Modes</a></li>
+    <li><a href="#s3">const by Default, and mutable</a></li>
+    <li><a href="#s4">Generic &amp; Templated Lambdas</a></li>
+    <li><a href="#s5">What a Lambda Actually Is</a></li>
+    <li><a href="#s6">Lambda vs. std::function</a></li>
+    <li><a href="#s7">Pitfalls &amp; Gotchas</a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: ANATOMY                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Anatomy of a Lambda Expression</div>
+  </div>
+
+  <p>A lambda has up to six parts, most of which are optional. The full form:</p>
+
+  <div class="anatomy">
+    <div class="part"><span class="lbl">capture</span><code>[&amp;total, x]</code></div>
+    <div class="part"><span class="lbl">params</span><code>(int n)</code></div>
+    <div class="part"><span class="lbl">mutable</span><code>mutable</code></div>
+    <div class="part"><span class="lbl">exception spec</span><code>noexcept</code></div>
+    <div class="part"><span class="lbl">return type</span><code>-&gt; int</code></div>
+    <div class="part"><span class="lbl">body</span><code>{ return x + n; }</code></div>
+  </div>
+
+  <p>In practice, most lambdas only need the capture clause, parameters, and body — the compiler deduces the return type from the <code>return</code> statement, and <code>mutable</code>/<code>noexcept</code> are only needed in specific cases covered below.</p>
+
+  <div class="flabel">minimal.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">auto</span> square = [](<span class="kw">int</span> n) { <span class="kw">return</span> n * n; };
+<span class="ln">2</span> square(6);   <span class="cm">// 36</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: CAPTURE MODES                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Capture Modes</div>
+  </div>
+
+  <p>The capture clause decides which surrounding variables the lambda's body can see, and whether it sees a copy or the original.</p>
+
+  <table>
+    <tr><th>Syntax</th><th>Meaning</th></tr>
+    <tr><td><code>[&nbsp;]</code></td><td>Captures nothing — body may only use its own parameters and globals.</td></tr>
+    <tr><td><code>[x]</code></td><td>Captures <code>x</code> by value (a const copy, unless <code>mutable</code>).</td></tr>
+    <tr><td><code>[&amp;x]</code></td><td>Captures <code>x</code> by reference — body sees live changes, and can modify the original.</td></tr>
+    <tr><td><code>[=]</code></td><td>Captures everything used in the body by value.</td></tr>
+    <tr><td><code>[&amp;]</code></td><td>Captures everything used in the body by reference.</td></tr>
+    <tr><td><code>[=, &amp;total]</code></td><td>Default by value, except <code>total</code> which is by reference.</td></tr>
+    <tr><td><code>[this]</code></td><td>Captures the enclosing object by pointer — body can access members via <code>this-&gt;</code>.</td></tr>
+    <tr><td><code>[*this]</code></td><td>(C++17) Captures a copy of the enclosing object itself, not just a pointer.</td></tr>
+    <tr><td><code>[val = expr]</code></td><td>(C++14) Init-capture — names a new captured variable with an arbitrary initializer, e.g. to move a resource in.</td></tr>
+  </table>
+
+  <div class="diagram">
+    <svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg">
+      <text x="10" y="26" fill="#7680a0" font-family="JetBrains Mono" font-size="11">ENCLOSING SCOPE</text>
+      <rect x="10" y="36" width="230" height="150" fill="none" stroke="#4a5570" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="30" y="65" fill="#dde2f0" font-family="JetBrains Mono" font-size="13">int threshold = 10;</text>
+      <text x="30" y="90" fill="#dde2f0" font-family="JetBrains Mono" font-size="13">int total = 0;</text>
+      <text x="30" y="115" fill="#dde2f0" font-family="JetBrains Mono" font-size="13">Logger log;</text>
+
+      <text x="290" y="26" fill="#a78bfa" font-family="JetBrains Mono" font-size="11">CLOSURE OBJECT [threshold, &amp;total]</text>
+      <rect x="290" y="36" width="290" height="150" fill="#151a2a" stroke="#a78bfa" stroke-width="1.2"/>
+      <text x="310" y="65" fill="#fbbf24" font-family="JetBrains Mono" font-size="12">int threshold_copy = 10;</text>
+      <text x="310" y="90" fill="#38bdf8" font-family="JetBrains Mono" font-size="12">int&amp; total_ref -----&gt;</text>
+      <text x="310" y="115" fill="#fb7185" font-family="JetBrains Mono" font-size="12">// log NOT captured</text>
+      <text x="310" y="140" fill="#7680a0" font-family="JetBrains Mono" font-size="11">operator()(int x) const {...}</text>
+
+      <line x1="580" y1="90" x2="700" y2="90" stroke="#38bdf8" stroke-width="1.2"/>
+      <line x1="700" y1="90" x2="700" y2="82" stroke="#38bdf8" stroke-width="1.2"/>
+      <line x1="700" y1="82" x2="240" y2="82" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <text x="600" y="200" fill="#7680a0" font-family="JetBrains Mono" font-size="11">by-value copy is independent · by-ref aliases the original</text>
+    </svg>
+    <div class="cap">FIG 1 — capture [threshold, &amp;total] copies threshold, aliases total, and ignores log entirely</div>
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Dangling Capture</div>
+    A lambda captured by reference, or by <code>[this]</code>, is only as safe as the lifetime of what it refers to. If the lambda is stored (e.g. as a <code>std::function</code> callback) and outlives the local variable or the object it points to, calling it is undefined behavior — this is the single most common lambda bug in async/callback-heavy code.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: MUTABLE                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">const by Default, and mutable</div>
+  </div>
+
+  <p>The compiler-generated closure type's <code>operator()</code> is <code>const</code> by default. That means value-captured variables are effectively <code>const</code> copies inside the body — you can read them but not reassign them, even though the lambda "owns" its own copy.</p>
+
+  <div class="flabel">mutable.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">int</span> calls = 0;
+<span class="ln">2</span> <span class="kw">auto</span> counter = [calls]() <span class="kw">mutable</span> {
+<span class="ln">3</span>     <span class="kw">return</span> ++calls;      <span class="cm">// legal only because of `mutable`</span>
+<span class="ln">4</span> };
+<span class="ln">5</span> counter(); counter();     <span class="cm">// 1, 2 — mutates the lambda's OWN copy</span>
+<span class="ln">6</span> <span class="cm">// the outer `calls` is untouched — still 0</span></div>
+
+  <p class="dim"><code>mutable</code> only affects value captures. A reference capture (<code>&amp;calls</code>) can already be reassigned without it, because you're modifying the original variable through the reference, not the closure's own state.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: GENERIC LAMBDAS                                 -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Generic &amp; Templated Lambdas</div>
+  </div>
+
+  <p>C++14 allows <code>auto</code> parameters, which makes <code>operator()</code> a template — the same lambda instance works across multiple argument types, resolved at each call site.</p>
+
+  <div class="flabel">generic.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">auto</span> add = [](<span class="kw">auto</span> a, <span class="kw">auto</span> b) { <span class="kw">return</span> a + b; };
+<span class="ln">2</span> add(2, 3);           <span class="cm">// int</span>
+<span class="ln">3</span> add(2.5, 1.5);        <span class="cm">// double</span>
+<span class="ln">4</span> add(std::string(<span class="st">"a"</span>), std::string(<span class="st">"b"</span>)); <span class="cm">// std::string</span></div>
+
+  <p>C++20 goes further and allows an explicit template parameter list, useful when you need to name the type or constrain it: <code>[]&lt;typename T&gt;(std::vector&lt;T&gt; v) { ... }</code>.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: CLOSURE TYPE                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">What a Lambda Actually Is</div>
+  </div>
+
+  <p>A lambda expression is syntactic sugar for a compiler-generated, uniquely-named class with captured variables as data members and the body as <code>operator()</code>. The two are equivalent:</p>
+
+  <div class="flabel">desugared.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="cm">// [threshold](int x) { return x &gt; threshold; }</span>
+<span class="ln">2</span> <span class="cm">// desugars to roughly:</span>
+<span class="ln">3</span> <span class="kw">class</span> __lambda_anon {
+<span class="ln">4</span> <span class="kw">public</span>:
+<span class="ln">5</span>     __lambda_anon(<span class="kw">int</span> t) : threshold(t) {}
+<span class="ln">6</span>     <span class="kw">bool</span> <span class="kw">operator</span>()(<span class="kw">int</span> x) <span class="kw">const</span> { <span class="kw">return</span> x &gt; threshold; }
+<span class="ln">7</span> <span class="kw">private</span>:
+<span class="ln">8</span>     <span class="kw">int</span> threshold;
+<span class="ln">9</span> };</div>
+
+  <ul>
+    <li>Each lambda expression has a distinct, unnamed type — two lambdas with identical source text are still different types.</li>
+    <li>A capture-less lambda (<code>[]</code>) implicitly converts to a plain function pointer, since it needs no stored state — useful for C APIs expecting a callback pointer.</li>
+    <li>Because the type is compiler-generated and often uninlinable-by-name, storing a lambda in <code>auto</code> is free; storing it in <code>std::function</code> is not.</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: STD::FUNCTION                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Lambda vs. std::function</div>
+  </div>
+
+  <div class="info-grid two">
+    <div class="info-card">
+      <h4>auto (the lambda's own type)</h4>
+      <p>Zero overhead — same cost as a hand-written struct with the captured members inlined. Use this whenever the type can stay local: template parameters, algorithm calls, immediate use.</p>
+    </div>
+    <div class="info-card">
+      <h4>std::function&lt;Sig&gt;</h4>
+      <p>Type-erased wrapper that can hold <em>any</em> callable matching the signature. Costs a virtual dispatch per call and typically a heap allocation for captures beyond a small-object-optimization threshold. Needed when you must store heterogeneous callables in one container, or name the type as a class member / return type.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Rule of Thumb</div>
+    Default to <code>auto</code> for locally-used lambdas (STL algorithms, immediately-invoked helpers). Reach for <code>std::function</code> only when you need to erase the type — e.g. storing a callback as a class member or in a container of mixed callables.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 7: PITFALLS                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Pitfalls &amp; Gotchas</div>
+  </div>
+  <ul>
+    <li><code>[=]</code> and <code>[&amp;]</code> capture <em>everything</em> the body touches, including things you might not have meant to — prefer naming captures explicitly (<code>[threshold, &amp;total]</code>) once a lambda is non-trivial, both for clarity and to avoid accidental dangling references.</li>
+    <li><code>[this]</code> captures the object by pointer, not by value — a copy of the lambda does not get a fresh copy of the object; both copies still point at the same <code>*this</code>.</li>
+    <li>A recursive lambda can't naturally refer to itself by name (there's no name yet during its own definition) — use an init-capture of a <code>std::function</code>, or, in C++23, the <code>this_lambda</code> deducing-this feature.</li>
+    <li>Capturing a large object by value on a hot path (e.g. inside a loop passed to an algorithm) copies it on every lambda construction — capture by reference or by pointer if the lambda is constructed repeatedly.</li>
+    <li>An immediately-invoked lambda, <code>[]{ ... }();</code>, is a legitimate way to initialize a <code>const</code> variable with multi-statement logic — don't mistake it for a mistake when reading someone else's code.</li>
+  </ul>
+</div>
+
+<footer>
+  C++ Lambdas · Closures Companion Notes<br>
+  Covers: Lambda Anatomy · Capture Modes · mutable · Generic Lambdas · The Closure Type · Lambda vs. std::function
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C++ Algorithms &amp; Data Structures — Notes</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    tags: 'ams'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c14;
+    --bg2:       #0f121e;
+    --bg3:       #151a2a;
+    --border:    #232a42;
+    --blue:      #5b8af0;
+    --blue2:     #93b4f7;
+    --blue-dim:  #2a3a70;
+    --pink:      #f472b6;
+    --pink-dim:  #7a2e56;
+    --text:      #dde2f0;
+    --text-dim:  #7680a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --green:     #4ade80;
+    --rose:      #fb7185;
+    --sky:       #38bdf8;
+    --teal:      #2dd4bf;
+    --amber:     #fbbf24;
+    --lime:      #a3e635;
+    --violet:    #a78bfa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #5b8af022, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--blue-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--blue2), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--blue2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--blue-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--blue2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--blue); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  .code-block {
+    background: #080a10;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--pink);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c8d3e8;
+  }
+  .code-block .kw { color: var(--pink); }
+  .code-block .ty { color: var(--sky); }
+  .code-block .fn { color: var(--amber); }
+  .code-block .cm { color: #5a6a7a; font-style: italic; }
+  .code-block .st { color: var(--lime); }
+  .code-block .nm { color: var(--blue2); }
+  .code-block .op { color: var(--pink); }
+
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.cpp     { background: #150a1c; border-left: 3px solid var(--pink); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.cpp     .ctitle { color: var(--pink); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); border-bottom: 1px solid var(--blue-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--blue-dim); color: var(--blue2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  .concept-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .concept-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--blue2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .cx-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.8rem;
+    text-align: center;
+  }
+  .cx-cell .cx-name  { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--blue2); display: block; margin-bottom: 0.25rem; letter-spacing: 0.04em; }
+  .cx-cell .cx-big   { font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: var(--amber); }
+  .cx-cell .cx-label { font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 0.15rem; }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--blue2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.5rem; }
+    .cx-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Quantitative Finance · C++ Companion</div>
+  <h1>C++ Algorithms &amp; Data Structures</h1>
+  <div class="subtitle">Language Essentials · Recursion · Searching &amp; Sorting · Trees &amp; Graphs · MST · Dynamic Programming</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">C++ Essentials</a>
+      <ul class="sub">
+        <li><a href="#s1-refs">Value, Reference &amp; Pointer Semantics</a></li>
+        <li><a href="#s1-stl">STL Container Complexity Cheat Sheet</a></li>
+        <li><a href="#s1-iter">Iterators &amp; Common Algorithms</a></li>
+        <li><a href="#s1-mem">Memory, RAII &amp; Smart Pointers</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">Recursion</a>
+      <ul class="sub">
+        <li><a href="#s2-anatomy">Base Case &amp; Recursive Case</a></li>
+        <li><a href="#s2-fib">Fibonacci: Naive, Memoized, Iterative</a></li>
+        <li><a href="#s2-stack">The Call Stack &amp; Tail Recursion</a></li>
+        <li><a href="#s2-string">Reversing a String Recursively</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">Searching</a>
+      <ul class="sub">
+        <li><a href="#s3-linear">Linear Search</a></li>
+        <li><a href="#s3-binary">Binary Search — Iterative &amp; Recursive</a></li>
+        <li><a href="#s3-bounds">lower_bound / upper_bound</a></li>
+        <li><a href="#s3-boa">Binary Search on the Answer</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">Sorting Algorithms</a>
+      <ul class="sub">
+        <li><a href="#s4-table">Complexity &amp; Stability Table</a></li>
+        <li><a href="#s4-stdsort">std::sort and Friends</a></li>
+        <li><a href="#s4-quick">Quicksort From Scratch</a></li>
+        <li><a href="#s4-merge">Mergesort From Scratch</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Trees &amp; Traversals</a>
+      <ul class="sub">
+        <li><a href="#s5-node">The Binary Tree Node</a></li>
+        <li><a href="#s5-dfs">In-Order, Pre-Order, Post-Order</a></li>
+        <li><a href="#s5-iter-trav">Iterative Traversal With an Explicit Stack</a></li>
+        <li><a href="#s5-bfs">Level-Order (BFS) Traversal</a></li>
+        <li><a href="#s5-bst">BST Insert / Search / Delete</a></li>
+      </ul>
+    </li>
+    <li><a href="#s6">Graphs &amp; Pathfinding</a>
+      <ul class="sub">
+        <li><a href="#s6-rep">Representations: Adjacency List vs Matrix</a></li>
+        <li><a href="#s6-bfsdfs">BFS &amp; DFS Implementation</a></li>
+        <li><a href="#s6-dijkstra">Dijkstra's Algorithm</a></li>
+        <li><a href="#s6-other">Bellman-Ford &amp; 0-1 BFS (Brief)</a></li>
+      </ul>
+    </li>
+    <li><a href="#s7">Minimum Spanning Tree</a>
+      <ul class="sub">
+        <li><a href="#s7-dsu">Union-Find (Disjoint Set Union)</a></li>
+        <li><a href="#s7-kruskal">Kruskal's Algorithm</a></li>
+        <li><a href="#s7-prim">Prim's Algorithm</a></li>
+      </ul>
+    </li>
+    <li><a href="#s8">Dynamic Programming</a>
+      <ul class="sub">
+        <li><a href="#s8-recipe">The DP Recipe in C++</a></li>
+        <li><a href="#s8-knapsack">0/1 Knapsack</a></li>
+        <li><a href="#s8-lcs">Longest Common Subsequence</a></li>
+        <li><a href="#s8-coin">Coin Change</a></li>
+        <li><a href="#s8-lis">Longest Increasing Subsequence</a></li>
+      </ul>
+    </li>
+    <li><a href="#s9">Quick Reference</a></li>
+  </ol>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: C++ ESSENTIALS                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">C++ Essentials</div>
+  </div>
+
+  <p>Before the algorithms themselves, it's worth being clear on what your C++ code is actually doing to memory. This section is the layer underneath every later section.</p>
+
+  <h3 id="s1-refs">1.1 Value, Reference &amp; Pointer Semantics</h3>
+
+  <div class="code-block"><span class="kw">void</span> <span class="fn">byValue</span>(<span class="ty">std::vector&lt;int&gt;</span> v)  { v.<span class="fn">push_back</span>(<span class="nm">1</span>); } <span class="cm">// copies the whole vector — O(n)</span>
+<span class="kw">void</span> <span class="fn">byRef</span>(<span class="ty">std::vector&lt;int&gt;</span>&amp; v)   { v.<span class="fn">push_back</span>(<span class="nm">1</span>); } <span class="cm">// no copy; mutates caller's vector</span>
+<span class="kw">void</span> <span class="fn">byConstRef</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; v) { <span class="cm">/* read-only, no copy */</span> }
+<span class="kw">void</span> <span class="fn">byPtr</span>(<span class="ty">std::vector&lt;int&gt;</span>* v)   { <span class="kw">if</span> (v) v-&gt;<span class="fn">push_back</span>(<span class="nm">1</span>); } <span class="cm">// nullable, needs a null check</span></div>
+
+  <table>
+    <tr><th>Pass style</th><th>Copies?</th><th>Can be null?</th><th>Use when</th></tr>
+    <tr><td><code>T</code> (by value)</td><td>Yes</td><td>No</td><td><code>T</code> is small (int, double, small struct) or you intend to mutate a local copy</td></tr>
+    <tr><td><code>T&amp;</code></td><td>No</td><td>No</td><td>You need to mutate the caller's object; the argument is guaranteed to exist</td></tr>
+    <tr><td><code>const T&amp;</code></td><td>No</td><td>No</td><td>Default choice for large read-only parameters (vectors, strings, structs)</td></tr>
+    <tr><td><code>T*</code></td><td>No</td><td>Yes</td><td>The argument is genuinely optional</td></tr>
+    <tr><td><code>T&amp;&amp;</code> (rvalue ref)</td><td>No (moves)</td><td>No</td><td>Move semantics — "steal" resources from a temporary</td></tr>
+  </table>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ A Common Bug: Accidental Copies</div>
+    Writing <code>for (auto x : bigVector)</code> instead of <code>for (const auto&amp; x : bigVector)</code> copies every element on every iteration — silently turning an O(n) loop into an O(n · sizeof(T)) one. Default to <code>const auto&amp;</code> in range-for loops unless you need a mutable copy.
+  </div>
+
+  <h3 id="s1-stl">1.2 STL Container Complexity Cheat Sheet</h3>
+
+  <table>
+    <tr><th>Container</th><th>Underlying structure</th><th>Access</th><th>Insert/Erase</th><th>Notes</th></tr>
+    <tr><td><code>vector</code></td><td>Dynamic array</td><td>O(1) by index</td><td>O(1) amortised at back; O(n) elsewhere</td><td>Contiguous — cache-friendly; default choice</td></tr>
+    <tr><td><code>deque</code></td><td>Chunked array</td><td>O(1) by index</td><td>O(1) at both ends; O(n) middle</td><td>Not fully contiguous; use for a queue/dequeue pattern</td></tr>
+    <tr><td><code>list</code></td><td>Doubly linked list</td><td>O(n)</td><td>O(1) given an iterator</td><td>No random access; rarely the right default</td></tr>
+    <tr><td><code>map</code> / <code>set</code></td><td>Red-black tree</td><td>O(log n)</td><td>O(log n)</td><td>Keeps keys sorted; iteration is in-order</td></tr>
+    <tr><td><code>unordered_map</code> / <code>unordered_set</code></td><td>Hash table</td><td>O(1) avg, O(n) worst</td><td>O(1) avg, O(n) worst</td><td>No ordering guarantee; usually the default choice</td></tr>
+    <tr><td><code>priority_queue</code></td><td>Binary heap (on <code>vector</code>)</td><td>O(1) top</td><td>O(log n) push/pop</td><td>Max-heap by default — see note below</td></tr>
+    <tr><td><code>stack</code> / <code>queue</code></td><td>Adapter (default: <code>deque</code>)</td><td>O(1) top/front</td><td>O(1)</td><td>Not iterable — that's the point</td></tr>
+  </table>
+
+  <div class="callout cpp">
+    <div class="ctitle">🔧 priority_queue Is a Max-Heap by Default</div>
+    <code>std::priority_queue&lt;int&gt; pq;</code> pops the <em>largest</em> element first. For a min-heap (needed for Dijkstra, §6.3):
+    <div class="code-block"><span class="ty">std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt;</span> minHeap;</div>
+    Forgetting the <code>std::greater&lt;int&gt;</code> comparator is one of the most common silent bugs in graph algorithm code.
+  </div>
+
+  <h3 id="s1-iter">1.3 Iterators &amp; Common Algorithms</h3>
+
+  <div class="code-block"><span class="ty">std::vector&lt;int&gt;</span> v = {<span class="nm">5</span>, <span class="nm">3</span>, <span class="nm">1</span>, <span class="nm">4</span>, <span class="nm">2</span>};
+
+<span class="ty">std::sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());                        <span class="cm">// [1,2,3,4,5]  O(n log n)</span>
+<span class="kw">auto</span> it = <span class="ty">std::find</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="nm">4</span>);           <span class="cm">// O(n) linear scan</span>
+<span class="kw">bool</span> has = <span class="ty">std::binary_search</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="nm">4</span>); <span class="cm">// O(log n) — requires sorted range</span>
+<span class="kw">int</span> total = <span class="ty">std::accumulate</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="nm">0</span>);   <span class="cm">// fold; O(n)</span>
+<span class="ty">std::reverse</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());                     <span class="cm">// in place; O(n)</span></div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Iterator Invalidation</div>
+    Erasing from a <code>vector</code> while iterating invalidates iterators <em>from the erase point onward</em>. The safe pattern uses the return value of <code>erase</code>:
+    <div class="code-block"><span class="kw">for</span> (<span class="kw">auto</span> it = v.<span class="fn">begin</span>(); it != v.<span class="fn">end</span>(); ) {
+    <span class="kw">if</span> (*it % <span class="nm">2</span> == <span class="nm">0</span>) it = v.<span class="fn">erase</span>(it);  <span class="cm">// erase returns the next valid iterator</span>
+    <span class="kw">else</span> ++it;
+}</div>
+    For <code>map</code>/<code>set</code>, erasing an iterator only invalidates <em>that</em> iterator — others stay valid, which is why the same pattern is even more commonly seen there.
+  </div>
+
+  <h3 id="s1-mem">1.4 Memory, RAII &amp; Smart Pointers</h3>
+
+  <table>
+    <tr><th>Type</th><th>Ownership model</th><th>Overhead</th><th>Use when</th></tr>
+    <tr><td><code>unique_ptr&lt;T&gt;</code></td><td>Exclusive — cannot be copied, only moved</td><td>Zero (same as raw pointer)</td><td>Default smart pointer; sole owner of a resource</td></tr>
+    <tr><td><code>shared_ptr&lt;T&gt;</code></td><td>Shared — reference-counted</td><td>Atomic refcount + control block</td><td>Multiple owners genuinely need to share lifetime</td></tr>
+    <tr><td><code>weak_ptr&lt;T&gt;</code></td><td>Non-owning observer of a <code>shared_ptr</code></td><td>Small</td><td>Breaking reference cycles (e.g. parent↔child trees)</td></tr>
+  </table>
+
+  <p><strong>RAII</strong> (Resource Acquisition Is Initialisation): tie a resource's lifetime to an object's scope, so it's released automatically — via the destructor — even if an exception is thrown. This is <em>why</em> smart pointers, <code>std::lock_guard</code>, and <code>std::vector</code> itself never leak: their destructors clean up.</p>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Stack vs Heap — What Matters</div>
+    <ul>
+      <li><strong>Stack:</strong> automatic storage, freed when scope ends, very fast (pointer bump), limited size (~1–8MB) — deep recursion overflows it.</li>
+      <li><strong>Heap:</strong> <code>new</code>/<code>malloc</code> (or a container growing internally), lives until explicitly freed (or the owning smart pointer/container goes out of scope), slower, effectively unbounded.</li>
+    </ul>
+    A <code>vector&lt;int&gt; v(1000000)</code> declared locally puts the <em>vector object</em> (a few pointers) on the stack, but its <em>data</em> on the heap — a very common "gotcha" question.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: RECURSION                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">Recursion</div>
+  </div>
+
+  <h3 id="s2-anatomy">2.1 Base Case &amp; Recursive Case</h3>
+
+  <p>Every correct recursive function needs exactly two ingredients:</p>
+
+  <div class="fbox gold">
+    <div class="flabel">Anatomy of a Recursive Function</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li><strong>Base case:</strong> the condition under which the function returns directly, without calling itself. This is what stops the recursion.</li>
+      <li><strong>Recursive case:</strong> the function calls itself on a <em>smaller</em> version of the problem, and combines that result into the answer for the current call.</li>
+    </ol>
+  </div>
+
+  <p>"Recursive case" specifically means the branch that makes another call to the same function — every recursive function must guarantee that each such call moves strictly closer to a base case, or it never terminates.</p>
+
+  <h3 id="s2-fib">2.2 Fibonacci: Naive, Memoized, Iterative</h3>
+
+  <div class="concept-card">
+    <h4>Naive Recursion</h4>
+    <div class="code-block"><span class="kw">int</span> <span class="fn">fib</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> n;              <span class="cm">// base case</span>
+    <span class="kw">return</span> <span class="fn">fib</span>(n - <span class="nm">1</span>) + <span class="fn">fib</span>(n - <span class="nm">2</span>);   <span class="cm">// recursive case</span>
+}</div>
+    <p><strong>Time complexity: $O(2^n)$.</strong> Each call spawns two more, and the same sub-problems (e.g. <code>fib(3)</code>) are recomputed exponentially many times — this recomputation is exactly what the next version fixes.</p>
+  </div>
+
+  <div class="concept-card">
+    <h4>Memoized (Top-Down DP)</h4>
+    <div class="code-block"><span class="ty">std::unordered_map&lt;int,long long&gt;</span> memo;
+
+<span class="kw">long long</span> <span class="fn">fibMemo</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">if</span> (memo.<span class="fn">count</span>(n)) <span class="kw">return</span> memo[n];    <span class="cm">// cache hit — O(1)</span>
+    <span class="kw">return</span> memo[n] = <span class="fn">fibMemo</span>(n - <span class="nm">1</span>) + <span class="fn">fibMemo</span>(n - <span class="nm">2</span>);
+}</div>
+    <p><strong>Time complexity: $O(n)$. Space complexity: $O(n)$</strong> (the cache, plus O(n) call-stack depth). Each distinct <code>n</code> is computed exactly once.</p>
+  </div>
+
+  <div class="concept-card">
+    <h4>Iterative (Bottom-Up, Constant Space)</h4>
+    <div class="code-block"><span class="kw">long long</span> <span class="fn">fibIter</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span> (n &lt;= <span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">long long</span> prev = <span class="nm">0</span>, curr = <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">2</span>; i &lt;= n; ++i) {
+        <span class="kw">long long</span> next = prev + curr;
+        prev = curr;
+        curr = next;
+    }
+    <span class="kw">return</span> curr;
+}</div>
+    <p><strong>Time complexity: $O(n)$. Space complexity: $O(1)$</strong> — no recursion, no cache, just two rolling variables. This is the version to reach for in production; the memoized version is the one to reach for when the recursive structure of the problem is less obvious (most DP problems).</p>
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The General Lesson</div>
+    Naive recursion → memoization → iteration is the standard three-step refinement path for any overlapping-subproblem recursion, not just Fibonacci: identify exponential blowup from repeated subproblems, cache to fix it, then ask whether the recursion can be "unrolled" into an iterative loop to drop the space cost.
+  </div>
+
+  <h3 id="s2-stack">2.3 The Call Stack &amp; Tail Recursion</h3>
+
+  <p>Every recursive call pushes a new stack frame (return address, parameters, locals). Depth $n$ recursion uses $O(n)$ stack space — for <code>fib(100000)</code> called naively, this overflows the stack (typically ~1MB, a few hundred thousand frames) long before the $O(2^n)$ time cost even becomes the bottleneck.</p>
+
+  <div class="fbox pink">
+    <div class="flabel">Tail Recursion</div>
+    A call is a <em>tail call</em> if it is the very last action in the function — nothing happens after it returns. <code>fibIter</code>'s loop body has no recursion at all, but a tail-recursive rewrite of Fibonacci would look like:
+  </div>
+
+  <div class="code-block"><span class="kw">long long</span> <span class="fn">fibTail</span>(<span class="kw">int</span> n, <span class="kw">long long</span> a = <span class="nm">0</span>, <span class="kw">long long</span> b = <span class="nm">1</span>) {
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> a;
+    <span class="kw">return</span> <span class="fn">fibTail</span>(n - <span class="nm">1</span>, b, a + b);   <span class="cm">// nothing left to do after this call returns</span>
+}</div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ C++ Does Not Guarantee Tail-Call Optimisation</div>
+    Unlike Scheme or some functional languages, the C++ standard does not require compilers to convert tail calls into loops — <code>-O2</code>/<code>-O3</code> often will, but it is not portable or guaranteed, especially in debug builds. <strong>Never rely on tail recursion for stack safety</strong> — if depth can be large, write the explicit loop (as in <code>fibIter</code>).
+  </div>
+
+  <h3 id="s2-string">2.4 Reversing a String Recursively</h3>
+
+  <div class="code-block"><span class="ty">std::string</span> <span class="fn">reverseStr</span>(<span class="ty">std::string</span> s) {
+    <span class="kw">if</span> (s.<span class="fn">size</span>() &lt;= <span class="nm">1</span>) <span class="kw">return</span> s;              <span class="cm">// base case</span>
+    <span class="kw">return</span> <span class="fn">reverseStr</span>(s.<span class="fn">substr</span>(<span class="nm">1</span>)) + s[<span class="nm">0</span>];   <span class="cm">// recursive case</span>
+}</div>
+
+  <p>Each call peels off the first character and appends it after the reversed remainder. This is clean but <strong>$O(n^2)$</strong> due to repeated <code>substr</code> copies. The in-place two-pointer version is the one to actually use:</p>
+
+  <div class="code-block"><span class="kw">void</span> <span class="fn">reverseInPlace</span>(<span class="ty">std::string</span>&amp; s, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt;= hi) <span class="kw">return</span>;                 <span class="cm">// base case</span>
+    <span class="ty">std::swap</span>(s[lo], s[hi]);
+    <span class="fn">reverseInPlace</span>(s, lo + <span class="nm">1</span>, hi - <span class="nm">1</span>); <span class="cm">// recursive case</span>
+}
+<span class="cm">// O(n) time, O(n) recursion-stack space (O(1) if written as a while-loop instead)</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: SEARCHING                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Searching</div>
+  </div>
+
+  <h3 id="s3-linear">3.1 Linear Search</h3>
+
+  <div class="code-block"><span class="kw">int</span> <span class="fn">linearSearch</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> target) {
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; (<span class="kw">int</span>)v.<span class="fn">size</span>(); ++i)
+        <span class="kw">if</span> (v[i] == target) <span class="kw">return</span> i;
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}
+<span class="cm">// O(n) time, O(1) space — the only option on unsorted data</span></div>
+
+  <h3 id="s3-binary">3.2 Binary Search — Iterative &amp; Recursive</h3>
+
+  <p>Requires the range to be <em>sorted</em>. At each step, halve the search space by comparing the midpoint to the target.</p>
+
+  <div class="code-block"><span class="cm">// Iterative — the version to default to (no stack-depth concerns)</span>
+<span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> target) {
+    <span class="kw">int</span> lo = <span class="nm">0</span>, hi = (<span class="kw">int</span>)v.<span class="fn">size</span>() - <span class="nm">1</span>;
+    <span class="kw">while</span> (lo &lt;= hi) {
+        <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;    <span class="cm">// avoids (lo+hi) overflow</span>
+        <span class="kw">if</span> (v[mid] == target) <span class="kw">return</span> mid;
+        <span class="kw">else if</span> (v[mid] &lt; target) lo = mid + <span class="nm">1</span>;
+        <span class="kw">else</span> hi = mid - <span class="nm">1</span>;
+    }
+    <span class="kw">return</span> -<span class="nm">1</span>;
+}</div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ The Classic Overflow Bug</div>
+    <code>int mid = (lo + hi) / 2;</code> overflows a 32-bit <code>int</code> when <code>lo + hi</code> exceeds ~2.1 billion — a real risk with large arrays. <code>mid = lo + (hi - lo) / 2</code> is algebraically identical but never overflows. It's the classic edge case worth checking any time you write binary search.
+  </div>
+
+  <div class="code-block"><span class="cm">// Recursive — equivalent, but costs O(log n) stack frames</span>
+<span class="kw">int</span> <span class="fn">binarySearchRec</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> target, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt; hi) <span class="kw">return</span> -<span class="nm">1</span>;                     <span class="cm">// base case: not found</span>
+    <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+    <span class="kw">if</span> (v[mid] == target) <span class="kw">return</span> mid;              <span class="cm">// base case: found</span>
+    <span class="kw">if</span> (v[mid] &lt; target) <span class="kw">return</span> <span class="fn">binarySearchRec</span>(v, target, mid + <span class="nm">1</span>, hi);
+    <span class="kw">return</span> <span class="fn">binarySearchRec</span>(v, target, lo, mid - <span class="nm">1</span>);
+}
+<span class="cm">// O(log n) time either way; O(log n) space recursive vs O(1) iterative</span></div>
+
+  <h3 id="s3-bounds">3.3 lower_bound / upper_bound</h3>
+
+  <p>The STL versions generalise binary search to find <em>boundaries</em> rather than exact matches — essential for counting occurrences and range queries.</p>
+
+  <table>
+    <tr><th>Function</th><th>Returns iterator to</th></tr>
+    <tr><td><code>lower_bound(first, last, x)</code></td><td>First element $\geq x$ (insertion point that keeps order, before duplicates of x)</td></tr>
+    <tr><td><code>upper_bound(first, last, x)</code></td><td>First element $> x$ (insertion point after all duplicates of x)</td></tr>
+  </table>
+
+  <div class="code-block"><span class="ty">std::vector&lt;int&gt;</span> v = {<span class="nm">1</span>, <span class="nm">3</span>, <span class="nm">3</span>, <span class="nm">3</span>, <span class="nm">5</span>, <span class="nm">7</span>};
+
+<span class="kw">auto</span> lo = <span class="ty">std::lower_bound</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="nm">3</span>);  <span class="cm">// points to first 3 (index 1)</span>
+<span class="kw">auto</span> hi = <span class="ty">std::upper_bound</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="nm">3</span>);  <span class="cm">// points to 5        (index 4)</span>
+<span class="kw">int</span> countOf3 = hi - lo;                                    <span class="cm">// = 3, in O(log n)</span></div>
+
+  <h3 id="s3-boa">3.4 Binary Search on the Answer</h3>
+
+  <p>A very common pattern: the array itself needn't be sorted — instead, binary search over the space of <em>candidate answers</em>, using a monotonic feasibility check (works for values $\leq x^*$, fails above it, or vice versa).</p>
+
+  <div class="callout example">
+    <div class="ctitle">📋 Pattern: Minimise the Maximum</div>
+    <em>"Split an array into k subarrays to minimise the largest subarray sum."</em> Binary search over the candidate answer (the max subarray sum), from <code>max(array)</code> to <code>sum(array)</code>. For each candidate <code>mid</code>, greedily check in $O(n)$ whether you can split the array into $\leq k$ pieces each summing to $\leq$ <code>mid</code>. Feasibility is monotone in <code>mid</code>, so binary search finds the smallest feasible value in $O(n \log(\text{sum}))$.
+  </div>
+
+  <div class="code-block"><span class="kw">bool</span> <span class="fn">feasible</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; a, <span class="kw">long long</span> cap, <span class="kw">int</span> k) {
+    <span class="kw">int</span> pieces = <span class="nm">1</span>; <span class="kw">long long</span> curr = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> x : a) {
+        <span class="kw">if</span> (curr + x &gt; cap) { ++pieces; curr = x; }   <span class="cm">// start a new piece</span>
+        <span class="kw">else</span> curr += x;
+    }
+    <span class="kw">return</span> pieces &lt;= k;
+}
+
+<span class="kw">long long</span> <span class="fn">minimiseMax</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; a, <span class="kw">int</span> k) {
+    <span class="kw">long long</span> lo = *<span class="ty">std::max_element</span>(a.<span class="fn">begin</span>(), a.<span class="fn">end</span>());
+    <span class="kw">long long</span> hi = <span class="ty">std::accumulate</span>(a.<span class="fn">begin</span>(), a.<span class="fn">end</span>(), <span class="nm">0LL</span>);
+    <span class="kw">while</span> (lo &lt; hi) {
+        <span class="kw">long long</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+        <span class="kw">if</span> (<span class="fn">feasible</span>(a, mid, k)) hi = mid;   <span class="cm">// try to do better</span>
+        <span class="kw">else</span> lo = mid + <span class="nm">1</span>;
+    }
+    <span class="kw">return</span> lo;
+}</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: SORTING                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">Sorting Algorithms</div>
+  </div>
+
+  <h3 id="s4-table">4.1 Complexity &amp; Stability Table</h3>
+
+  <table>
+    <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable?</th></tr>
+    <tr><td>Bubble sort</td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr>
+    <tr><td>Insertion sort</td><td>$O(n)$</td><td>$O(n^2)$</td><td>$O(n^2)$</td><td>$O(1)$</td><td>Yes</td></tr>
+    <tr><td>Merge sort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n)$</td><td>Yes</td></tr>
+    <tr><td>Quicksort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n^2)$ (bad pivot)</td><td>$O(\log n)$</td><td>No</td></tr>
+    <tr><td>Heapsort</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(n\log n)$</td><td>$O(1)$</td><td>No</td></tr>
+    <tr><td>Counting sort</td><td>$O(n+k)$</td><td>$O(n+k)$</td><td>$O(n+k)$</td><td>$O(k)$</td><td>Yes</td></tr>
+  </table>
+
+  <p><strong>Stable</strong> means elements with equal keys keep their relative order — important when sorting by one field after already having sorted by another.</p>
+
+  <h3 id="s4-stdsort">4.2 std::sort and Friends</h3>
+
+  <table>
+    <tr><th>Function</th><th>Complexity</th><th>Stable?</th><th>Notes</th></tr>
+    <tr><td><code>std::sort</code></td><td>$O(n\log n)$</td><td>No</td><td>Introsort: quicksort, falls back to heapsort on bad pivots, insertion sort for small ranges</td></tr>
+    <tr><td><code>std::stable_sort</code></td><td>$O(n\log n)$</td><td>Yes</td><td>Mergesort-based; slightly more memory</td></tr>
+    <tr><td><code>std::partial_sort</code></td><td>$O(n\log k)$</td><td>No</td><td>Only fully sorts the first <code>k</code> elements — useful for "top-k"</td></tr>
+    <tr><td><code>std::nth_element</code></td><td>$O(n)$ average</td><td>No</td><td>Partitions so index <code>n</code> holds its sorted value — quickselect under the hood</td></tr>
+  </table>
+
+  <div class="code-block"><span class="ty">std::sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>());                                  <span class="cm">// ascending</span>
+<span class="ty">std::sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), <span class="ty">std::greater&lt;int&gt;</span>());          <span class="cm">// descending</span>
+<span class="ty">std::sort</span>(v.<span class="fn">begin</span>(), v.<span class="fn">end</span>(), [](<span class="kw">int</span> a, <span class="kw">int</span> b){ <span class="kw">return</span> a &gt; b; }); <span class="cm">// custom lambda comparator</span></div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ In Practice: Always Use std::sort</div>
+    Hand-rolled sorts (quicksort/mergesort below) are worth understanding for the mechanics and the complexity/stack-depth reasoning they teach — never write one over <code>std::sort</code> in production code when you just need sorted output. <code>std::nth_element</code> is the one worth reaching for deliberately: it finds the k-th smallest in $O(n)$ without paying for a full sort.
+  </div>
+
+  <h3 id="s4-quick">4.3 Quicksort From Scratch</h3>
+
+  <div class="code-block"><span class="kw">int</span> <span class="fn">partition</span>(<span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">int</span> pivot = v[hi];              <span class="cm">// last element as pivot</span>
+    <span class="kw">int</span> i = lo - <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> j = lo; j &lt; hi; ++j)
+        <span class="kw">if</span> (v[j] &lt; pivot) <span class="ty">std::swap</span>(v[++i], v[j]);
+    <span class="ty">std::swap</span>(v[i + <span class="nm">1</span>], v[hi]);
+    <span class="kw">return</span> i + <span class="nm">1</span>;                  <span class="cm">// final pivot position</span>
+}
+
+<span class="kw">void</span> <span class="fn">quicksort</span>(<span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt;= hi) <span class="kw">return</span>;                    <span class="cm">// base case</span>
+    <span class="kw">int</span> p = <span class="fn">partition</span>(v, lo, hi);
+    <span class="fn">quicksort</span>(v, lo, p - <span class="nm">1</span>);
+    <span class="fn">quicksort</span>(v, p + <span class="nm">1</span>, hi);
+}</div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Worst Case: Already-Sorted Input</div>
+    With last-element pivoting, an already-sorted (or reverse-sorted) array degrades every partition to size $n-1$ vs $0$, giving $O(n^2)$ time and $O(n)$ recursion depth (risking stack overflow). Fixes: pick a random pivot, or median-of-three (first/middle/last), which make the worst case exponentially unlikely.
+  </div>
+
+  <h3 id="s4-merge">4.4 Mergesort From Scratch</h3>
+
+  <div class="code-block"><span class="kw">void</span> <span class="fn">merge</span>(<span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> lo, <span class="kw">int</span> mid, <span class="kw">int</span> hi) {
+    <span class="ty">std::vector&lt;int&gt;</span> tmp;
+    <span class="kw">int</span> i = lo, j = mid + <span class="nm">1</span>;
+    <span class="kw">while</span> (i &lt;= mid &amp;&amp; j &lt;= hi)
+        tmp.<span class="fn">push_back</span>(v[i] &lt;= v[j] ? v[i++] : v[j++]);  <span class="cm">// &lt;= keeps it stable</span>
+    <span class="kw">while</span> (i &lt;= mid) tmp.<span class="fn">push_back</span>(v[i++]);
+    <span class="kw">while</span> (j &lt;= hi)  tmp.<span class="fn">push_back</span>(v[j++]);
+    <span class="ty">std::copy</span>(tmp.<span class="fn">begin</span>(), tmp.<span class="fn">end</span>(), v.<span class="fn">begin</span>() + lo);
+}
+
+<span class="kw">void</span> <span class="fn">mergesort</span>(<span class="ty">std::vector&lt;int&gt;</span>&amp; v, <span class="kw">int</span> lo, <span class="kw">int</span> hi) {
+    <span class="kw">if</span> (lo &gt;= hi) <span class="kw">return</span>;                        <span class="cm">// base case</span>
+    <span class="kw">int</span> mid = lo + (hi - lo) / <span class="nm">2</span>;
+    <span class="fn">mergesort</span>(v, lo, mid);
+    <span class="fn">mergesort</span>(v, mid + <span class="nm">1</span>, hi);
+    <span class="fn">merge</span>(v, lo, mid, hi);
+}
+<span class="cm">// Recurrence T(n) = 2T(n/2) + O(n)  →  O(n log n) always, O(n) extra space</span></div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Quicksort vs Mergesort — The Short Answer</div>
+    Quicksort sorts in place ($O(\log n)$ stack space) and has better cache locality, so it's typically faster in practice — this is why <code>std::sort</code> is quicksort-based. Mergesort guarantees $O(n\log n)$ worst case and is stable, at the cost of $O(n)$ extra memory — this is why <code>std::stable_sort</code> and external sorts (data too big for RAM) use it.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: TREES & TRAVERSALS                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Trees &amp; Traversals</div>
+  </div>
+
+  <h3 id="s5-node">5.1 The Binary Tree Node</h3>
+
+  <div class="code-block"><span class="kw">struct</span> <span class="ty">TreeNode</span> {
+    <span class="kw">int</span> val;
+    <span class="ty">TreeNode</span>* left;
+    <span class="ty">TreeNode</span>* right;
+    <span class="fn">TreeNode</span>(<span class="kw">int</span> x) : val(x), left(<span class="kw">nullptr</span>), right(<span class="kw">nullptr</span>) {}
+};</div>
+
+  <h3 id="s5-dfs">5.2 In-Order, Pre-Order, Post-Order</h3>
+
+  <table>
+    <tr><th>Traversal</th><th>Order</th><th>Typical use</th></tr>
+    <tr><td>In-order</td><td>left → node → right</td><td>On a BST, visits values in <em>sorted</em> order</td></tr>
+    <tr><td>Pre-order</td><td>node → left → right</td><td>Copying/serialising a tree (root first)</td></tr>
+    <tr><td>Post-order</td><td>left → right → node</td><td>Deleting a tree; evaluating expression trees (operands before operator)</td></tr>
+  </table>
+
+  <div class="code-block"><span class="kw">void</span> <span class="fn">inOrder</span>(<span class="ty">TreeNode</span>* node, <span class="ty">std::vector&lt;int&gt;</span>&amp; out) {
+    <span class="kw">if</span> (!node) <span class="kw">return</span>;                 <span class="cm">// base case</span>
+    <span class="fn">inOrder</span>(node-&gt;left,  out);
+    out.<span class="fn">push_back</span>(node-&gt;val);
+    <span class="fn">inOrder</span>(node-&gt;right, out);
+}
+
+<span class="kw">void</span> <span class="fn">preOrder</span>(<span class="ty">TreeNode</span>* node, <span class="ty">std::vector&lt;int&gt;</span>&amp; out) {
+    <span class="kw">if</span> (!node) <span class="kw">return</span>;
+    out.<span class="fn">push_back</span>(node-&gt;val);
+    <span class="fn">preOrder</span>(node-&gt;left,  out);
+    <span class="fn">preOrder</span>(node-&gt;right, out);
+}
+
+<span class="kw">void</span> <span class="fn">postOrder</span>(<span class="ty">TreeNode</span>* node, <span class="ty">std::vector&lt;int&gt;</span>&amp; out) {
+    <span class="kw">if</span> (!node) <span class="kw">return</span>;
+    <span class="fn">postOrder</span>(node-&gt;left,  out);
+    <span class="fn">postOrder</span>(node-&gt;right, out);
+    out.<span class="fn">push_back</span>(node-&gt;val);
+}
+<span class="cm">// All three: O(n) time (visit every node once), O(h) recursion stack, h = tree height</span></div>
+
+  <h3 id="s5-iter-trav">5.3 Iterative Traversal With an Explicit Stack</h3>
+
+  <p>Recursive traversal uses the call stack implicitly; writing the iterative version is a good way to check you understand what that call stack is actually doing.</p>
+
+  <div class="code-block"><span class="ty">std::vector&lt;int&gt;</span> <span class="fn">inOrderIter</span>(<span class="ty">TreeNode</span>* root) {
+    <span class="ty">std::vector&lt;int&gt;</span> out;
+    <span class="ty">std::stack&lt;TreeNode*&gt;</span> stk;
+    <span class="ty">TreeNode</span>* curr = root;
+    <span class="kw">while</span> (curr || !stk.<span class="fn">empty</span>()) {
+        <span class="kw">while</span> (curr) {                 <span class="cm">// walk all the way left, pushing as we go</span>
+            stk.<span class="fn">push</span>(curr);
+            curr = curr-&gt;left;
+        }
+        curr = stk.<span class="fn">top</span>(); stk.<span class="fn">pop</span>();
+        out.<span class="fn">push_back</span>(curr-&gt;val);
+        curr = curr-&gt;right;
+    }
+    <span class="kw">return</span> out;
+}
+<span class="cm">// O(n) time, O(h) space — same complexity as recursion, but the stack is explicit</span></div>
+
+  <h3 id="s5-bfs">5.4 Level-Order (BFS) Traversal</h3>
+
+  <div class="code-block"><span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span> <span class="fn">levelOrder</span>(<span class="ty">TreeNode</span>* root) {
+    <span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span> levels;
+    <span class="kw">if</span> (!root) <span class="kw">return</span> levels;
+    <span class="ty">std::queue&lt;TreeNode*&gt;</span> q;
+    q.<span class="fn">push</span>(root);
+    <span class="kw">while</span> (!q.<span class="fn">empty</span>()) {
+        <span class="kw">int</span> sz = q.<span class="fn">size</span>();               <span class="cm">// snapshot: nodes at the current level</span>
+        <span class="ty">std::vector&lt;int&gt;</span> level;
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; sz; ++i) {
+            <span class="ty">TreeNode</span>* node = q.<span class="fn">front</span>(); q.<span class="fn">pop</span>();
+            level.<span class="fn">push_back</span>(node-&gt;val);
+            <span class="kw">if</span> (node-&gt;left)  q.<span class="fn">push</span>(node-&gt;left);
+            <span class="kw">if</span> (node-&gt;right) q.<span class="fn">push</span>(node-&gt;right);
+        }
+        levels.<span class="fn">push_back</span>(level);
+    }
+    <span class="kw">return</span> levels;
+}
+<span class="cm">// O(n) time, O(w) space, w = maximum width of the tree</span></div>
+
+  <h3 id="s5-bst">5.5 BST Insert / Search / Delete</h3>
+
+  <div class="code-block"><span class="ty">TreeNode</span>* <span class="fn">bstInsert</span>(<span class="ty">TreeNode</span>* node, <span class="kw">int</span> val) {
+    <span class="kw">if</span> (!node) <span class="kw">return</span> <span class="kw">new</span> <span class="ty">TreeNode</span>(val);        <span class="cm">// base case: found the insertion spot</span>
+    <span class="kw">if</span> (val &lt; node-&gt;val) node-&gt;left  = <span class="fn">bstInsert</span>(node-&gt;left,  val);
+    <span class="kw">else</span>                node-&gt;right = <span class="fn">bstInsert</span>(node-&gt;right, val);
+    <span class="kw">return</span> node;
+}
+
+<span class="kw">bool</span> <span class="fn">bstSearch</span>(<span class="ty">TreeNode</span>* node, <span class="kw">int</span> val) {
+    <span class="kw">if</span> (!node) <span class="kw">return</span> <span class="kw">false</span>;
+    <span class="kw">if</span> (node-&gt;val == val) <span class="kw">return</span> <span class="kw">true</span>;
+    <span class="kw">return</span> val &lt; node-&gt;val ? <span class="fn">bstSearch</span>(node-&gt;left, val) : <span class="fn">bstSearch</span>(node-&gt;right, val);
+}
+<span class="cm">// O(h) time — O(log n) if balanced, degrades to O(n) on a skewed/linear tree</span></div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ A Plain BST Is Not Worst-Case Efficient</div>
+    Inserting already-sorted data into a plain BST produces a degenerate linked list — $O(n)$ operations, not $O(\log n)$. This is exactly why <code>std::map</code>/<code>std::set</code> use a self-balancing red-black tree internally: it re-balances on every insert/erase to guarantee $O(\log n)$ regardless of input order. It's worth knowing this trade-off and being able to name the failure mode of a naive BST, even if you rarely implement AVL/red-black rebalancing from scratch.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: GRAPHS & PATHFINDING                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Graphs &amp; Pathfinding</div>
+  </div>
+
+  <h3 id="s6-rep">6.1 Representations: Adjacency List vs Matrix</h3>
+
+  <table>
+    <tr><th>Representation</th><th>Space</th><th>Edge lookup</th><th>Iterate neighbours</th><th>Best for</th></tr>
+    <tr><td>Adjacency list</td><td>$O(V+E)$</td><td>$O(\deg(v))$</td><td>$O(\deg(v))$</td><td>Sparse graphs — the default choice</td></tr>
+    <tr><td>Adjacency matrix</td><td>$O(V^2)$</td><td>$O(1)$</td><td>$O(V)$</td><td>Dense graphs; frequent "is there an edge?" queries</td></tr>
+  </table>
+
+  <div class="code-block"><span class="cm">// Adjacency list, unweighted</span>
+<span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span> adj(n);
+adj[u].<span class="fn">push_back</span>(v);
+adj[v].<span class="fn">push_back</span>(u);   <span class="cm">// omit for a directed graph</span>
+
+<span class="cm">// Adjacency list, weighted — pair&lt;neighbour, weight&gt;</span>
+<span class="ty">std::vector&lt;std::vector&lt;std::pair&lt;int,int&gt;&gt;&gt;</span> wadj(n);
+wadj[u].<span class="fn">push_back</span>({v, weight});</div>
+
+  <h3 id="s6-bfsdfs">6.2 BFS &amp; DFS Implementation</h3>
+
+  <div class="code-block"><span class="cm">// BFS — shortest path in an UNWEIGHTED graph</span>
+<span class="ty">std::vector&lt;int&gt;</span> <span class="fn">bfs</span>(<span class="kw">int</span> src, <span class="kw">int</span> n, <span class="kw">const</span> <span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span>&amp; adj) {
+    <span class="ty">std::vector&lt;int&gt;</span> dist(n, -<span class="nm">1</span>);
+    <span class="ty">std::queue&lt;int&gt;</span> q;
+    dist[src] = <span class="nm">0</span>; q.<span class="fn">push</span>(src);
+    <span class="kw">while</span> (!q.<span class="fn">empty</span>()) {
+        <span class="kw">int</span> u = q.<span class="fn">front</span>(); q.<span class="fn">pop</span>();
+        <span class="kw">for</span> (<span class="kw">int</span> v : adj[u])
+            <span class="kw">if</span> (dist[v] == -<span class="nm">1</span>) { dist[v] = dist[u] + <span class="nm">1</span>; q.<span class="fn">push</span>(v); }
+    }
+    <span class="kw">return</span> dist;   <span class="cm">// dist[v] = fewest edges from src to v, or -1 if unreachable</span>
+}
+
+<span class="cm">// DFS — recursive; reachability, cycle detection, topological sort</span>
+<span class="kw">void</span> <span class="fn">dfs</span>(<span class="kw">int</span> u, <span class="kw">const</span> <span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span>&amp; adj, <span class="ty">std::vector&lt;bool&gt;</span>&amp; visited) {
+    visited[u] = <span class="kw">true</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> v : adj[u])
+        <span class="kw">if</span> (!visited[v]) <span class="fn">dfs</span>(v, adj, visited);
+}
+<span class="cm">// Both: O(V + E) time, O(V) space</span></div>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ BFS vs DFS — When to Reach for Which</div>
+    <strong>BFS</strong> when you need the shortest path in an unweighted graph, or level-by-level structure. <strong>DFS</strong> when you just need reachability/connectivity, cycle detection, or a topological order — and DFS is usually the simpler code (recursion vs an explicit queue).
+  </div>
+
+  <h3 id="s6-dijkstra">6.3 Dijkstra's Algorithm</h3>
+
+  <p>Shortest paths from a single source in a weighted graph with <strong>non-negative</strong> edge weights. Greedily extends the shortest-known frontier using a min-heap.</p>
+
+  <div class="code-block"><span class="ty">std::vector&lt;long long&gt;</span> <span class="fn">dijkstra</span>(<span class="kw">int</span> src, <span class="kw">int</span> n,
+        <span class="kw">const</span> <span class="ty">std::vector&lt;std::vector&lt;std::pair&lt;int,int&gt;&gt;&gt;</span>&amp; adj) {  <span class="cm">// adj[u] = {(v, weight), ...}</span>
+    <span class="ty">std::vector&lt;long long&gt;</span> dist(n, <span class="ty">std::numeric_limits&lt;long long&gt;</span>::max());
+    <span class="ty">std::priority_queue&lt;std::pair&lt;long long,int&gt;,
+                        std::vector&lt;std::pair&lt;long long,int&gt;&gt;,
+                        std::greater&lt;&gt;&gt;</span> pq;             <span class="cm">// min-heap by distance</span>
+    dist[src] = <span class="nm">0</span>;
+    pq.<span class="fn">push</span>({<span class="nm">0</span>, src});
+    <span class="kw">while</span> (!pq.<span class="fn">empty</span>()) {
+        <span class="kw">auto</span> [d, u] = pq.<span class="fn">top</span>(); pq.<span class="fn">pop</span>();
+        <span class="kw">if</span> (d &gt; dist[u]) <span class="kw">continue</span>;             <span class="cm">// stale entry — a shorter path was already found</span>
+        <span class="kw">for</span> (<span class="kw">auto</span> [v, w] : adj[u]) {
+            <span class="kw">if</span> (dist[u] + w &lt; dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.<span class="fn">push</span>({dist[v], v});
+            }
+        }
+    }
+    <span class="kw">return</span> dist;
+}
+<span class="cm">// O((V + E) log V) with a binary heap</span></div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Dijkstra Fails on Negative Edge Weights</div>
+    The greedy "once popped, finalised" argument relies on all edge weights being $\geq 0$. With a negative edge, a shorter path could still be discovered after a node is finalised, and Dijkstra will return a wrong (too-large) distance without any error or warning. Use Bellman-Ford when negative weights are possible.
+  </div>
+
+  <h3 id="s6-other">6.4 Bellman-Ford &amp; 0-1 BFS (Brief)</h3>
+
+  <table>
+    <tr><th>Algorithm</th><th>Handles</th><th>Complexity</th><th>Notes</th></tr>
+    <tr><td>Bellman-Ford</td><td>Negative edges (not negative cycles)</td><td>$O(VE)$</td><td>Relax every edge $V-1$ times; a further relaxation possible ⟹ negative cycle</td></tr>
+    <tr><td>0-1 BFS</td><td>Edge weights restricted to {0, 1}</td><td>$O(V+E)$</td><td>Use a <code>deque</code>: push 0-weight edges to the front, 1-weight to the back</td></tr>
+    <tr><td>Floyd-Warshall</td><td>All-pairs shortest paths, negative edges OK</td><td>$O(V^3)$</td><td>Simple triple-nested-loop DP; fine for small dense graphs</td></tr>
+  </table>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 7: MINIMUM SPANNING TREE                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Minimum Spanning Tree</div>
+  </div>
+
+  <p>A minimum spanning tree (MST) connects all $V$ vertices of a weighted, undirected, connected graph using exactly $V-1$ edges, at minimum total weight. Two classic greedy algorithms — Kruskal's needs Union-Find; Prim's needs a priority queue.</p>
+
+  <h3 id="s7-dsu">7.1 Union-Find (Disjoint Set Union)</h3>
+
+  <p>Maintains a partition of elements into disjoint sets, supporting near-$O(1)$ "are these connected?" and "merge these two sets" — the engine behind Kruskal's algorithm and cycle detection in undirected graphs.</p>
+
+  <div class="code-block"><span class="kw">struct</span> <span class="ty">DSU</span> {
+    <span class="ty">std::vector&lt;int&gt;</span> parent, rank_;
+    <span class="fn">DSU</span>(<span class="kw">int</span> n) : parent(n), rank_(n, <span class="nm">0</span>) {
+        <span class="ty">std::iota</span>(parent.<span class="fn">begin</span>(), parent.<span class="fn">end</span>(), <span class="nm">0</span>);   <span class="cm">// each node its own parent initially</span>
+    }
+    <span class="kw">int</span> <span class="fn">find</span>(<span class="kw">int</span> x) {
+        <span class="kw">if</span> (parent[x] != x) parent[x] = <span class="fn">find</span>(parent[x]);  <span class="cm">// path compression</span>
+        <span class="kw">return</span> parent[x];
+    }
+    <span class="kw">bool</span> <span class="fn">unite</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+        a = <span class="fn">find</span>(a); b = <span class="fn">find</span>(b);
+        <span class="kw">if</span> (a == b) <span class="kw">return</span> <span class="kw">false</span>;               <span class="cm">// already connected — would form a cycle</span>
+        <span class="kw">if</span> (rank_[a] &lt; rank_[b]) <span class="ty">std::swap</span>(a, b);
+        parent[b] = a;                          <span class="cm">// union by rank</span>
+        <span class="kw">if</span> (rank_[a] == rank_[b]) rank_[a]++;
+        <span class="kw">return</span> <span class="kw">true</span>;
+    }
+};
+<span class="cm">// With both optimisations: amortised O(α(n)) per op — α = inverse Ackermann, effectively constant</span></div>
+
+  <h3 id="s7-kruskal">7.2 Kruskal's Algorithm</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Kruskal — Sort Edges, Greedily Add if No Cycle</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li>Sort all edges by weight, ascending.</li>
+      <li>For each edge $(u,v,w)$ in order: if $u$ and $v$ are in different DSU components, add the edge to the MST and union them.</li>
+      <li>Stop once $V-1$ edges have been added.</li>
+    </ol>
+  </div>
+
+  <div class="code-block"><span class="kw">struct</span> <span class="ty">Edge</span> { <span class="kw">int</span> u, v, w; };
+
+<span class="kw">long long</span> <span class="fn">kruskal</span>(<span class="kw">int</span> n, <span class="ty">std::vector&lt;Edge&gt;</span> edges) {
+    <span class="ty">std::sort</span>(edges.<span class="fn">begin</span>(), edges.<span class="fn">end</span>(),
+              [](<span class="kw">const</span> <span class="ty">Edge</span>&amp; a, <span class="kw">const</span> <span class="ty">Edge</span>&amp; b) { <span class="kw">return</span> a.w &lt; b.w; });
+    <span class="ty">DSU</span> dsu(n);
+    <span class="kw">long long</span> total = <span class="nm">0</span>; <span class="kw">int</span> used = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">auto</span>&amp; e : edges) {
+        <span class="kw">if</span> (dsu.<span class="fn">unite</span>(e.u, e.v)) {   <span class="cm">// returns false if it would create a cycle</span>
+            total += e.w;
+            <span class="kw">if</span> (++used == n - <span class="nm">1</span>) <span class="kw">break</span>;
+        }
+    }
+    <span class="kw">return</span> total;
+}
+<span class="cm">// O(E log E) — dominated by the sort</span></div>
+
+  <h3 id="s7-prim">7.3 Prim's Algorithm</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Prim — Grow One Tree From a Start Vertex</div>
+    Maintain a frontier of edges leaving the current tree in a min-heap; repeatedly pull the cheapest edge that reaches a new vertex.
+  </div>
+
+  <div class="code-block"><span class="kw">long long</span> <span class="fn">prim</span>(<span class="kw">int</span> n, <span class="kw">const</span> <span class="ty">std::vector&lt;std::vector&lt;std::pair&lt;int,int&gt;&gt;&gt;</span>&amp; adj) { <span class="cm">// adj[u] = {(v,w)}</span>
+    <span class="ty">std::vector&lt;bool&gt;</span> inMST(n, <span class="kw">false</span>);
+    <span class="ty">std::priority_queue&lt;std::pair&lt;int,int&gt;,
+                        std::vector&lt;std::pair&lt;int,int&gt;&gt;,
+                        std::greater&lt;&gt;&gt;</span> pq;   <span class="cm">// (weight, vertex), min-heap</span>
+    pq.<span class="fn">push</span>({<span class="nm">0</span>, <span class="nm">0</span>});
+    <span class="kw">long long</span> total = <span class="nm">0</span>;
+    <span class="kw">while</span> (!pq.<span class="fn">empty</span>()) {
+        <span class="kw">auto</span> [w, u] = pq.<span class="fn">top</span>(); pq.<span class="fn">pop</span>();
+        <span class="kw">if</span> (inMST[u]) <span class="kw">continue</span>;             <span class="cm">// stale entry</span>
+        inMST[u] = <span class="kw">true</span>;
+        total += w;
+        <span class="kw">for</span> (<span class="kw">auto</span> [v, vw] : adj[u])
+            <span class="kw">if</span> (!inMST[v]) pq.<span class="fn">push</span>({vw, v});
+    }
+    <span class="kw">return</span> total;
+}
+<span class="cm">// O(E log V) with a binary heap — same asymptotic class as Kruskal</span></div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Kruskal vs Prim — When to Reach for Which</div>
+    <strong>Kruskal</strong> is the natural choice for a sparse edge list you can sort once — and reuses the DSU machinery you likely already need for cycle detection elsewhere. <strong>Prim</strong> is a better fit for a dense graph given as an adjacency matrix/list from a fixed start vertex, and feels structurally close to Dijkstra (both grow a frontier from a min-heap) — the one-line difference is that Prim relaxes by <em>edge weight</em>, while Dijkstra relaxes by <em>cumulative distance</em>.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 8: DYNAMIC PROGRAMMING                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <div class="section-title">Dynamic Programming</div>
+  </div>
+
+  <h3 id="s8-recipe">8.1 The DP Recipe in C++</h3>
+
+  <div class="fbox gold">
+    <div class="flabel">Five Steps, Every Time</div>
+    <ol style="margin:0.4rem 0 0 1.2rem;">
+      <li><strong>Define the state:</strong> what does <code>dp[i]</code> (or <code>dp[i][j]</code>) mean, in words?</li>
+      <li><strong>Write the recurrence:</strong> express the state in terms of smaller states.</li>
+      <li><strong>Identify base cases.</strong></li>
+      <li><strong>Choose direction:</strong> top-down with an <code>unordered_map</code>/<code>vector</code> cache, or bottom-up filling a table in order.</li>
+      <li><strong>Extract the answer</strong> from the state(s) that represent the full problem.</li>
+    </ol>
+  </div>
+
+  <table>
+    <tr><th></th><th>Memoisation (top-down)</th><th>Tabulation (bottom-up)</th></tr>
+    <tr><td>C++ tool</td><td><code>unordered_map</code> or a <code>vector</code> initialised to a sentinel (e.g. <code>-1</code>)</td><td><code>vector&lt;vector&lt;int&gt;&gt;</code> filled in a fixed loop order</td></tr>
+    <tr><td>Computes</td><td>Only the states actually needed</td><td>Every state (unless you skip via the recurrence's structure)</td></tr>
+    <tr><td>Stack risk</td><td>Yes — deep recursion can overflow</td><td>No — purely iterative</td></tr>
+    <tr><td>Space optimisation</td><td>Harder</td><td>Easy — often reducible to $O(1)$ or $O(n)$ via a rolling array</td></tr>
+  </table>
+
+  <h3 id="s8-knapsack">8.2 0/1 Knapsack</h3>
+
+  <p><strong>State:</strong> <code>dp[i][c]</code> = max value using the first <code>i</code> items with capacity <code>c</code>.</p>
+
+  <div class="code-block"><span class="kw">int</span> <span class="fn">knapsack</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; wt, <span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; val, <span class="kw">int</span> W) {
+    <span class="kw">int</span> n = wt.<span class="fn">size</span>();
+    <span class="ty">std::vector&lt;int&gt;</span> dp(W + <span class="nm">1</span>, <span class="nm">0</span>);          <span class="cm">// rolling 1D array — capacity dimension only</span>
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> c = W; c &gt;= wt[i]; --c)     <span class="cm">// iterate DOWN — each item used at most once</span>
+            dp[c] = <span class="ty">std::max</span>(dp[c], val[i] + dp[c - wt[i]]);
+    <span class="kw">return</span> dp[W];
+}
+<span class="cm">// O(n * W) time, O(W) space</span></div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Loop Direction Is the Whole Trick</div>
+    Iterating the capacity loop <em>downward</em> ensures <code>dp[c - wt[i]]</code> still refers to the value <em>before</em> item <code>i</code> was considered — giving 0/1 (each item used once). Iterating <em>upward</em> instead turns this into the <em>unbounded</em> knapsack (unlimited reuse of each item) — a one-character change with a completely different meaning, and an easy bug to introduce without noticing.
+  </div>
+
+  <h3 id="s8-lcs">8.3 Longest Common Subsequence</h3>
+
+  <p><strong>State:</strong> <code>dp[i][j]</code> = LCS length of <code>s[0..i)</code> and <code>t[0..j)</code>.</p>
+
+  <div class="code-block"><span class="kw">int</span> <span class="fn">lcs</span>(<span class="kw">const</span> <span class="ty">std::string</span>&amp; s, <span class="kw">const</span> <span class="ty">std::string</span>&amp; t) {
+    <span class="kw">int</span> m = s.<span class="fn">size</span>(), n = t.<span class="fn">size</span>();
+    <span class="ty">std::vector&lt;std::vector&lt;int&gt;&gt;</span> dp(m + <span class="nm">1</span>, <span class="ty">std::vector&lt;int&gt;</span>(n + <span class="nm">1</span>, <span class="nm">0</span>));
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">1</span>; i &lt;= m; ++i)
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">1</span>; j &lt;= n; ++j)
+            dp[i][j] = (s[i-<span class="nm">1</span>] == t[j-<span class="nm">1</span>])
+                     ? dp[i-<span class="nm">1</span>][j-<span class="nm">1</span>] + <span class="nm">1</span>
+                     : <span class="ty">std::max</span>(dp[i-<span class="nm">1</span>][j], dp[i][j-<span class="nm">1</span>]);
+    <span class="kw">return</span> dp[m][n];
+}
+<span class="cm">// O(mn) time and space; space reducible to O(min(m,n)) with a rolling row</span></div>
+
+  <h3 id="s8-coin">8.4 Coin Change (Fewest Coins)</h3>
+
+  <p><strong>State:</strong> <code>dp[a]</code> = fewest coins summing to amount <code>a</code>.</p>
+
+  <div class="code-block"><span class="kw">int</span> <span class="fn">coinChange</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; coins, <span class="kw">int</span> amount) {
+    <span class="ty">std::vector&lt;int&gt;</span> dp(amount + <span class="nm">1</span>, <span class="ty">INT_MAX</span>);
+    dp[<span class="nm">0</span>] = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> a = <span class="nm">1</span>; a &lt;= amount; ++a)
+        <span class="kw">for</span> (<span class="kw">int</span> c : coins)
+            <span class="kw">if</span> (c &lt;= a &amp;&amp; dp[a - c] != <span class="ty">INT_MAX</span>)
+                dp[a] = <span class="ty">std::min</span>(dp[a], dp[a - c] + <span class="nm">1</span>);
+    <span class="kw">return</span> dp[amount] == <span class="ty">INT_MAX</span> ? -<span class="nm">1</span> : dp[amount];
+}
+<span class="cm">// O(amount * |coins|) time, O(amount) space — coins loop INSIDE: unlimited reuse per coin</span></div>
+
+  <h3 id="s8-lis">8.5 Longest Increasing Subsequence</h3>
+
+  <div class="code-block"><span class="cm">// O(n^2) DP: dp[i] = length of the longest increasing subsequence ending at i</span>
+<span class="kw">int</span> <span class="fn">lisSlow</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; a) {
+    <span class="kw">int</span> n = a.<span class="fn">size</span>();
+    <span class="ty">std::vector&lt;int&gt;</span> dp(n, <span class="nm">1</span>);
+    <span class="kw">int</span> best = n ? <span class="nm">1</span> : <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; n; ++i) {
+        <span class="kw">for</span> (<span class="kw">int</span> j = <span class="nm">0</span>; j &lt; i; ++j)
+            <span class="kw">if</span> (a[j] &lt; a[i]) dp[i] = <span class="ty">std::max</span>(dp[i], dp[j] + <span class="nm">1</span>);
+        best = <span class="ty">std::max</span>(best, dp[i]);
+    }
+    <span class="kw">return</span> best;
+}
+
+<span class="cm">// O(n log n): maintain the smallest possible tail for each achievable LIS length</span>
+<span class="kw">int</span> <span class="fn">lisFast</span>(<span class="kw">const</span> <span class="ty">std::vector&lt;int&gt;</span>&amp; a) {
+    <span class="ty">std::vector&lt;int&gt;</span> tails;                     <span class="cm">// tails[k] = smallest tail of an increasing subseq of length k+1</span>
+    <span class="kw">for</span> (<span class="kw">int</span> x : a) {
+        <span class="kw">auto</span> it = <span class="ty">std::lower_bound</span>(tails.<span class="fn">begin</span>(), tails.<span class="fn">end</span>(), x);
+        <span class="kw">if</span> (it == tails.<span class="fn">end</span>()) tails.<span class="fn">push_back</span>(x);  <span class="cm">// extends the longest subsequence so far</span>
+        <span class="kw">else</span> *it = x;                                <span class="cm">// improves (lowers) an existing tail</span>
+    }
+    <span class="kw">return</span> tails.<span class="fn">size</span>();
+}</div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Why lisFast Works</div>
+    <code>tails</code> is always sorted, and its <em>length</em> — not its contents — is the LIS length; each entry is the smallest tail achievable for that subsequence length, which maximises future extensibility. Binary-searching for where <code>x</code> belongs and overwriting is what compresses $O(n^2)$ into $O(n\log n)$ — a pattern (greedy + binary search replacing an $O(n)$ inner scan) worth recognising beyond just LIS.
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  QUICK REFERENCE                                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-number">★</div>
+    <div class="section-title">Quick-Reference Tables</div>
+  </div>
+
+  <h3>Algorithm Complexity at a Glance</h3>
+  <table>
+    <tr><th>Algorithm</th><th>Time</th><th>Space</th><th>Notes</th></tr>
+    <tr><td>Linear search</td><td>$O(n)$</td><td>$O(1)$</td><td>Unsorted data</td></tr>
+    <tr><td>Binary search</td><td>$O(\log n)$</td><td>$O(1)$ iter / $O(\log n)$ rec</td><td>Requires sorted data</td></tr>
+    <tr><td>std::sort</td><td>$O(n\log n)$</td><td>$O(\log n)$</td><td>Introsort; not stable</td></tr>
+    <tr><td>Mergesort</td><td>$O(n\log n)$</td><td>$O(n)$</td><td>Stable; worst case guaranteed</td></tr>
+    <tr><td>Quicksort</td><td>$O(n\log n)$ avg, $O(n^2)$ worst</td><td>$O(\log n)$</td><td>In place; randomise pivot</td></tr>
+    <tr><td>Tree traversal (any)</td><td>$O(n)$</td><td>$O(h)$</td><td>$h$ = height; $O(\log n)$ balanced, $O(n)$ skewed</td></tr>
+    <tr><td>BFS / DFS</td><td>$O(V+E)$</td><td>$O(V)$</td><td>BFS: shortest path unweighted; DFS: reachability/cycles</td></tr>
+    <tr><td>Dijkstra (binary heap)</td><td>$O((V+E)\log V)$</td><td>$O(V)$</td><td>Non-negative weights only</td></tr>
+    <tr><td>Bellman-Ford</td><td>$O(VE)$</td><td>$O(V)$</td><td>Handles negative edges; detects negative cycles</td></tr>
+    <tr><td>Kruskal's MST</td><td>$O(E\log E)$</td><td>$O(V)$</td><td>Sort + DSU</td></tr>
+    <tr><td>Prim's MST</td><td>$O(E\log V)$</td><td>$O(V)$</td><td>Min-heap frontier growth</td></tr>
+    <tr><td>DSU (union by rank + path compression)</td><td>$O(\alpha(n))$ amortised</td><td>$O(n)$</td><td>Effectively constant per operation</td></tr>
+    <tr><td>0/1 Knapsack</td><td>$O(nW)$</td><td>$O(W)$</td><td>Iterate capacity downward</td></tr>
+    <tr><td>LCS</td><td>$O(mn)$</td><td>$O(mn)$ or $O(\min(m,n))$</td><td>Rolling-row optimisation</td></tr>
+    <tr><td>Coin change (fewest coins)</td><td>$O(\text{amount}\cdot|\text{coins}|)$</td><td>$O(\text{amount})$</td><td>Coins loop inside — unlimited reuse</td></tr>
+    <tr><td>LIS (fast)</td><td>$O(n\log n)$</td><td>$O(n)$</td><td>Patience-sorting / binary-search trick</td></tr>
+  </table>
+
+  <h3>STL Container Cheat Sheet</h3>
+  <table>
+    <tr><th>Need</th><th>Container</th><th>Why</th></tr>
+    <tr><td>Default dynamic array</td><td><code>vector</code></td><td>Contiguous, cache-friendly, O(1) amortised push_back</td></tr>
+    <tr><td>Push/pop both ends</td><td><code>deque</code></td><td>O(1) at front and back</td></tr>
+    <tr><td>Fast key lookup, no order needed</td><td><code>unordered_map</code> / <code>unordered_set</code></td><td>O(1) average</td></tr>
+    <tr><td>Sorted iteration + lookup</td><td><code>map</code> / <code>set</code></td><td>O(log n); red-black tree keeps order</td></tr>
+    <tr><td>Repeated min/max extraction</td><td><code>priority_queue</code></td><td>O(log n) push/pop, O(1) top; max-heap by default</td></tr>
+    <tr><td>Union-Find / connectivity</td><td>Hand-rolled <code>DSU</code> struct</td><td>Not in the STL — implement as in §7.1</td></tr>
+    <tr><td>LIFO / FIFO with no iteration</td><td><code>stack</code> / <code>queue</code></td><td>Adapters over <code>deque</code> by default</td></tr>
+  </table>
+
+  <h3>C++-Specific Gotchas</h3>
+  <table>
+    <tr><th>Gotcha</th><th>Fix</th></tr>
+    <tr><td><code>for (auto x : v)</code> silently copies every element</td><td>Use <code>const auto&amp; x</code> unless you need a mutable copy</td></tr>
+    <tr><td><code>(lo + hi) / 2</code> overflows for large indices</td><td><code>lo + (hi - lo) / 2</code></td></tr>
+    <tr><td><code>priority_queue&lt;int&gt;</code> is a max-heap</td><td>Add <code>std::greater&lt;int&gt;</code> for a min-heap</td></tr>
+    <tr><td>Erasing from a <code>vector</code> mid-loop invalidates iterators</td><td>Reassign from <code>erase</code>'s return value</td></tr>
+    <tr><td>Knapsack capacity loop direction</td><td>Downward = 0/1 (once each); upward = unbounded (reuse)</td></tr>
+    <tr><td>Deep naive recursion overflows the stack</td><td>Memoise, or rewrite as an explicit loop / stack</td></tr>
+    <tr><td>Relying on C++ tail-call optimisation</td><td>Not guaranteed by the standard — write the loop explicitly if depth matters</td></tr>
+    <tr><td>Dijkstra with negative edge weights</td><td>Silently wrong — switch to Bellman-Ford</td></tr>
+    <tr><td>Naive BST degrades to O(n) on sorted input</td><td>Use <code>std::map</code>/<code>set</code> (self-balancing) in practice</td></tr>
+  </table>
+
+  <h3>Pattern → Technique Map</h3>
+  <table>
+    <tr><th>If the problem says…</th><th>Reach for</th></tr>
+    <tr><td>"Find/count in a sorted array"</td><td>Binary search, or <code>lower_bound</code>/<code>upper_bound</code></td></tr>
+    <tr><td>"Minimise the maximum" / "maximise the minimum"</td><td>Binary search on the answer</td></tr>
+    <tr><td>"Shortest path, unweighted graph"</td><td>BFS</td></tr>
+    <tr><td>"Shortest path, weighted, non-negative"</td><td>Dijkstra</td></tr>
+    <tr><td>"Shortest path, negative weights allowed"</td><td>Bellman-Ford</td></tr>
+    <tr><td>"Connect everything cheaply"</td><td>MST — Kruskal (edge list) or Prim (adjacency list, dense)</td></tr>
+    <tr><td>"Are these two nodes connected?" repeatedly</td><td>Union-Find (DSU)</td></tr>
+    <tr><td>"Optimal value over choices/subsequences"</td><td>Dynamic programming — define state, write recurrence</td></tr>
+    <tr><td>"Overlapping subproblems, natural recursive structure"</td><td>Memoisation first, then consider bottom-up for space</td></tr>
+  </table>
+</div>
+
+<footer>
+  C++ Algorithms &amp; Data Structures · Quant Companion Notes<br>
+  Covers: Value/Reference/Pointer Semantics · STL Containers · Smart Pointers &amp; RAII · Recursion · Fibonacci (Naive/Memoised/Iterative) · Linear &amp; Binary Search · Binary Search on the Answer · Sorting (Quicksort, Mergesort, std::sort) · Tree Traversals (Recursive &amp; Iterative) · BST · Graphs (BFS, DFS, Dijkstra) · Minimum Spanning Tree (Union-Find, Kruskal, Prim) · Dynamic Programming (Knapsack, LCS, Coin Change, LIS)
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Move Semantics — C++ Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c14;
+    --bg2:       #0f121e;
+    --bg3:       #151a2a;
+    --border:    #232a42;
+    --blue:      #5b8af0;
+    --blue2:     #93b4f7;
+    --blue-dim:  #2a3a70;
+    --pink:      #f472b6;
+    --pink-dim:  #7a2e56;
+    --text:      #dde2f0;
+    --text-dim:  #7680a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --green:     #4ade80;
+    --rose:      #fb7185;
+    --sky:       #38bdf8;
+    --teal:      #2dd4bf;
+    --amber:     #fbbf24;
+    --lime:      #a3e635;
+    --violet:    #a78bfa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #5b8af022, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--blue-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--blue2), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--blue2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--blue-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--blue2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--blue); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+  p.dim { color: var(--text-dim); }
+
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  .code-block {
+    background: #080a10;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--pink);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c8d3e8;
+  }
+  .code-block .kw { color: var(--pink); }
+  .code-block .ty { color: var(--sky); }
+  .code-block .fn { color: var(--amber); }
+  .code-block .cm { color: #5a6a7a; font-style: italic; }
+  .code-block .st { color: var(--lime); }
+  .code-block .nm { color: var(--blue2); }
+  .code-block .op { color: var(--pink); }
+  .code-block .ln { color: #3a4560; display:inline-block; width:1.4em; user-select:none; }
+
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.cpp     { background: #150a1c; border-left: 3px solid var(--pink); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.cpp     .ctitle { color: var(--pink); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); border-bottom: 1px solid var(--blue-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--blue-dim); color: var(--blue2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  .concept-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .concept-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--blue2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .cx-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.8rem;
+    text-align: center;
+  }
+  .cx-cell .cx-name  { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--blue2); display: block; margin-bottom: 0.25rem; letter-spacing: 0.04em; }
+  .cx-cell .cx-big   { font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: var(--amber); }
+  .cx-cell .cx-label { font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 0.15rem; }
+
+  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.2rem 0; }
+  .info-grid.two { grid-template-columns:repeat(2,1fr); }
+  .info-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.3rem; }
+  .info-card h4 { font-family:'Cinzel',serif; font-size:0.92rem; color:var(--blue2); margin-bottom:0.5rem; font-style:normal; letter-spacing:0.03em; }
+  .info-card p { font-size:0.9rem; color:var(--text-dim); margin:0; }
+
+  .diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.6rem; margin: 1.3rem 0; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram .cap { margin-top: 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dim); text-align: center; letter-spacing: 0.03em; }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--blue2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.5rem; }
+    .cx-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-grid, .info-grid.two { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Value Categories · C++ Companion</div>
+  <h1>Move Semantics</h1>
+  <div class="subtitle">Transferring ownership of a resource instead of copying it — rvalue references, std::move, and the rule of five</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Lvalues, Rvalues, and Why It Matters</a></li>
+    <li><a href="#s2">std::move</a></li>
+    <li><a href="#s3">Move Constructor &amp; Move Assignment</a>
+      <ul class="sub">
+        <li><a href="#s3-diagram">Resource Handoff, Visually</a></li>
+        <li><a href="#s3-noexcept">Why noexcept Matters Here</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">The Rule of Five (and the Rule of Zero)</a></li>
+    <li><a href="#s5">Copy Elision &amp; RVO</a></li>
+    <li><a href="#s6">Perfect Forwarding &amp; std::forward</a></li>
+    <li><a href="#s7">Pitfalls &amp; Gotchas</a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: LVALUES / RVALUES                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Lvalues, Rvalues, and Why It Matters</div>
+  </div>
+
+  <p>Every C++ expression has a <strong>value category</strong>. The distinction that matters for move semantics is:</p>
+
+  <div class="info-grid two">
+    <div class="info-card">
+      <h4>lvalue</h4>
+      <p>Has a name, persists beyond the expression, you can take its address. A variable is an lvalue. Copying from it is the only safe option — someone else might still need it.</p>
+    </div>
+    <div class="info-card">
+      <h4>rvalue</h4>
+      <p>A temporary with no name — the result of a function returning by value, or a literal. It's about to be destroyed anyway, so <em>stealing</em> its internals instead of copying them is safe.</p>
+    </div>
+  </div>
+
+  <div class="flabel">value_categories.cpp</div>
+  <div class="code-block"><span class="ln">1</span> std::string a = <span class="st">"hello"</span>;   <span class="cm">// a: lvalue</span>
+<span class="ln">2</span> std::string b = a;               <span class="cm">// copy — a still needed after this line</span>
+<span class="ln">3</span> std::string c = a + <span class="st">" world"</span>; <span class="cm">// (a + " world"): rvalue, a fresh temporary</span>
+<span class="ln">4</span>                                   <span class="cm">// c can steal its buffer instead of copying</span></div>
+
+  <p>Rvalue references, written <code>T&amp;&amp;</code>, are a reference type that can only bind to rvalues. Overload resolution uses this to route temporaries into a cheaper "move" code path and named variables into the "copy" code path automatically.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: STD::MOVE                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">std::move</div>
+  </div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 The One Thing to Remember</div>
+    <code>std::move</code> does not move anything. It's a cast — <code>static_cast&lt;T&amp;&amp;&gt;(x)</code> — that tells the compiler "treat this lvalue as an rvalue," which makes it eligible to bind to move constructors and move-assignment operators. The actual moving happens inside whatever function receives the result.
+  </div>
+
+  <div class="flabel">std_move.cpp</div>
+  <div class="code-block"><span class="ln">1</span> std::vector&lt;<span class="kw">int</span>&gt; source = {1,2,3,4,5};
+<span class="ln">2</span> std::vector&lt;<span class="kw">int</span>&gt; dest = std::<span class="fn">move</span>(source);
+<span class="ln">3</span> <span class="cm">// dest now owns the heap buffer that source used to own</span>
+<span class="ln">4</span> <span class="cm">// source is left in a "valid but unspecified" state —</span>
+<span class="ln">5</span> <span class="cm">// typically empty for vector/string, but don't assume that generally</span></div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ After a Move</div>
+    A moved-from object must remain <strong>destructible and assignable</strong> — that's the only guarantee the standard makes. Reading its value (other than to reassign it) is a logic bug waiting to happen, even though it's usually not undefined behavior for standard-library types.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: MOVE CTORS                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">Move Constructor &amp; Move Assignment</div>
+  </div>
+
+  <p>A class that owns a resource (heap buffer, file handle, socket) should implement both. The pattern: steal the source's internals, then null them out so the source's destructor is a no-op.</p>
+
+  <div class="flabel">buffer.hpp</div>
+  <div class="code-block"><span class="ln">1</span>  <span class="kw">class</span> <span class="ty">Buffer</span> {
+<span class="ln">2</span>  <span class="kw">public</span>:
+<span class="ln">3</span>      <span class="cm">// move constructor</span>
+<span class="ln">4</span>      <span class="fn">Buffer</span>(<span class="ty">Buffer</span>&amp;&amp; other) <span class="kw">noexcept</span>
+<span class="ln">5</span>          : data_(other.data_), size_(other.size_) {
+<span class="ln">6</span>          other.data_ = <span class="kw">nullptr</span>;   <span class="cm">// leave source in a safe, empty state</span>
+<span class="ln">7</span>          other.size_ = 0;
+<span class="ln">8</span>      }
+<span class="ln">9</span>      <span class="cm">// move assignment</span>
+<span class="ln">10</span>     <span class="ty">Buffer</span>&amp; <span class="kw">operator</span>=(<span class="ty">Buffer</span>&amp;&amp; other) <span class="kw">noexcept</span> {
+<span class="ln">11</span>         <span class="kw">if</span> (<span class="kw">this</span> != &amp;other) {
+<span class="ln">12</span>             <span class="kw">delete</span>[] data_;             <span class="cm">// release our own resource first</span>
+<span class="ln">13</span>             data_ = other.data_;
+<span class="ln">14</span>             size_ = other.size_;
+<span class="ln">15</span>             other.data_ = <span class="kw">nullptr</span>;
+<span class="ln">16</span>             other.size_ = 0;
+<span class="ln">17</span>         }
+<span class="ln">18</span>         <span class="kw">return</span> *<span class="kw">this</span>;
+<span class="ln">19</span>     }
+<span class="ln">20</span>     ~<span class="ty">Buffer</span>() { <span class="kw">delete</span>[] data_; }   <span class="cm">// safe on nullptr</span>
+<span class="ln">21</span> <span class="kw">private</span>:
+<span class="ln">22</span>     <span class="kw">char</span>* data_; <span class="kw">size_t</span> size_;
+<span class="ln">23</span> };</div>
+
+  <h3 id="s3-diagram">3.1 Resource Handoff, Visually</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 820 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrM" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#c9a84c"/>
+        </marker>
+      </defs>
+      <text x="10" y="30" fill="#7680a0" font-family="JetBrains Mono" font-size="11">BEFORE MOVE</text>
+      <rect x="10" y="45" width="160" height="46" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="90" y="73" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">source</text>
+      <line x1="170" y1="68" x2="270" y2="68" stroke="#5b8af0" stroke-width="1.2" marker-end="url(#arrM)"/>
+      <rect x="275" y="45" width="160" height="46" fill="none" stroke="#4ade80" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="355" y="73" fill="#4ade80" font-family="JetBrains Mono" font-size="12" text-anchor="middle">heap buffer</text>
+
+      <rect x="10" y="150" width="160" height="46" fill="none" stroke="#4a5570" stroke-width="1.2"/>
+      <text x="90" y="178" fill="#7680a0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">dest</text>
+      <text x="200" y="178" fill="#4a5570" font-family="JetBrains Mono" font-size="11">(not yet constructed)</text>
+
+      <text x="600" y="30" fill="#c9a84c" font-family="JetBrains Mono" font-size="11">AFTER  dest(std::move(source))</text>
+
+      <rect x="480" y="45" width="150" height="46" fill="none" stroke="#4a5570" stroke-width="1.2"/>
+      <text x="555" y="73" fill="#4a5570" font-family="JetBrains Mono" font-size="13" text-anchor="middle">source</text>
+      <text x="480" y="105" fill="#fb7185" font-family="JetBrains Mono" font-size="11">data_ = nullptr</text>
+
+      <rect x="480" y="150" width="150" height="46" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="555" y="178" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">dest</text>
+      <line x1="630" y1="173" x2="710" y2="130" stroke="#4ade80" stroke-width="1.2" marker-end="url(#arrM)"/>
+      <text x="720" y="120" fill="#4ade80" font-family="JetBrains Mono" font-size="12">same heap buffer</text>
+      <text x="720" y="136" fill="#7680a0" font-family="JetBrains Mono" font-size="10.5">(no copy — pointer reassigned)</text>
+    </svg>
+    <div class="cap">FIG 1 — the move constructor reassigns the pointer instead of copying the bytes it points to</div>
+  </div>
+
+  <h3 id="s3-noexcept">3.2 Why noexcept Matters Here Specifically</h3>
+  <p>Standard containers like <code>std::vector</code> only use the move constructor during reallocation if it's marked <code>noexcept</code>. If it isn't, they silently fall back to copying — because if a move constructor throws partway through, the container can't safely roll back a "half moved" state. Mark move operations <code>noexcept</code> whenever they genuinely can't throw (which is almost always, since moving just reassigns pointers).</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: RULE OF FIVE                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">The Rule of Five (and the Rule of Zero)</div>
+  </div>
+
+  <p>If a class defines any one of these, it usually needs to define — or explicitly default/delete — all five: destructor, copy constructor, copy assignment, move constructor, move assignment. Defining only some of them leads to a class that's copyable when it shouldn't be, or that silently falls back to copying when a move was intended.</p>
+
+  <table>
+    <tr><th>Situation</th><th>What to Do</th></tr>
+    <tr><td>Class owns a raw resource directly</td><td>Rule of five — implement all five, or wrap the resource in a smart pointer instead</td></tr>
+    <tr><td>Class only holds smart pointers / standard containers</td><td>Rule of zero — write none of the five, let the members' own special members do the work</td></tr>
+    <tr><td>Class should be non-copyable, move-only</td><td><code>= delete</code> the copy ctor/assignment, <code>= default</code> the move ctor/assignment</td></tr>
+  </table>
+
+  <p class="dim">In practice, the rule of zero is the goal: compose your class out of RAII types (<code>unique_ptr</code>, <code>vector</code>, <code>string</code>) so you never have to hand-write any of the five. Hand-writing them, as in the <code>Buffer</code> example above, is what you do <em>inside</em> the low-level wrapper types themselves.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: COPY ELISION                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Copy Elision &amp; RVO</div>
+  </div>
+
+  <p>Returning a local object by value looks like it should trigger a move (or copy) into the caller's storage. Modern compilers are required (as of C++17, for the guaranteed cases) to elide that entirely — the object is constructed <em>directly</em> in the caller's memory, with no move or copy call at all.</p>
+
+  <div class="flabel">rvo.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="ty">Buffer</span> <span class="fn">make_buffer</span>() {
+<span class="ln">2</span>     <span class="ty">Buffer</span> b(1024);
+<span class="ln">3</span>     <span class="kw">return</span> b;              <span class="cm">// NRVO: constructed directly at the call site</span>
+<span class="ln">4</span> }                          <span class="cm">// no move ctor call, even though Buffer has one</span>
+<span class="ln">5</span>
+<span class="ln">6</span> <span class="ty">Buffer</span> buf = <span class="fn">make_buffer</span>(); <span class="cm">// guaranteed elision — zero copies, zero moves</span></div>
+
+  <div class="callout insight">
+    <div class="ctitle">💡 Common Misconception</div>
+    Writing <code>return std::move(b);</code> here is actively harmful — it disables guaranteed copy elision (in the unnamed-return-value case) or the compiler's NRVO (in the named case) and forces an actual move constructor call where the compiler could otherwise have skipped construction entirely. Just <code>return b;</code>.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: PERFECT FORWARDING                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Perfect Forwarding &amp; std::forward</div>
+  </div>
+
+  <p>A function template parameter written as <code>T&amp;&amp;</code> is a <strong>forwarding reference</strong> (sometimes called a "universal reference") — not an rvalue reference — when <code>T</code> is itself deduced. It binds to anything, and deduces whether the argument was an lvalue or rvalue. <code>std::forward&lt;T&gt;</code> then propagates that original value category onward.</p>
+
+  <div class="flabel">forwarding.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">template</span>&lt;<span class="kw">typename</span> <span class="ty">T</span>&gt;
+<span class="ln">2</span> <span class="kw">void</span> <span class="fn">wrapper</span>(<span class="ty">T</span>&amp;&amp; arg) {
+<span class="ln">3</span>     <span class="fn">inner</span>(std::<span class="fn">forward</span>&lt;<span class="ty">T</span>&gt;(arg));   <span class="cm">// lvalue in -&gt; lvalue out, rvalue in -&gt; rvalue out</span>
+<span class="ln">4</span> }
+<span class="ln">5</span>
+<span class="ln">6</span> <span class="ty">Widget</span> w;
+<span class="ln">7</span> <span class="fn">wrapper</span>(w);              <span class="cm">// T deduced as Widget&amp;  -&gt; forwards as lvalue</span>
+<span class="ln">8</span> <span class="fn">wrapper</span>(<span class="ty">Widget</span>{});      <span class="cm">// T deduced as Widget    -&gt; forwards as rvalue</span></div>
+
+  <p class="dim">This is exactly the mechanism behind <code>std::make_unique</code>, <code>std::make_shared</code>, and container <code>emplace</code> functions — they forward constructor arguments without forcing an extra copy, regardless of whether the caller passed a temporary or a named variable.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 7: PITFALLS                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <div class="section-title">Pitfalls &amp; Gotchas</div>
+  </div>
+  <ul>
+    <li>Moving from a <code>const</code> object silently falls back to a copy — <code>const T&amp;&amp;</code> can't bind to a non-const move constructor, so overload resolution picks the copy constructor instead, with no warning.</li>
+    <li>Moving is not automatically cheap for every type — a small type with no heap allocation (like a plain struct of two ints) moves by copying its bytes anyway; move semantics pay off specifically for types that own a heap resource.</li>
+    <li>Using a variable after <code>std::move(x)</code> without reassigning it is a logic bug, not necessarily UB — but it's exactly the kind of bug that's easy to introduce during a refactor.</li>
+    <li>Returning a member by <code>std::move</code> from a function that also needs the object afterward silently guts it — double check lifetime before adding <code>std::move</code> reflexively.</li>
+    <li>Forwarding references (<code>T&amp;&amp;</code> in a template) are easy to confuse with rvalue references (<code>T&amp;&amp;</code> in a concrete, non-template context) — they look identical but behave completely differently.</li>
+  </ul>
+</div>
+
+<footer>
+  C++ Move Semantics · Value Categories Companion Notes<br>
+  Covers: Lvalues &amp; Rvalues · std::move · Move Constructor &amp; Assignment · Rule of Five/Zero · Copy Elision &amp; RVO · Perfect Forwarding
+</footer>
+
+</body>
+</html>

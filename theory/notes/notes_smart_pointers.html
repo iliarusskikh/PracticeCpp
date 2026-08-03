@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Pointers — C++ Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a0c14;
+    --bg2:       #0f121e;
+    --bg3:       #151a2a;
+    --border:    #232a42;
+    --blue:      #5b8af0;
+    --blue2:     #93b4f7;
+    --blue-dim:  #2a3a70;
+    --pink:      #f472b6;
+    --pink-dim:  #7a2e56;
+    --text:      #dde2f0;
+    --text-dim:  #7680a0;
+    --gold:      #c9a84c;
+    --gold2:     #e8c97a;
+    --green:     #4ade80;
+    --rose:      #fb7185;
+    --sky:       #38bdf8;
+    --teal:      #2dd4bf;
+    --amber:     #fbbf24;
+    --lime:      #a3e635;
+    --violet:    #a78bfa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.78;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 2rem 2rem 6rem;
+  }
+
+  .masthead {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% -5%, #5b8af022, transparent);
+    pointer-events: none;
+  }
+  .masthead .series-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--blue-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+  .masthead h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--blue2), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+  .masthead .subtitle { color: var(--text-dim); font-size: 1rem; font-style: italic; }
+
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3.5rem;
+  }
+  .toc h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .toc ol { padding-left: 1.4rem; }
+  .toc li { margin: 0.28rem 0; }
+  .toc a { color: var(--text-dim); text-decoration: none; font-size: 0.93rem; transition: color .15s; }
+  .toc a:hover { color: var(--blue2); }
+  .toc .sub { padding-left: 1.2rem; font-size: 0.87rem; list-style-type: disc; }
+
+  .section { margin-bottom: 4.5rem; }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-number { font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--blue-dim); min-width: 2.5rem; }
+  .section-title   { font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--blue2); font-weight: 600; }
+
+  h3 { font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--text); margin: 2.4rem 0 0.9rem; letter-spacing: 0.05em; font-weight: 600; }
+  h4 { font-size: 1rem; color: var(--blue); margin: 1.5rem 0 0.5rem; font-style: italic; font-weight: 500; }
+
+  p { margin-bottom: 0.85rem; }
+  p.dim { color: var(--text-dim); }
+
+  .fbox {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1.1rem 1.5rem; margin: 1rem 0; overflow-x: auto;
+  }
+  .fbox.gold   { border-left-color: var(--gold); }
+  .fbox.pink   { border-left-color: var(--pink); }
+  .fbox.teal   { border-left-color: var(--teal); }
+  .fbox.green  { border-left-color: var(--green); }
+  .fbox.amber  { border-left-color: var(--amber); }
+
+  .flabel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+
+  .code-block {
+    background: #080a10;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--pink);
+    border-radius: 4px;
+    padding: 1.1rem 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #c8d3e8;
+  }
+  .code-block .kw { color: var(--pink); }
+  .code-block .ty { color: var(--sky); }
+  .code-block .fn { color: var(--amber); }
+  .code-block .cm { color: #5a6a7a; font-style: italic; }
+  .code-block .st { color: var(--lime); }
+  .code-block .nm { color: var(--blue2); }
+  .code-block .op { color: var(--pink); }
+  .code-block .ln { color: #3a4560; display:inline-block; width:1.4em; user-select:none; }
+
+  .callout { border-radius: 4px; padding: 1rem 1.4rem; margin: 1.2rem 0; font-size: 0.95rem; }
+  .callout.tip     { background: #0a1e10; border-left: 3px solid var(--green); }
+  .callout.trap    { background: #1e0a0a; border-left: 3px solid var(--rose); }
+  .callout.insight { background: #140a22; border-left: 3px solid var(--violet); }
+  .callout.example { background: #08101e; border-left: 3px solid var(--sky); }
+  .callout.cpp     { background: #150a1c; border-left: 3px solid var(--pink); }
+  .callout.proof   { background: var(--bg2); border: 1px dashed var(--border); font-style: italic; color: var(--text-dim); }
+
+  .ctitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .callout.tip     .ctitle { color: var(--green); }
+  .callout.trap    .ctitle { color: var(--rose); }
+  .callout.insight .ctitle { color: var(--violet); }
+  .callout.example .ctitle { color: var(--sky); }
+  .callout.cpp     .ctitle { color: var(--pink); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.91rem; }
+  th { font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); border-bottom: 1px solid var(--blue-dim); padding: 0.6rem 0.8rem; text-align: left; background: var(--bg2); }
+  td { padding: 0.52rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: var(--bg2); }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li { counter-increment: step; display: flex; gap: 1rem; margin: 0.7rem 0; }
+  .steps li::before {
+    content: counter(step);
+    background: var(--blue-dim); color: var(--blue2);
+    font-family: 'Cinzel', serif; font-size: 0.72rem;
+    min-width: 1.6rem; height: 1.6rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 0.15rem;
+  }
+
+  .concept-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem 1.8rem; margin: 1.6rem 0;
+  }
+  .concept-card h4 {
+    font-family: 'Cinzel', serif; font-size: 1.02rem; color: var(--blue2);
+    margin-top: 0; margin-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+    font-style: normal; letter-spacing: 0.05em;
+  }
+
+  .cx-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .cx-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.7rem 0.8rem;
+    text-align: center;
+  }
+  .cx-cell .cx-name  { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--blue2); display: block; margin-bottom: 0.25rem; letter-spacing: 0.04em; }
+  .cx-cell .cx-big   { font-family: 'JetBrains Mono', monospace; font-size: 0.86rem; color: var(--amber); }
+  .cx-cell .cx-label { font-size: 0.72rem; color: var(--text-dim); display: block; margin-top: 0.15rem; }
+
+  .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1.2rem 0; }
+  .info-grid.two { grid-template-columns:repeat(2,1fr); }
+  .info-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.3rem; }
+  .info-card h4 { font-family:'Cinzel',serif; font-size:0.92rem; color:var(--blue2); margin-bottom:0.5rem; font-style:normal; letter-spacing:0.03em; }
+  .info-card p { font-size:0.9rem; color:var(--text-dim); margin:0; }
+
+  .diagram { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 1.6rem; margin: 1.3rem 0; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .diagram .cap { margin-top: 0.8rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dim); text-align: center; letter-spacing: 0.03em; }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: var(--bg3); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 3px; color: var(--blue2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.5rem 0; }
+  ul { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ul li { margin: 0.3rem 0; }
+  ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+  ol li { margin: 0.3rem 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.82rem; padding-top: 2rem; border-top: 1px solid var(--border); font-style: italic; }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; padding: 1rem 1rem 4rem; }
+    .masthead h1 { font-size: 1.5rem; }
+    .cx-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-grid, .info-grid.two { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MASTHEAD ═══════════ -->
+<div class="masthead">
+  <div class="series-label">Memory Management · C++ Companion</div>
+  <h1>Smart Pointers</h1>
+  <div class="subtitle">Ownership as a type, not a convention — unique_ptr, shared_ptr, weak_ptr, and RAII</div>
+</div>
+
+<!-- ═══════════ TOC ═══════════ -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#s1">Why Smart Pointers Exist</a></li>
+    <li><a href="#s2">std::unique_ptr</a>
+      <ul class="sub">
+        <li><a href="#s2-props">Key Properties</a></li>
+        <li><a href="#s2-deleter">Custom Deleters</a></li>
+        <li><a href="#s2-pass">Passing to Functions</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">std::shared_ptr</a>
+      <ul class="sub">
+        <li><a href="#s3-cb">The Control Block</a></li>
+        <li><a href="#s3-make">make_shared vs. shared_ptr(new T)</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">std::weak_ptr</a>
+      <ul class="sub">
+        <li><a href="#s4-cycles">Breaking Reference Cycles</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">Pitfalls &amp; Gotchas</a></li>
+    <li><a href="#s6">Decision Cheat Sheet</a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 1: WHY SMART POINTERS EXIST                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <div class="section-title">Why Smart Pointers Exist</div>
+  </div>
+
+  <p>A raw pointer answers "where is this object" but says nothing about "who is responsible for destroying it." Every bug class below comes from that missing answer:</p>
+
+  <div class="info-grid">
+    <div class="info-card"><h4>Leaks</h4><p>An exception or early <code>return</code> skips the matching <code>delete</code>.</p></div>
+    <div class="info-card"><h4>Double frees</h4><p>Two code paths both believe they own the pointer and both call <code>delete</code>.</p></div>
+    <div class="info-card"><h4>Dangling access</h4><p>Object is freed, pointer is not nulled, something later dereferences it.</p></div>
+  </div>
+
+  <p>Smart pointers bind an object's lifetime to a stack-allocated wrapper's lifetime (RAII). When the wrapper goes out of scope — normally or via exception unwinding — its destructor runs, and cleanup happens automatically. The ownership question gets encoded directly in the type: <code>unique_ptr&lt;T&gt;</code> reads as "exactly one owner," <code>shared_ptr&lt;T&gt;</code> reads as "shared ownership, refcounted."</p>
+
+  <div class="callout tip">
+    <div class="ctitle">✓ Rule of Thumb</div>
+    If you're writing <code>new</code> or <code>delete</code> directly in application code (outside of a smart pointer's own implementation), stop and ask why a smart pointer or container isn't doing it for you.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 2: UNIQUE_PTR                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <div class="section-title">std::unique_ptr</div>
+  </div>
+
+  <p><code>unique_ptr</code> models <strong>exclusive ownership</strong>. Exactly one <code>unique_ptr</code> instance owns the managed object at any time. It is move-only — copying is disabled at compile time — so ownership can be <em>transferred</em> but never <em>duplicated</em>.</p>
+
+  <div class="flabel">unique_ptr_basics.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">auto</span> conn = std::<span class="fn">make_unique</span>&lt;<span class="ty">Connection</span>&gt;(host, port);
+<span class="ln">2</span> conn-&gt;<span class="fn">send</span>(payload);              <span class="cm">// use like a raw pointer</span>
+<span class="ln">3</span>
+<span class="ln">4</span> <span class="kw">auto</span> owner2 = std::<span class="fn">move</span>(conn);      <span class="cm">// ownership transferred</span>
+<span class="ln">5</span> <span class="cm">// conn is now nullptr — using it is a bug, not UB by itself,</span>
+<span class="ln">6</span> <span class="cm">// but dereferencing a null unique_ptr IS undefined behavior</span>
+<span class="ln">7</span>
+<span class="ln">8</span> <span class="cm">// conn2 = conn;   // compile error: copy ctor is deleted</span></div>
+
+  <h3 id="s2-props">2.1 Key Properties</h3>
+  <ul>
+    <li>Zero overhead vs. a raw pointer in the common case — no atomic refcount, no control block. It's a thin RAII wrapper around a pointer plus (optionally) a deleter.</li>
+    <li>Always prefer <code>std::make_unique&lt;T&gt;(args...)</code> over <code>unique_ptr&lt;T&gt;(new T(args...))</code> — it avoids naming <code>new</code> directly and eliminates a leak edge case in function-argument evaluation order.</li>
+    <li>Supports custom deleters via a second template parameter, for wrapping C-style resources (file handles, sockets).</li>
+    <li>Arrays: <code>unique_ptr&lt;T[]&gt;</code> uses <code>delete[]</code> automatically and provides <code>operator[]</code>.</li>
+  </ul>
+
+  <h3 id="s2-deleter">2.2 Custom Deleter (a Socket, for Example)</h3>
+  <div class="flabel">socket_guard.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">auto</span> deleter = [](<span class="kw">int</span>* fd) { <span class="fn">close</span>(*fd); <span class="kw">delete</span> fd; };
+<span class="ln">2</span> std::unique_ptr&lt;<span class="kw">int</span>, <span class="kw">decltype</span>(deleter)&gt; sock(<span class="kw">new</span> <span class="kw">int</span>(fd), deleter);
+<span class="ln">3</span> <span class="cm">// close(fd) runs automatically when sock leaves scope,</span>
+<span class="ln">4</span> <span class="cm">// including when an exception unwinds the stack</span></div>
+  <p class="dim">This pattern — wrapping a POSIX file descriptor so <code>close()</code> is called automatically — is exactly what a <code>SocketGuard</code>-style RAII wrapper does for a Berkeley sockets file descriptor: it turns a manual <code>close(fd)</code> call into a destructor that runs unconditionally.</p>
+
+  <h3 id="s2-pass">2.3 Passing to Functions</h3>
+  <table>
+    <tr><th>Signature</th><th>Meaning</th></tr>
+    <tr><td><code>void f(unique_ptr&lt;T&gt; p)</code></td><td>Function takes ownership; caller must <code>std::move</code> in.</td></tr>
+    <tr><td><code>void f(unique_ptr&lt;T&gt;&amp; p)</code></td><td>Function may reset/reassign the caller's pointer.</td></tr>
+    <tr><td><code>void f(T* p)</code> / <code>f(T&amp; t)</code></td><td>Function just <em>uses</em> the object, no ownership involved — call with <code>p.get()</code> or <code>*p</code>. This is the most common and idiomatic case.</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 3: SHARED_PTR                                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <div class="section-title">std::shared_ptr</div>
+  </div>
+
+  <p><code>shared_ptr</code> models <strong>shared ownership</strong> via reference counting. Multiple <code>shared_ptr</code> instances can point at the same object; the object is destroyed when the last one is destroyed or reset.</p>
+
+  <div class="flabel">shared_ptr_basics.cpp</div>
+  <div class="code-block"><span class="ln">1</span> <span class="kw">auto</span> a = std::<span class="fn">make_shared</span>&lt;<span class="ty">Session</span>&gt;(id);   <span class="cm">// use_count == 1</span>
+<span class="ln">2</span> <span class="kw">auto</span> b = a;                                <span class="cm">// use_count == 2, copy is allowed</span>
+<span class="ln">3</span> { <span class="kw">auto</span> c = a; }                          <span class="cm">// use_count -&gt; 3 -&gt; back to 2 on scope exit</span>
+<span class="ln">4</span> std::cout &lt;&lt; a.<span class="fn">use_count</span>();               <span class="cm">// 2</span></div>
+
+  <h3 id="s3-cb">3.1 The Control Block</h3>
+  <p>Every <code>shared_ptr</code> group shares one heap-allocated <strong>control block</strong> holding: the strong reference count, the weak reference count, the deleter, and (for <code>make_shared</code>) the object itself.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 860 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#5b8af0"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="150" height="46" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="95" y="48" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">shared_ptr a</text>
+      <rect x="20" y="150" width="150" height="46" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="95" y="178" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">shared_ptr b</text>
+
+      <line x1="170" y1="43" x2="330" y2="90" stroke="#5b8af0" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="170" y1="173" x2="330" y2="120" stroke="#5b8af0" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <rect x="335" y="55" width="220" height="100" fill="#151a2a" stroke="#c9a84c" stroke-width="1.2"/>
+      <text x="445" y="76" fill="#c9a84c" font-family="JetBrains Mono" font-size="11" text-anchor="middle" letter-spacing="1">CONTROL BLOCK</text>
+      <text x="355" y="98" fill="#dde2f0" font-family="JetBrains Mono" font-size="12">strong count: 2</text>
+      <text x="355" y="116" fill="#dde2f0" font-family="JetBrains Mono" font-size="12">weak count:   0</text>
+      <text x="355" y="134" fill="#dde2f0" font-family="JetBrains Mono" font-size="12">deleter, allocator</text>
+
+      <line x1="555" y1="105" x2="660" y2="105" stroke="#4ade80" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <rect x="665" y="65" width="170" height="80" fill="none" stroke="#4ade80" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="750" y="100" fill="#4ade80" font-family="JetBrains Mono" font-size="12" text-anchor="middle">Session</text>
+      <text x="750" y="118" fill="#7680a0" font-family="JetBrains Mono" font-size="10.5" text-anchor="middle">managed object</text>
+    </svg>
+    <div class="cap">FIG 1 — two shared_ptr instances referencing one control block, which owns the object</div>
+  </div>
+
+  <div class="callout trap">
+    <div class="ctitle">⚠ Cost</div>
+    Unlike <code>unique_ptr</code>, <code>shared_ptr</code> is not free: the control block is heap-allocated (unless elided via <code>make_shared</code>), the refcount increment/decrement is atomic (thread-safe refcounting), and the pointer itself is twice the size of a raw pointer (object pointer + control block pointer). Don't reach for <code>shared_ptr</code> as a default — use it only when ownership genuinely needs to be shared.
+  </div>
+
+  <h3 id="s3-make">3.2 make_shared vs. shared_ptr(new T)</h3>
+  <table>
+    <tr><th>make_shared&lt;T&gt;(args...)</th><th>shared_ptr&lt;T&gt;(new T(args...))</th></tr>
+    <tr><td>One allocation (object + control block combined)</td><td>Two allocations — separate heap blocks</td></tr>
+    <tr><td>Better cache locality</td><td>Object and control block can be far apart in memory</td></tr>
+    <tr><td>Exception-safe by construction</td><td>Can leak if used as a raw arg in a function call with unspecified evaluation order (pre-C++17)</td></tr>
+    <tr><td>Object memory not freed until every weak_ptr is gone too</td><td>Object destroyed as soon as strong count hits zero</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 4: WEAK_PTR                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <div class="section-title">std::weak_ptr</div>
+  </div>
+
+  <p><code>weak_ptr</code> observes an object managed by <code>shared_ptr</code> <strong>without</strong> contributing to the strong reference count. It cannot be dereferenced directly — you must first <code>lock()</code> it into a temporary <code>shared_ptr</code>, which is <code>nullptr</code> if the object has already been destroyed.</p>
+
+  <div class="flabel">weak_ptr_lock.cpp</div>
+  <div class="code-block"><span class="ln">1</span> std::weak_ptr&lt;<span class="ty">Session</span>&gt; observer = session;
+<span class="ln">2</span> <span class="kw">if</span> (<span class="kw">auto</span> locked = observer.<span class="fn">lock</span>()) {   <span class="cm">// promotes to shared_ptr, or null</span>
+<span class="ln">3</span>     locked-&gt;<span class="fn">touch</span>();                 <span class="cm">// safe: locked keeps it alive here</span>
+<span class="ln">4</span> } <span class="kw">else</span> {
+<span class="ln">5</span>     <span class="cm">// the object is already gone — handle gracefully</span>
+<span class="ln">6</span> }</div>
+
+  <h3 id="s4-cycles">4.1 The Classic Use Case: Breaking Cycles</h3>
+  <p>Two objects holding <code>shared_ptr</code> to each other create a reference cycle — neither strong count ever reaches zero, so neither is destroyed, even when nothing external refers to them. This is a real, common leak pattern (parent/child trees, observer graphs, doubly-linked structures). The fix is to make one direction of the relationship a <code>weak_ptr</code>, typically the "back" pointer (child → parent).</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#fb7185"/>
+        </marker>
+        <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#4ade80"/>
+        </marker>
+      </defs>
+      <rect x="60" y="70" width="150" height="60" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="135" y="105" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">Parent</text>
+
+      <rect x="480" y="70" width="150" height="60" fill="none" stroke="#5b8af0" stroke-width="1.2"/>
+      <text x="555" y="105" fill="#dde2f0" font-family="JetBrains Mono" font-size="13" text-anchor="middle">Child</text>
+
+      <path d="M210,90 C300,60 400,60 480,90" fill="none" stroke="#4ade80" stroke-width="1.4" marker-end="url(#arrow3)"/>
+      <text x="345" y="55" fill="#4ade80" font-family="JetBrains Mono" font-size="11" text-anchor="middle">shared_ptr (owns)</text>
+
+      <path d="M480,112 C400,142 300,142 210,112" fill="none" stroke="#fb7185" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow2)"/>
+      <text x="345" y="165" fill="#fb7185" font-family="JetBrains Mono" font-size="11" text-anchor="middle">weak_ptr (observes, no ownership)</text>
+    </svg>
+    <div class="cap">FIG 2 — parent owns child by shared_ptr; child refers back with weak_ptr, so the cycle can't keep both alive</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 5: PITFALLS                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <div class="section-title">Pitfalls &amp; Gotchas</div>
+  </div>
+  <ul>
+    <li><strong>Never</strong> construct two independent <code>shared_ptr</code> from the same raw pointer — <code>shared_ptr&lt;T&gt;(raw)</code> called twice creates two unrelated control blocks, so the object gets destroyed twice.</li>
+    <li>Calling <code>.get()</code> to obtain a raw pointer is fine for temporary use, but never store that raw pointer somewhere that outlives the smart pointer's ownership.</li>
+    <li><code>enable_shared_from_this</code> is required if a member function needs to hand out a <code>shared_ptr</code> to <code>*this</code> — constructing one directly from <code>this</code> creates a second, disconnected control block.</li>
+    <li>Passing <code>shared_ptr</code> by value into every function "for safety" is a common overcorrection — it forces an atomic refcount bump on every call. Pass by <code>const&amp;</code> if the callee doesn't need to extend ownership.</li>
+    <li><code>unique_ptr</code> in a moved-from state holds <code>nullptr</code> — reassign or check before use; dereferencing it is undefined behavior, same as any null pointer.</li>
+    <li><code>weak_ptr::lock()</code> is the only safe way to access the underlying object; testing <code>expired()</code> then locking separately has a race window in multithreaded code (use the result of <code>lock()</code> directly).</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  SECTION 6: CHEAT SHEET                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <div class="section-title">Decision Cheat Sheet</div>
+  </div>
+  <div class="info-grid two">
+    <div class="info-card">
+      <h4>Default choice</h4>
+      <p><code>unique_ptr</code>. Start here for any owned heap resource. Upgrade to <code>shared_ptr</code> only when you can name the second owner.</p>
+    </div>
+    <div class="info-card">
+      <h4>Need shared ownership</h4>
+      <p><code>shared_ptr</code> — but confirm the lifetime actually needs multiple owners, not just multiple <em>users</em>.</p>
+    </div>
+    <div class="info-card">
+      <h4>Non-owning observer</h4>
+      <p>Raw pointer or reference if lifetime is guaranteed by scope; <code>weak_ptr</code> if the object might outlive or be outlived unpredictably.</p>
+    </div>
+    <div class="info-card">
+      <h4>Breaking a cycle</h4>
+      <p>One direction of a bidirectional owning relationship becomes <code>weak_ptr</code>.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  C++ Smart Pointers · Memory Management Companion Notes<br>
+  Covers: unique_ptr · shared_ptr &amp; the Control Block · weak_ptr &amp; Breaking Cycles · RAII · Custom Deleters
+</footer>
+
+</body>
+</html>
